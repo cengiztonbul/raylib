@@ -3,20 +3,20 @@
 *   rtextures - Basic functions to load and draw textures
 *
 *   CONFIGURATION:
-*       #define SUPPORT_MODULE_RTEXTURES
+*       #define RAYLIB_SUPPORT_MODULE_RTEXTURES
 *           rtextures module is included in the build
 *
 *       #define SUPPORT_FILEFORMAT_BMP
-*       #define SUPPORT_FILEFORMAT_PNG
+*       #define RAYLIB_SUPPORT_FILEFORMAT_PNG
 *       #define SUPPORT_FILEFORMAT_TGA
 *       #define SUPPORT_FILEFORMAT_JPG
-*       #define SUPPORT_FILEFORMAT_GIF
-*       #define SUPPORT_FILEFORMAT_QOI
+*       #define RAYLIB_SUPPORT_FILEFORMAT_GIF
+*       #define RAYLIB_SUPPORT_FILEFORMAT_QOI
 *       #define SUPPORT_FILEFORMAT_PSD
 *       #define SUPPORT_FILEFORMAT_HDR
 *       #define SUPPORT_FILEFORMAT_PIC
 *       #define SUPPORT_FILEFORMAT_PNM
-*       #define SUPPORT_FILEFORMAT_DDS
+*       #define RAYLIB_SUPPORT_FILEFORMAT_DDS
 *       #define SUPPORT_FILEFORMAT_PKM
 *       #define SUPPORT_FILEFORMAT_KTX
 *       #define SUPPORT_FILEFORMAT_PVR
@@ -24,14 +24,14 @@
 *           Select desired fileformats to be supported for image data loading. Some of those formats are
 *           supported by default, to remove support, just comment unrequired #define in this module
 *
-*       #define SUPPORT_IMAGE_EXPORT
+*       #define RAYLIB_SUPPORT_IMAGE_EXPORT
 *           Support image export in multiple file formats
 *
-*       #define SUPPORT_IMAGE_MANIPULATION
+*       #define RAYLIB_SUPPORT_IMAGE_MANIPULATION
 *           Support multiple image editing functions to scale, adjust colors, flip, draw on images, crop...
-*           If not defined only some image editing functions supported: ImageFormat(), ImageAlphaMask(), ImageResize*()
+*           If not defined only some image editing functions supported: RaylibImageFormat(), RaylibImageAlphaMask(), RaylibImageResize*()
 *
-*       #define SUPPORT_IMAGE_GENERATION
+*       #define RAYLIB_SUPPORT_IMAGE_GENERATION
 *           Support procedural image generation functionality (gradient, spot, perlin-noise, cellular)
 *
 *   DEPENDENCIES:
@@ -68,33 +68,33 @@
     #include "config.h"         // Defines module configuration flags
 #endif
 
-#if defined(SUPPORT_MODULE_RTEXTURES)
+#if defined(RAYLIB_SUPPORT_MODULE_RTEXTURES)
 
-#include "utils.h"              // Required for: TRACELOG()
+#include "utils.h"              // Required for: RAYLIB_TRACELOG()
 #include "rlgl.h"               // OpenGL abstraction layer to multiple versions
 
 #include <stdlib.h>             // Required for: malloc(), calloc(), free()
-#include <string.h>             // Required for: strlen() [Used in ImageTextEx()], strcmp() [Used in LoadImageFromMemory()/LoadImageAnimFromMemory()/ExportImageToMemory()]
-#include <math.h>               // Required for: fabsf() [Used in DrawTextureRec()]
-#include <stdio.h>              // Required for: sprintf() [Used in ExportImageAsCode()]
+#include <string.h>             // Required for: strlen() [Used in RaylibImageTextEx()], strcmp() [Used in RaylibLoadImageFromMemory()/RaylibLoadImageAnimFromMemory()/RaylibExportImageToMemory()]
+#include <math.h>               // Required for: fabsf() [Used in RaylibDrawTextureRec()]
+#include <stdio.h>              // Required for: sprintf() [Used in RaylibExportImageAsCode()]
 
 // Support only desired texture formats on stb_image
 #if !defined(SUPPORT_FILEFORMAT_BMP)
     #define STBI_NO_BMP
 #endif
-#if !defined(SUPPORT_FILEFORMAT_PNG)
+#if !defined(RAYLIB_SUPPORT_FILEFORMAT_PNG)
     #define STBI_NO_PNG
 #endif
 #if !defined(SUPPORT_FILEFORMAT_TGA)
     #define STBI_NO_TGA
 #endif
 #if !defined(SUPPORT_FILEFORMAT_JPG)
-    #define STBI_NO_JPEG        // Image format .jpg and .jpeg
+    #define STBI_NO_JPEG        // RaylibImage format .jpg and .jpeg
 #endif
 #if !defined(SUPPORT_FILEFORMAT_PSD)
     #define STBI_NO_PSD
 #endif
-#if !defined(SUPPORT_FILEFORMAT_GIF)
+#if !defined(RAYLIB_SUPPORT_FILEFORMAT_GIF)
     #define STBI_NO_GIF
 #endif
 #if !defined(SUPPORT_FILEFORMAT_PIC)
@@ -107,7 +107,7 @@
     #define STBI_NO_PNM
 #endif
 
-#if defined(SUPPORT_FILEFORMAT_DDS)
+#if defined(RAYLIB_SUPPORT_FILEFORMAT_DDS)
     #define RL_GPUTEX_SUPPORT_DDS
 #endif
 #if defined(SUPPORT_FILEFORMAT_PKM)
@@ -123,17 +123,17 @@
     #define RL_GPUTEX_SUPPORT_ASTC
 #endif
 
-// Image fileformats not supported by default
+// RaylibImage fileformats not supported by default
 #if defined(__TINYC__)
     #define STBI_NO_SIMD
 #endif
 
 #if (defined(SUPPORT_FILEFORMAT_BMP) || \
-     defined(SUPPORT_FILEFORMAT_PNG) || \
+     defined(RAYLIB_SUPPORT_FILEFORMAT_PNG) || \
      defined(SUPPORT_FILEFORMAT_TGA) || \
      defined(SUPPORT_FILEFORMAT_JPG) || \
      defined(SUPPORT_FILEFORMAT_PSD) || \
-     defined(SUPPORT_FILEFORMAT_GIF) || \
+     defined(RAYLIB_SUPPORT_FILEFORMAT_GIF) || \
      defined(SUPPORT_FILEFORMAT_HDR) || \
      defined(SUPPORT_FILEFORMAT_PIC) || \
      defined(SUPPORT_FILEFORMAT_PNM))
@@ -158,7 +158,7 @@
     #endif
 #endif
 
-#if (defined(SUPPORT_FILEFORMAT_DDS) || \
+#if (defined(RAYLIB_SUPPORT_FILEFORMAT_DDS) || \
      defined(SUPPORT_FILEFORMAT_PKM) || \
      defined(SUPPORT_FILEFORMAT_KTX) || \
      defined(SUPPORT_FILEFORMAT_PVR) || \
@@ -178,7 +178,7 @@
     #endif
 #endif
 
-#if defined(SUPPORT_FILEFORMAT_QOI)
+#if defined(RAYLIB_SUPPORT_FILEFORMAT_QOI)
     #define QOI_MALLOC RL_MALLOC
     #define QOI_FREE RL_FREE
 
@@ -196,7 +196,7 @@
 
 #endif
 
-#if defined(SUPPORT_IMAGE_EXPORT)
+#if defined(RAYLIB_SUPPORT_IMAGE_EXPORT)
     #define STBIW_MALLOC RL_MALLOC
     #define STBIW_FREE RL_FREE
     #define STBIW_REALLOC RL_REALLOC
@@ -205,7 +205,7 @@
     #include "external/stb_image_write.h"   // Required for: stbi_write_*()
 #endif
 
-#if defined(SUPPORT_IMAGE_GENERATION)
+#if defined(RAYLIB_SUPPORT_IMAGE_GENERATION)
     #define STB_PERLIN_IMPLEMENTATION
     #include "external/stb_perlin.h"        // Required for: stb_perlin_fbm_noise3
 #endif
@@ -219,7 +219,7 @@
 #endif
 
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
-#include "external/stb_image_resize2.h"     // Required for: stbir_resize_uint8_linear() [ImageResize()]
+#include "external/stb_image_resize2.h"     // Required for: stbir_resize_uint8_linear() [RaylibImageResize()]
 
 #if defined(__GNUC__) // GCC and Clang
     #pragma GCC diagnostic pop
@@ -257,29 +257,29 @@
 //----------------------------------------------------------------------------------
 // Other Modules Functions Declaration (required by text)
 //----------------------------------------------------------------------------------
-extern void LoadFontDefault(void);          // [Module: text] Loads default font, required by ImageDrawText()
+extern void LoadFontDefault(void);          // [Module: text] Loads default font, required by RaylibImageDrawText()
 
 //----------------------------------------------------------------------------------
 // Module specific Functions Declaration
 //----------------------------------------------------------------------------------
 static float HalfToFloat(unsigned short x);
 static unsigned short FloatToHalf(float x);
-static Vector4 *LoadImageDataNormalized(Image image);       // Load pixel data from image as Vector4 array (float normalized)
+static RaylibVector4 *LoadImageDataNormalized(RaylibImage image);       // Load pixel data from image as RaylibVector4 array (float normalized)
 
 //----------------------------------------------------------------------------------
 // Module Functions Definition
 //----------------------------------------------------------------------------------
 
 // Load image from file into CPU memory (RAM)
-Image LoadImage(const char *fileName)
+RaylibImage RaylibLoadImage(const char *fileName)
 {
-    Image image = { 0 };
+    RaylibImage image = { 0 };
 
-#if defined(SUPPORT_FILEFORMAT_PNG) || \
+#if defined(RAYLIB_SUPPORT_FILEFORMAT_PNG) || \
     defined(SUPPORT_FILEFORMAT_BMP) || \
     defined(SUPPORT_FILEFORMAT_TGA) || \
     defined(SUPPORT_FILEFORMAT_JPG) || \
-    defined(SUPPORT_FILEFORMAT_GIF) || \
+    defined(RAYLIB_SUPPORT_FILEFORMAT_GIF) || \
     defined(SUPPORT_FILEFORMAT_PIC) || \
     defined(SUPPORT_FILEFORMAT_HDR) || \
     defined(SUPPORT_FILEFORMAT_PNM) || \
@@ -290,31 +290,31 @@ Image LoadImage(const char *fileName)
 
     // Loading file to memory
     int dataSize = 0;
-    unsigned char *fileData = LoadFileData(fileName, &dataSize);
+    unsigned char *fileData = RaylibLoadFileData(fileName, &dataSize);
 
     // Loading image from memory data
     if (fileData != NULL)
     {
-        image = LoadImageFromMemory(GetFileExtension(fileName), fileData, dataSize);
+        image = RaylibLoadImageFromMemory(RaylibGetFileExtension(fileName), fileData, dataSize);
 
-        UnloadFileData(fileData);
+        RaylibUnloadFileData(fileData);
     }
 
     return image;
 }
 
 // Load an image from RAW file data
-Image LoadImageRaw(const char *fileName, int width, int height, int format, int headerSize)
+RaylibImage RaylibLoadImageRaw(const char *fileName, int width, int height, int format, int headerSize)
 {
-    Image image = { 0 };
+    RaylibImage image = { 0 };
 
     int dataSize = 0;
-    unsigned char *fileData = LoadFileData(fileName, &dataSize);
+    unsigned char *fileData = RaylibLoadFileData(fileName, &dataSize);
 
     if (fileData != NULL)
     {
         unsigned char *dataPtr = fileData;
-        int size = GetPixelDataSize(width, height, format);
+        int size = RaylibGetPixelDataSize(width, height, format);
 
         if (size <= dataSize)   // Security check
         {
@@ -329,16 +329,16 @@ Image LoadImageRaw(const char *fileName, int width, int height, int format, int 
             image.format = format;
         }
 
-        UnloadFileData(fileData);
+        RaylibUnloadFileData(fileData);
     }
 
     return image;
 }
 
 // Load an image from a SVG file or string with custom size
-Image LoadImageSvg(const char *fileNameOrString, int width, int height)
+RaylibImage RaylibLoadImageSvg(const char *fileNameOrString, int width, int height)
 {
-    Image image = { 0 };
+    RaylibImage image = { 0 };
 
 #if defined(SUPPORT_FILEFORMAT_SVG)
     bool isSvgStringValid = false;
@@ -349,9 +349,9 @@ Image LoadImageSvg(const char *fileNameOrString, int width, int height)
         int dataSize = 0;
         unsigned char *fileData = NULL;
 
-        if (FileExists(fileNameOrString))
+        if (RaylibFileExists(fileNameOrString))
         {
-            fileData = LoadFileData(fileNameOrString, &dataSize);
+            fileData = RaylibLoadFileData(fileNameOrString, &dataSize);
             isSvgStringValid = true;
         }
         else
@@ -397,37 +397,37 @@ Image LoadImageSvg(const char *fileNameOrString, int width, int height)
             image.width = width;
             image.height = height;
             image.mipmaps = 1;
-            image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+            image.format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
 
             // Free used memory
             nsvgDelete(svgImage);
             nsvgDeleteRasterizer(rast);
         }
 
-        if (isSvgStringValid && (fileData != fileNameOrString)) UnloadFileData(fileData);
+        if (isSvgStringValid && (fileData != fileNameOrString)) RaylibUnloadFileData(fileData);
     }
 #else
-    TRACELOG(LOG_WARNING, "SVG image support not enabled, image can not be loaded");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "SVG image support not enabled, image can not be loaded");
 #endif
 
     return image;
 }
 
 // Load animated image data
-//  - Image.data buffer includes all frames: [image#0][image#1][image#2][...]
+//  - RaylibImage.data buffer includes all frames: [image#0][image#1][image#2][...]
 //  - Number of frames is returned through 'frames' parameter
 //  - All frames are returned in RGBA format
 //  - Frames delay data is discarded
-Image LoadImageAnim(const char *fileName, int *frames)
+RaylibImage RaylibLoadImageAnim(const char *fileName, int *frames)
 {
-    Image image = { 0 };
+    RaylibImage image = { 0 };
     int frameCount = 0;
 
-#if defined(SUPPORT_FILEFORMAT_GIF)
-    if (IsFileExtension(fileName, ".gif"))
+#if defined(RAYLIB_SUPPORT_FILEFORMAT_GIF)
+    if (RaylibIsFileExtension(fileName, ".gif"))
     {
         int dataSize = 0;
-        unsigned char *fileData = LoadFileData(fileName, &dataSize);
+        unsigned char *fileData = RaylibLoadFileData(fileName, &dataSize);
 
         if (fileData != NULL)
         {
@@ -436,9 +436,9 @@ Image LoadImageAnim(const char *fileName, int *frames)
             image.data = stbi_load_gif_from_memory(fileData, dataSize, &delays, &image.width, &image.height, &frameCount, &comp, 4);
 
             image.mipmaps = 1;
-            image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+            image.format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
 
-            UnloadFileData(fileData);
+            RaylibUnloadFileData(fileData);
             RL_FREE(delays);        // NOTE: Frames delays are discarded
         }
     }
@@ -447,7 +447,7 @@ Image LoadImageAnim(const char *fileName, int *frames)
 #endif
     else
     {
-        image = LoadImage(fileName);
+        image = RaylibLoadImage(fileName);
         frameCount = 1;
     }
 
@@ -456,19 +456,19 @@ Image LoadImageAnim(const char *fileName, int *frames)
 }
 
 // Load animated image data
-//  - Image.data buffer includes all frames: [image#0][image#1][image#2][...]
+//  - RaylibImage.data buffer includes all frames: [image#0][image#1][image#2][...]
 //  - Number of frames is returned through 'frames' parameter
 //  - All frames are returned in RGBA format
 //  - Frames delay data is discarded
-Image LoadImageAnimFromMemory(const char *fileType, const unsigned char *fileData, int dataSize, int *frames)
+RaylibImage RaylibLoadImageAnimFromMemory(const char *fileType, const unsigned char *fileData, int dataSize, int *frames)
 {
-    Image image = { 0 };
+    RaylibImage image = { 0 };
     int frameCount = 0;
 
     // Security check for input data
     if ((fileType == NULL) || (fileData == NULL) || (dataSize == 0)) return image;
 
-#if defined(SUPPORT_FILEFORMAT_GIF)
+#if defined(RAYLIB_SUPPORT_FILEFORMAT_GIF)
     if ((strcmp(fileType, ".gif") == 0) || (strcmp(fileType, ".GIF") == 0))
     {
         if (fileData != NULL)
@@ -478,7 +478,7 @@ Image LoadImageAnimFromMemory(const char *fileType, const unsigned char *fileDat
             image.data = stbi_load_gif_from_memory(fileData, dataSize, &delays, &image.width, &image.height, &frameCount, &comp, 4);
 
             image.mipmaps = 1;
-            image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+            image.format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
 
             RL_FREE(delays);        // NOTE: Frames delays are discarded
         }
@@ -488,7 +488,7 @@ Image LoadImageAnimFromMemory(const char *fileType, const unsigned char *fileDat
 #endif
     else
     {
-        image = LoadImageFromMemory(fileType, fileData, dataSize);
+        image = RaylibLoadImageFromMemory(fileType, fileData, dataSize);
         frameCount = 1;
     }
 
@@ -498,15 +498,15 @@ Image LoadImageAnimFromMemory(const char *fileType, const unsigned char *fileDat
 
 // Load image from memory buffer, fileType refers to extension: i.e. ".png"
 // WARNING: File extension must be provided in lower-case
-Image LoadImageFromMemory(const char *fileType, const unsigned char *fileData, int dataSize)
+RaylibImage RaylibLoadImageFromMemory(const char *fileType, const unsigned char *fileData, int dataSize)
 {
-    Image image = { 0 };
+    RaylibImage image = { 0 };
 
     // Security check for input data
     if ((fileType == NULL) || (fileData == NULL) || (dataSize == 0)) return image;
 
     if ((false)
-#if defined(SUPPORT_FILEFORMAT_PNG)
+#if defined(RAYLIB_SUPPORT_FILEFORMAT_PNG)
         || (strcmp(fileType, ".png") == 0) || (strcmp(fileType, ".PNG") == 0)
 #endif
 #if defined(SUPPORT_FILEFORMAT_BMP)
@@ -519,7 +519,7 @@ Image LoadImageFromMemory(const char *fileType, const unsigned char *fileData, i
         || (strcmp(fileType, ".jpg") == 0) || (strcmp(fileType, ".jpeg") == 0)
         || (strcmp(fileType, ".JPG") == 0) || (strcmp(fileType, ".JPEG") == 0)
 #endif
-#if defined(SUPPORT_FILEFORMAT_GIF)
+#if defined(RAYLIB_SUPPORT_FILEFORMAT_GIF)
         || (strcmp(fileType, ".gif") == 0) || (strcmp(fileType, ".GIF") == 0)
 #endif
 #if defined(SUPPORT_FILEFORMAT_PIC)
@@ -546,10 +546,10 @@ Image LoadImageFromMemory(const char *fileType, const unsigned char *fileData, i
             {
                 image.mipmaps = 1;
 
-                if (comp == 1) image.format = PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
-                else if (comp == 2) image.format = PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA;
-                else if (comp == 3) image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8;
-                else if (comp == 4) image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+                if (comp == 1) image.format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
+                else if (comp == 2) image.format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA;
+                else if (comp == 3) image.format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8;
+                else if (comp == 4) image.format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
             }
         }
 #endif
@@ -565,19 +565,19 @@ Image LoadImageFromMemory(const char *fileType, const unsigned char *fileData, i
 
             image.mipmaps = 1;
 
-            if (comp == 1) image.format = PIXELFORMAT_UNCOMPRESSED_R32;
-            else if (comp == 3) image.format = PIXELFORMAT_UNCOMPRESSED_R32G32B32;
-            else if (comp == 4) image.format = PIXELFORMAT_UNCOMPRESSED_R32G32B32A32;
+            if (comp == 1) image.format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32;
+            else if (comp == 3) image.format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32;
+            else if (comp == 4) image.format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32;
             else
             {
-                TRACELOG(LOG_WARNING, "IMAGE: HDR file format not supported");
-                UnloadImage(image);
+                RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: HDR file format not supported");
+                RaylibUnloadImage(image);
             }
         }
 #endif
     }
 #endif
-#if defined(SUPPORT_FILEFORMAT_QOI)
+#if defined(RAYLIB_SUPPORT_FILEFORMAT_QOI)
     else if ((strcmp(fileType, ".qoi") == 0) || (strcmp(fileType, ".QOI") == 0))
     {
         if (fileData != NULL)
@@ -586,7 +586,7 @@ Image LoadImageFromMemory(const char *fileType, const unsigned char *fileData, i
             image.data = qoi_decode(fileData, dataSize, &desc, 4);
             image.width = desc.width;
             image.height = desc.height;
-            image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+            image.format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
             image.mipmaps = 1;
         }
     }
@@ -614,14 +614,14 @@ Image LoadImageFromMemory(const char *fileType, const unsigned char *fileData, i
             image.width = svgImage->width;
             image.height = svgImage->height;
             image.mipmaps = 1;
-            image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+            image.format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
 
             nsvgDelete(svgImage);
             nsvgDeleteRasterizer(rast);
         }
     }
 #endif
-#if defined(SUPPORT_FILEFORMAT_DDS)
+#if defined(RAYLIB_SUPPORT_FILEFORMAT_DDS)
     else if ((strcmp(fileType, ".dds") == 0) || (strcmp(fileType, ".DDS") == 0))
     {
         image.data = rl_load_dds_from_memory(fileData, dataSize, &image.width, &image.height, &image.format, &image.mipmaps);
@@ -651,21 +651,21 @@ Image LoadImageFromMemory(const char *fileType, const unsigned char *fileData, i
         image.data = rl_load_astc_from_memory(fileData, dataSize, &image.width, &image.height, &image.format, &image.mipmaps);
     }
 #endif
-    else TRACELOG(LOG_WARNING, "IMAGE: Data format not supported");
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Data format not supported");
 
-    if (image.data != NULL) TRACELOG(LOG_INFO, "IMAGE: Data loaded successfully (%ix%i | %s | %i mipmaps)", image.width, image.height, rlGetPixelFormatName(image.format), image.mipmaps);
-    else TRACELOG(LOG_WARNING, "IMAGE: Failed to load image data");
+    if (image.data != NULL) RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "IMAGE: Data loaded successfully (%ix%i | %s | %i mipmaps)", image.width, image.height, rlGetPixelFormatName(image.format), image.mipmaps);
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Failed to load image data");
 
     return image;
 }
 
 // Load image from GPU texture data
 // NOTE: Compressed texture formats not supported
-Image LoadImageFromTexture(Texture2D texture)
+RaylibImage RaylibLoadImageFromTexture(Texture2D texture)
 {
-    Image image = { 0 };
+    RaylibImage image = { 0 };
 
-    if (texture.format < PIXELFORMAT_COMPRESSED_DXT1_RGB)
+    if (texture.format < RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB)
     {
         image.data = rlReadTexturePixels(texture.id, texture.width, texture.height, texture.format);
 
@@ -676,38 +676,38 @@ Image LoadImageFromTexture(Texture2D texture)
             image.format = texture.format;
             image.mipmaps = 1;
 
-#if defined(GRAPHICS_API_OPENGL_ES2)
+#if defined(RAYLIB_GRAPHICS_API_OPENGL_ES2)
             // NOTE: Data retrieved on OpenGL ES 2.0 should be RGBA,
             // coming from FBO color buffer attachment, but it seems
             // original texture format is retrieved on RPI...
-            image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+            image.format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
 #endif
-            TRACELOG(LOG_INFO, "TEXTURE: [ID %i] Pixel data retrieved successfully", texture.id);
+            RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "TEXTURE: [ID %i] Pixel data retrieved successfully", texture.id);
         }
-        else TRACELOG(LOG_WARNING, "TEXTURE: [ID %i] Failed to retrieve pixel data", texture.id);
+        else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "TEXTURE: [ID %i] Failed to retrieve pixel data", texture.id);
     }
-    else TRACELOG(LOG_WARNING, "TEXTURE: [ID %i] Failed to retrieve compressed pixel data", texture.id);
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "TEXTURE: [ID %i] Failed to retrieve compressed pixel data", texture.id);
 
     return image;
 }
 
 // Load image from screen buffer and (screenshot)
-Image LoadImageFromScreen(void)
+RaylibImage RaylibLoadImageFromScreen(void)
 {
-    Vector2 scale = GetWindowScaleDPI();
-    Image image = { 0 };
+    RaylibVector2 scale = RaylibGetWindowScaleDPI();
+    RaylibImage image = { 0 };
 
-    image.width = (int)(GetScreenWidth()*scale.x);
-    image.height = (int)(GetScreenHeight()*scale.y);
+    image.width = (int)(RaylibGetScreenWidth()*scale.x);
+    image.height = (int)(RaylibGetScreenHeight()*scale.y);
     image.mipmaps = 1;
-    image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+    image.format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
     image.data = rlReadScreenPixels(image.width, image.height);
 
     return image;
 }
 
 // Check if an image is ready
-bool IsImageReady(Image image)
+bool RaylibIsImageReady(RaylibImage image)
 {
     bool result = false;
 
@@ -721,64 +721,64 @@ bool IsImageReady(Image image)
 }
 
 // Unload image from CPU memory (RAM)
-void UnloadImage(Image image)
+void RaylibUnloadImage(RaylibImage image)
 {
     RL_FREE(image.data);
 }
 
 // Export image data to file
 // NOTE: File format depends on fileName extension
-bool ExportImage(Image image, const char *fileName)
+bool RaylibExportImage(RaylibImage image, const char *fileName)
 {
     int result = 0;
 
     // Security check for input data
     if ((image.width == 0) || (image.height == 0) || (image.data == NULL)) return result;
 
-#if defined(SUPPORT_IMAGE_EXPORT)
+#if defined(RAYLIB_SUPPORT_IMAGE_EXPORT)
     int channels = 4;
     bool allocatedData = false;
     unsigned char *imgData = (unsigned char *)image.data;
 
-    if (image.format == PIXELFORMAT_UNCOMPRESSED_GRAYSCALE) channels = 1;
-    else if (image.format == PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA) channels = 2;
-    else if (image.format == PIXELFORMAT_UNCOMPRESSED_R8G8B8) channels = 3;
-    else if (image.format == PIXELFORMAT_UNCOMPRESSED_R8G8B8A8) channels = 4;
+    if (image.format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE) channels = 1;
+    else if (image.format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA) channels = 2;
+    else if (image.format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8) channels = 3;
+    else if (image.format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8) channels = 4;
     else
     {
-        // NOTE: Getting Color array as RGBA unsigned char values
-        imgData = (unsigned char *)LoadImageColors(image);
+        // NOTE: Getting RaylibColor array as RGBA unsigned char values
+        imgData = (unsigned char *)RaylibLoadImageColors(image);
         allocatedData = true;
     }
 
-#if defined(SUPPORT_FILEFORMAT_PNG)
-    if (IsFileExtension(fileName, ".png"))
+#if defined(RAYLIB_SUPPORT_FILEFORMAT_PNG)
+    if (RaylibIsFileExtension(fileName, ".png"))
     {
         int dataSize = 0;
         unsigned char *fileData = stbi_write_png_to_mem((const unsigned char *)imgData, image.width*channels, image.width, image.height, channels, &dataSize);
-        result = SaveFileData(fileName, fileData, dataSize);
+        result = RaylibSaveFileData(fileName, fileData, dataSize);
         RL_FREE(fileData);
     }
 #else
     if (false) { }
 #endif
 #if defined(SUPPORT_FILEFORMAT_BMP)
-    else if (IsFileExtension(fileName, ".bmp")) result = stbi_write_bmp(fileName, image.width, image.height, channels, imgData);
+    else if (RaylibIsFileExtension(fileName, ".bmp")) result = stbi_write_bmp(fileName, image.width, image.height, channels, imgData);
 #endif
 #if defined(SUPPORT_FILEFORMAT_TGA)
-    else if (IsFileExtension(fileName, ".tga")) result = stbi_write_tga(fileName, image.width, image.height, channels, imgData);
+    else if (RaylibIsFileExtension(fileName, ".tga")) result = stbi_write_tga(fileName, image.width, image.height, channels, imgData);
 #endif
 #if defined(SUPPORT_FILEFORMAT_JPG)
-    else if (IsFileExtension(fileName, ".jpg") ||
-             IsFileExtension(fileName, ".jpeg")) result = stbi_write_jpg(fileName, image.width, image.height, channels, imgData, 90);  // JPG quality: between 1 and 100
+    else if (RaylibIsFileExtension(fileName, ".jpg") ||
+             RaylibIsFileExtension(fileName, ".jpeg")) result = stbi_write_jpg(fileName, image.width, image.height, channels, imgData, 90);  // JPG quality: between 1 and 100
 #endif
-#if defined(SUPPORT_FILEFORMAT_QOI)
-    else if (IsFileExtension(fileName, ".qoi"))
+#if defined(RAYLIB_SUPPORT_FILEFORMAT_QOI)
+    else if (RaylibIsFileExtension(fileName, ".qoi"))
     {
         channels = 0;
-        if (image.format == PIXELFORMAT_UNCOMPRESSED_R8G8B8) channels = 3;
-        else if (image.format == PIXELFORMAT_UNCOMPRESSED_R8G8B8A8) channels = 4;
-        else TRACELOG(LOG_WARNING, "IMAGE: Image pixel format must be R8G8B8 or R8G8B8A8");
+        if (image.format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8) channels = 3;
+        else if (image.format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8) channels = 4;
+        else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: RaylibImage pixel format must be R8G8B8 or R8G8B8A8");
 
         if ((channels == 3) || (channels == 4))
         {
@@ -793,29 +793,29 @@ bool ExportImage(Image image, const char *fileName)
     }
 #endif
 #if defined(SUPPORT_FILEFORMAT_KTX)
-    else if (IsFileExtension(fileName, ".ktx"))
+    else if (RaylibIsFileExtension(fileName, ".ktx"))
     {
         result = rl_save_ktx(fileName, image.data, image.width, image.height, image.format, image.mipmaps);
     }
 #endif
-    else if (IsFileExtension(fileName, ".raw"))
+    else if (RaylibIsFileExtension(fileName, ".raw"))
     {
         // Export raw pixel data (without header)
         // NOTE: It's up to the user to track image parameters
-        result = SaveFileData(fileName, image.data, GetPixelDataSize(image.width, image.height, image.format));
+        result = RaylibSaveFileData(fileName, image.data, RaylibGetPixelDataSize(image.width, image.height, image.format));
     }
 
     if (allocatedData) RL_FREE(imgData);
-#endif      // SUPPORT_IMAGE_EXPORT
+#endif      // RAYLIB_SUPPORT_IMAGE_EXPORT
 
-    if (result != 0) TRACELOG(LOG_INFO, "FILEIO: [%s] Image exported successfully", fileName);
-    else TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to export image", fileName);
+    if (result != 0) RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "FILEIO: [%s] RaylibImage exported successfully", fileName);
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: [%s] Failed to export image", fileName);
 
     return result;
 }
 
 // Export image to memory buffer
-unsigned char *ExportImageToMemory(Image image, const char *fileType, int *dataSize)
+unsigned char *RaylibExportImageToMemory(RaylibImage image, const char *fileType, int *dataSize)
 {
     unsigned char *fileData = NULL;
     *dataSize = 0;
@@ -823,15 +823,15 @@ unsigned char *ExportImageToMemory(Image image, const char *fileType, int *dataS
     // Security check for input data
     if ((image.width == 0) || (image.height == 0) || (image.data == NULL)) return NULL;
 
-#if defined(SUPPORT_IMAGE_EXPORT)
+#if defined(RAYLIB_SUPPORT_IMAGE_EXPORT)
     int channels = 4;
 
-    if (image.format == PIXELFORMAT_UNCOMPRESSED_GRAYSCALE) channels = 1;
-    else if (image.format == PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA) channels = 2;
-    else if (image.format == PIXELFORMAT_UNCOMPRESSED_R8G8B8) channels = 3;
-    else if (image.format == PIXELFORMAT_UNCOMPRESSED_R8G8B8A8) channels = 4;
+    if (image.format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE) channels = 1;
+    else if (image.format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA) channels = 2;
+    else if (image.format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8) channels = 3;
+    else if (image.format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8) channels = 4;
 
-#if defined(SUPPORT_FILEFORMAT_PNG)
+#if defined(RAYLIB_SUPPORT_FILEFORMAT_PNG)
     if ((strcmp(fileType, ".png") == 0) || (strcmp(fileType, ".PNG") == 0))
     {
         fileData = stbi_write_png_to_mem((const unsigned char *)image.data, image.width*channels, image.width, image.height, channels, dataSize);
@@ -844,17 +844,17 @@ unsigned char *ExportImageToMemory(Image image, const char *fileType, int *dataS
 }
 
 // Export image as code file (.h) defining an array of bytes
-bool ExportImageAsCode(Image image, const char *fileName)
+bool RaylibExportImageAsCode(RaylibImage image, const char *fileName)
 {
     bool success = false;
 
-#if defined(SUPPORT_IMAGE_EXPORT)
+#if defined(RAYLIB_SUPPORT_IMAGE_EXPORT)
 
 #ifndef TEXT_BYTES_PER_LINE
     #define TEXT_BYTES_PER_LINE     20
 #endif
 
-    int dataSize = GetPixelDataSize(image.width, image.height, image.format);
+    int dataSize = RaylibGetPixelDataSize(image.width, image.height, image.format);
 
     // NOTE: Text data buffer size is estimated considering image data size in bytes
     // and requiring 6 char bytes for every byte: "0x00, "
@@ -863,7 +863,7 @@ bool ExportImageAsCode(Image image, const char *fileName)
     int byteCount = 0;
     byteCount += sprintf(txtData + byteCount, "////////////////////////////////////////////////////////////////////////////////////////\n");
     byteCount += sprintf(txtData + byteCount, "//                                                                                    //\n");
-    byteCount += sprintf(txtData + byteCount, "// ImageAsCode exporter v1.0 - Image pixel data exported as an array of bytes         //\n");
+    byteCount += sprintf(txtData + byteCount, "// ImageAsCode exporter v1.0 - RaylibImage pixel data exported as an array of bytes         //\n");
     byteCount += sprintf(txtData + byteCount, "//                                                                                    //\n");
     byteCount += sprintf(txtData + byteCount, "// more info and bugs-report:  github.com/raysan5/raylib                              //\n");
     byteCount += sprintf(txtData + byteCount, "// feedback and support:       ray[at]raylib.com                                      //\n");
@@ -874,11 +874,11 @@ bool ExportImageAsCode(Image image, const char *fileName)
 
     // Get file name from path and convert variable name to uppercase
     char varFileName[256] = { 0 };
-    strcpy(varFileName, GetFileNameWithoutExt(fileName));
+    strcpy(varFileName, RaylibGetFileNameWithoutExt(fileName));
     for (int i = 0; varFileName[i] != '\0'; i++) if ((varFileName[i] >= 'a') && (varFileName[i] <= 'z')) { varFileName[i] = varFileName[i] - 32; }
 
     // Add image information
-    byteCount += sprintf(txtData + byteCount, "// Image data information\n");
+    byteCount += sprintf(txtData + byteCount, "// RaylibImage data information\n");
     byteCount += sprintf(txtData + byteCount, "#define %s_WIDTH    %i\n", varFileName, image.width);
     byteCount += sprintf(txtData + byteCount, "#define %s_HEIGHT   %i\n", varFileName, image.height);
     byteCount += sprintf(txtData + byteCount, "#define %s_FORMAT   %i          // raylib internal pixel format\n\n", varFileName, image.format);
@@ -888,47 +888,47 @@ bool ExportImageAsCode(Image image, const char *fileName)
     byteCount += sprintf(txtData + byteCount, "0x%x };\n", ((unsigned char *)image.data)[dataSize - 1]);
 
     // NOTE: Text data size exported is determined by '\0' (NULL) character
-    success = SaveFileText(fileName, txtData);
+    success = RaylibSaveFileText(fileName, txtData);
 
     RL_FREE(txtData);
 
-#endif      // SUPPORT_IMAGE_EXPORT
+#endif      // RAYLIB_SUPPORT_IMAGE_EXPORT
 
-    if (success != 0) TRACELOG(LOG_INFO, "FILEIO: [%s] Image as code exported successfully", fileName);
-    else TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to export image as code", fileName);
+    if (success != 0) RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "FILEIO: [%s] RaylibImage as code exported successfully", fileName);
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: [%s] Failed to export image as code", fileName);
 
     return success;
 }
 
 //------------------------------------------------------------------------------------
-// Image generation functions
+// RaylibImage generation functions
 //------------------------------------------------------------------------------------
 // Generate image: plain color
-Image GenImageColor(int width, int height, Color color)
+RaylibImage RaylibGenImageColor(int width, int height, RaylibColor color)
 {
-    Color *pixels = (Color *)RL_CALLOC(width*height, sizeof(Color));
+    RaylibColor *pixels = (RaylibColor *)RL_CALLOC(width*height, sizeof(RaylibColor));
 
     for (int i = 0; i < width*height; i++) pixels[i] = color;
 
-    Image image = {
+    RaylibImage image = {
         .data = pixels,
         .width = width,
         .height = height,
-        .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
+        .format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
         .mipmaps = 1
     };
 
     return image;
 }
 
-#if defined(SUPPORT_IMAGE_GENERATION)
+#if defined(RAYLIB_SUPPORT_IMAGE_GENERATION)
 // Generate image: linear gradient
 // The direction value specifies the direction of the gradient (in degrees)
 // with 0 being vertical (from top to bottom), 90 being horizontal (from left to right)
 // The gradient effectively rotates counter-clockwise by the specified amount
-Image GenImageGradientLinear(int width, int height, int direction, Color start, Color end)
+RaylibImage RaylibGenImageGradientLinear(int width, int height, int direction, RaylibColor start, RaylibColor end)
 {
-    Color *pixels = (Color *)RL_MALLOC(width*height*sizeof(Color));
+    RaylibColor *pixels = (RaylibColor *)RL_MALLOC(width*height*sizeof(RaylibColor));
 
     float radianDirection = (float)(90 - direction)/180.f*3.14159f;
     float cosDir = cosf(radianDirection);
@@ -942,8 +942,8 @@ Image GenImageGradientLinear(int width, int height, int direction, Color start, 
             float pos = (i*cosDir + j*sinDir)/(width*cosDir + height*sinDir);
 
             float factor = pos;
-            factor = (factor > 1.0f)? 1.0f : factor;  // Clamp to [0,1]
-            factor = (factor < 0.0f)? 0.0f : factor;  // Clamp to [0,1]
+            factor = (factor > 1.0f)? 1.0f : factor;  // RaylibClamp to [0,1]
+            factor = (factor < 0.0f)? 0.0f : factor;  // RaylibClamp to [0,1]
 
             // Generate the color for this pixel
             pixels[j*width + i].r = (int)((float)end.r*factor + (float)start.r*(1.0f - factor));
@@ -953,11 +953,11 @@ Image GenImageGradientLinear(int width, int height, int direction, Color start, 
         }
     }
 
-    Image image = {
+    RaylibImage image = {
         .data = pixels,
         .width = width,
         .height = height,
-        .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
+        .format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
         .mipmaps = 1
     };
 
@@ -965,9 +965,9 @@ Image GenImageGradientLinear(int width, int height, int direction, Color start, 
 }
 
 // Generate image: radial gradient
-Image GenImageGradientRadial(int width, int height, float density, Color inner, Color outer)
+RaylibImage RaylibGenImageGradientRadial(int width, int height, float density, RaylibColor inner, RaylibColor outer)
 {
-    Color *pixels = (Color *)RL_MALLOC(width*height*sizeof(Color));
+    RaylibColor *pixels = (RaylibColor *)RL_MALLOC(width*height*sizeof(RaylibColor));
     float radius = (width < height)? (float)width/2.0f : (float)height/2.0f;
 
     float centerX = (float)width/2.0f;
@@ -990,11 +990,11 @@ Image GenImageGradientRadial(int width, int height, float density, Color inner, 
         }
     }
 
-    Image image = {
+    RaylibImage image = {
         .data = pixels,
         .width = width,
         .height = height,
-        .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
+        .format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
         .mipmaps = 1
     };
 
@@ -1002,9 +1002,9 @@ Image GenImageGradientRadial(int width, int height, float density, Color inner, 
 }
 
 // Generate image: square gradient
-Image GenImageGradientSquare(int width, int height, float density, Color inner, Color outer)
+RaylibImage RaylibGenImageGradientSquare(int width, int height, float density, RaylibColor inner, RaylibColor outer)
 {
-    Color *pixels = (Color *)RL_MALLOC(width*height*sizeof(Color));
+    RaylibColor *pixels = (RaylibColor *)RL_MALLOC(width*height*sizeof(RaylibColor));
 
     float centerX = (float)width/2.0f;
     float centerY = (float)height/2.0f;
@@ -1017,7 +1017,7 @@ Image GenImageGradientSquare(int width, int height, float density, Color inner, 
             float distX = fabsf(x - centerX);
             float distY = fabsf(y - centerY);
 
-            // Normalize the distances by the dimensions of the gradient rectangle
+            // RaylibNormalize the distances by the dimensions of the gradient rectangle
             float normalizedDistX = distX/centerX;
             float normalizedDistY = distY/centerY;
 
@@ -1028,7 +1028,7 @@ Image GenImageGradientSquare(int width, int height, float density, Color inner, 
             // This makes the gradient start from the center when density is 0, and from the edge when density is 1
             float factor = (manhattanDist - density)/(1.0f - density);
 
-            // Clamp the factor between 0 and 1
+            // RaylibClamp the factor between 0 and 1
             factor = fminf(fmaxf(factor, 0.0f), 1.0f);
 
             // Blend the colors based on the calculated factor
@@ -1039,11 +1039,11 @@ Image GenImageGradientSquare(int width, int height, float density, Color inner, 
         }
     }
 
-    Image image = {
+    RaylibImage image = {
         .data = pixels,
         .width = width,
         .height = height,
-        .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
+        .format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
         .mipmaps = 1
     };
 
@@ -1051,9 +1051,9 @@ Image GenImageGradientSquare(int width, int height, float density, Color inner, 
 }
 
 // Generate image: checked
-Image GenImageChecked(int width, int height, int checksX, int checksY, Color col1, Color col2)
+RaylibImage RaylibGenImageChecked(int width, int height, int checksX, int checksY, RaylibColor col1, RaylibColor col2)
 {
-    Color *pixels = (Color *)RL_MALLOC(width*height*sizeof(Color));
+    RaylibColor *pixels = (RaylibColor *)RL_MALLOC(width*height*sizeof(RaylibColor));
 
     for (int y = 0; y < height; y++)
     {
@@ -1064,11 +1064,11 @@ Image GenImageChecked(int width, int height, int checksX, int checksY, Color col
         }
     }
 
-    Image image = {
+    RaylibImage image = {
         .data = pixels,
         .width = width,
         .height = height,
-        .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
+        .format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
         .mipmaps = 1
     };
 
@@ -1076,22 +1076,22 @@ Image GenImageChecked(int width, int height, int checksX, int checksY, Color col
 }
 
 // Generate image: white noise
-// NOTE: It requires GetRandomValue(), defined in [rcore]
-Image GenImageWhiteNoise(int width, int height, float factor)
+// NOTE: It requires RaylibGetRandomValue(), defined in [rcore]
+RaylibImage RaylibGenImageWhiteNoise(int width, int height, float factor)
 {
-    Color *pixels = (Color *)RL_MALLOC(width*height*sizeof(Color));
+    RaylibColor *pixels = (RaylibColor *)RL_MALLOC(width*height*sizeof(RaylibColor));
 
     for (int i = 0; i < width*height; i++)
     {
-        if (GetRandomValue(0, 99) < (int)(factor*100.0f)) pixels[i] = WHITE;
-        else pixels[i] = BLACK;
+        if (RaylibGetRandomValue(0, 99) < (int)(factor*100.0f)) pixels[i] = RAYLIB_WHITE;
+        else pixels[i] = RAYLIB_BLACK;
     }
 
-    Image image = {
+    RaylibImage image = {
         .data = pixels,
         .width = width,
         .height = height,
-        .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
+        .format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
         .mipmaps = 1
     };
 
@@ -1099,9 +1099,9 @@ Image GenImageWhiteNoise(int width, int height, float factor)
 }
 
 // Generate image: perlin noise
-Image GenImagePerlinNoise(int width, int height, int offsetX, int offsetY, float scale)
+RaylibImage RaylibGenImagePerlinNoise(int width, int height, int offsetX, int offsetY, float scale)
 {
-    Color *pixels = (Color *)RL_MALLOC(width*height*sizeof(Color));
+    RaylibColor *pixels = (RaylibColor *)RL_MALLOC(width*height*sizeof(RaylibColor));
 
     for (int y = 0; y < height; y++)
     {
@@ -1120,7 +1120,7 @@ Image GenImagePerlinNoise(int width, int height, int offsetX, int offsetY, float
             //   octaves    =  6     -- number of "octaves" of noise3() to sum
             float p = stb_perlin_fbm_noise3(nx, ny, 1.0f, 2.0f, 0.5f, 6);
 
-            // Clamp between -1.0f and 1.0f
+            // RaylibClamp between -1.0f and 1.0f
             if (p < -1.0f) p = -1.0f;
             if (p > 1.0f) p = 1.0f;
 
@@ -1128,15 +1128,15 @@ Image GenImagePerlinNoise(int width, int height, int offsetX, int offsetY, float
             float np = (p + 1.0f)/2.0f;
 
             int intensity = (int)(np*255.0f);
-            pixels[y*width + x] = (Color){ intensity, intensity, intensity, 255 };
+            pixels[y*width + x] = (RaylibColor){ intensity, intensity, intensity, 255 };
         }
     }
 
-    Image image = {
+    RaylibImage image = {
         .data = pixels,
         .width = width,
         .height = height,
-        .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
+        .format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
         .mipmaps = 1
     };
 
@@ -1144,21 +1144,21 @@ Image GenImagePerlinNoise(int width, int height, int offsetX, int offsetY, float
 }
 
 // Generate image: cellular algorithm. Bigger tileSize means bigger cells
-Image GenImageCellular(int width, int height, int tileSize)
+RaylibImage RaylibGenImageCellular(int width, int height, int tileSize)
 {
-    Color *pixels = (Color *)RL_MALLOC(width*height*sizeof(Color));
+    RaylibColor *pixels = (RaylibColor *)RL_MALLOC(width*height*sizeof(RaylibColor));
 
     int seedsPerRow = width/tileSize;
     int seedsPerCol = height/tileSize;
     int seedCount = seedsPerRow*seedsPerCol;
 
-    Vector2 *seeds = (Vector2 *)RL_MALLOC(seedCount*sizeof(Vector2));
+    RaylibVector2 *seeds = (RaylibVector2 *)RL_MALLOC(seedCount*sizeof(RaylibVector2));
 
     for (int i = 0; i < seedCount; i++)
     {
-        int y = (i/seedsPerRow)*tileSize + GetRandomValue(0, tileSize - 1);
-        int x = (i%seedsPerRow)*tileSize + GetRandomValue(0, tileSize - 1);
-        seeds[i] = (Vector2){ (float)x, (float)y };
+        int y = (i/seedsPerRow)*tileSize + RaylibGetRandomValue(0, tileSize - 1);
+        int x = (i%seedsPerRow)*tileSize + RaylibGetRandomValue(0, tileSize - 1);
+        seeds[i] = (RaylibVector2){ (float)x, (float)y };
     }
 
     for (int y = 0; y < height; y++)
@@ -1180,7 +1180,7 @@ Image GenImageCellular(int width, int height, int tileSize)
                 {
                     if ((tileY + j < 0) || (tileY + j >= seedsPerCol)) continue;
 
-                    Vector2 neighborSeed = seeds[(tileY + j)*seedsPerRow + tileX + i];
+                    RaylibVector2 neighborSeed = seeds[(tileY + j)*seedsPerRow + tileX + i];
 
                     float dist = (float)hypot(x - (int)neighborSeed.x, y - (int)neighborSeed.y);
                     minDistance = (float)fmin(minDistance, dist);
@@ -1191,17 +1191,17 @@ Image GenImageCellular(int width, int height, int tileSize)
             int intensity = (int)(minDistance*256.0f/tileSize);
             if (intensity > 255) intensity = 255;
 
-            pixels[y*width + x] = (Color){ intensity, intensity, intensity, 255 };
+            pixels[y*width + x] = (RaylibColor){ intensity, intensity, intensity, 255 };
         }
     }
 
     RL_FREE(seeds);
 
-    Image image = {
+    RaylibImage image = {
         .data = pixels,
         .width = width,
         .height = height,
-        .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
+        .format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
         .mipmaps = 1
     };
 
@@ -1209,16 +1209,16 @@ Image GenImageCellular(int width, int height, int tileSize)
 }
 
 // Generate image: grayscale image from text data
-Image GenImageText(int width, int height, const char *text)
+RaylibImage RaylibGenImageText(int width, int height, const char *text)
 {
-    Image image = { 0 };
+    RaylibImage image = { 0 };
 
-    int textLength = TextLength(text);
+    int textLength = RaylibTextLength(text);
     int imageViewSize = width*height;
 
     image.width = width;
     image.height = height;
-    image.format = PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
+    image.format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
     image.data = RL_CALLOC(imageViewSize, 1);
     image.mipmaps = 1;
 
@@ -1226,15 +1226,15 @@ Image GenImageText(int width, int height, const char *text)
 
     return image;
 }
-#endif      // SUPPORT_IMAGE_GENERATION
+#endif      // RAYLIB_SUPPORT_IMAGE_GENERATION
 
 //------------------------------------------------------------------------------------
-// Image manipulation functions
+// RaylibImage manipulation functions
 //------------------------------------------------------------------------------------
 // Copy an image to a new image
-Image ImageCopy(Image image)
+RaylibImage RaylibImageCopy(RaylibImage image)
 {
-    Image newImage = { 0 };
+    RaylibImage newImage = { 0 };
 
     int width = image.width;
     int height = image.height;
@@ -1242,7 +1242,7 @@ Image ImageCopy(Image image)
 
     for (int i = 0; i < image.mipmaps; i++)
     {
-        size += GetPixelDataSize(width, height, image.format);
+        size += RaylibGetPixelDataSize(width, height, image.format);
 
         width /= 2;
         height /= 2;
@@ -1269,11 +1269,11 @@ Image ImageCopy(Image image)
 }
 
 // Create an image from another image piece
-Image ImageFromImage(Image image, Rectangle rec)
+RaylibImage RaylibImageFromImage(RaylibImage image, RaylibRectangle rec)
 {
-    Image result = { 0 };
+    RaylibImage result = { 0 };
 
-    int bytesPerPixel = GetPixelDataSize(1, 1, image.format);
+    int bytesPerPixel = RaylibGetPixelDataSize(1, 1, image.format);
 
     result.width = (int)rec.width;
     result.height = (int)rec.height;
@@ -1291,7 +1291,7 @@ Image ImageFromImage(Image image, Rectangle rec)
 
 // Crop an image to area defined by a rectangle
 // NOTE: Security checks are performed in case rectangle goes out of bounds
-void ImageCrop(Image *image, Rectangle crop)
+void RaylibImageCrop(RaylibImage *image, RaylibRectangle crop)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
@@ -1303,15 +1303,15 @@ void ImageCrop(Image *image, Rectangle crop)
     if ((crop.y + crop.height) > image->height) crop.height = image->height - crop.y;
     if ((crop.x > image->width) || (crop.y > image->height))
     {
-        TRACELOG(LOG_WARNING, "IMAGE: Failed to crop, rectangle out of bounds");
+        RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Failed to crop, rectangle out of bounds");
         return;
     }
 
-    if (image->mipmaps > 1) TRACELOG(LOG_WARNING, "Image manipulation only applied to base mipmap level");
-    if (image->format >= PIXELFORMAT_COMPRESSED_DXT1_RGB) TRACELOG(LOG_WARNING, "Image manipulation not supported for compressed formats");
+    if (image->mipmaps > 1) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibImage manipulation only applied to base mipmap level");
+    if (image->format >= RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibImage manipulation not supported for compressed formats");
     else
     {
-        int bytesPerPixel = GetPixelDataSize(1, 1, image->format);
+        int bytesPerPixel = RaylibGetPixelDataSize(1, 1, image->format);
 
         unsigned char *croppedData = (unsigned char *)RL_MALLOC((int)(crop.width*crop.height)*bytesPerPixel);
 
@@ -1342,16 +1342,16 @@ void ImageCrop(Image *image, Rectangle crop)
 }
 
 // Convert image data to desired format
-void ImageFormat(Image *image, int newFormat)
+void RaylibImageFormat(RaylibImage *image, int newFormat)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
 
     if ((newFormat != 0) && (image->format != newFormat))
     {
-        if ((image->format < PIXELFORMAT_COMPRESSED_DXT1_RGB) && (newFormat < PIXELFORMAT_COMPRESSED_DXT1_RGB))
+        if ((image->format < RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB) && (newFormat < RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB))
         {
-            Vector4 *pixels = LoadImageDataNormalized(*image);     // Supports 8 to 32 bit per channel
+            RaylibVector4 *pixels = LoadImageDataNormalized(*image);     // Supports 8 to 32 bit per channel
 
             RL_FREE(image->data);      // WARNING! We loose mipmaps data --> Regenerated at the end...
             image->data = NULL;
@@ -1359,7 +1359,7 @@ void ImageFormat(Image *image, int newFormat)
 
             switch (image->format)
             {
-                case PIXELFORMAT_UNCOMPRESSED_GRAYSCALE:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE:
                 {
                     image->data = (unsigned char *)RL_MALLOC(image->width*image->height*sizeof(unsigned char));
 
@@ -1369,7 +1369,7 @@ void ImageFormat(Image *image, int newFormat)
                     }
 
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
                 {
                     image->data = (unsigned char *)RL_MALLOC(image->width*image->height*2*sizeof(unsigned char));
 
@@ -1380,7 +1380,7 @@ void ImageFormat(Image *image, int newFormat)
                     }
 
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R5G6B5:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G6B5:
                 {
                     image->data = (unsigned short *)RL_MALLOC(image->width*image->height*sizeof(unsigned short));
 
@@ -1398,7 +1398,7 @@ void ImageFormat(Image *image, int newFormat)
                     }
 
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R8G8B8:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8:
                 {
                     image->data = (unsigned char *)RL_MALLOC(image->width*image->height*3*sizeof(unsigned char));
 
@@ -1409,7 +1409,7 @@ void ImageFormat(Image *image, int newFormat)
                         ((unsigned char *)image->data)[i + 2] = (unsigned char)(pixels[k].z*255.0f);
                     }
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
                 {
                     image->data = (unsigned short *)RL_MALLOC(image->width*image->height*sizeof(unsigned short));
 
@@ -1429,7 +1429,7 @@ void ImageFormat(Image *image, int newFormat)
                     }
 
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R4G4B4A4:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4:
                 {
                     image->data = (unsigned short *)RL_MALLOC(image->width*image->height*sizeof(unsigned short));
 
@@ -1449,7 +1449,7 @@ void ImageFormat(Image *image, int newFormat)
                     }
 
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R8G8B8A8:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8:
                 {
                     image->data = (unsigned char *)RL_MALLOC(image->width*image->height*4*sizeof(unsigned char));
 
@@ -1461,9 +1461,9 @@ void ImageFormat(Image *image, int newFormat)
                         ((unsigned char *)image->data)[i + 3] = (unsigned char)(pixels[k].w*255.0f);
                     }
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R32:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32:
                 {
-                    // WARNING: Image is converted to GRAYSCALE equivalent 32bit
+                    // WARNING: RaylibImage is converted to GRAYSCALE equivalent 32bit
 
                     image->data = (float *)RL_MALLOC(image->width*image->height*sizeof(float));
 
@@ -1472,7 +1472,7 @@ void ImageFormat(Image *image, int newFormat)
                         ((float *)image->data)[i] = (float)(pixels[i].x*0.299f + pixels[i].y*0.587f + pixels[i].z*0.114f);
                     }
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R32G32B32:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32:
                 {
                     image->data = (float *)RL_MALLOC(image->width*image->height*3*sizeof(float));
 
@@ -1483,7 +1483,7 @@ void ImageFormat(Image *image, int newFormat)
                         ((float *)image->data)[i + 2] = pixels[k].z;
                     }
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R32G32B32A32:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32:
                 {
                     image->data = (float *)RL_MALLOC(image->width*image->height*4*sizeof(float));
 
@@ -1495,9 +1495,9 @@ void ImageFormat(Image *image, int newFormat)
                         ((float *)image->data)[i + 3] = pixels[k].w;
                     }
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R16:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16:
                 {
-                    // WARNING: Image is converted to GRAYSCALE equivalent 16bit
+                    // WARNING: RaylibImage is converted to GRAYSCALE equivalent 16bit
 
                     image->data = (unsigned short *)RL_MALLOC(image->width*image->height*sizeof(unsigned short));
 
@@ -1506,7 +1506,7 @@ void ImageFormat(Image *image, int newFormat)
                         ((unsigned short *)image->data)[i] = FloatToHalf((float)(pixels[i].x*0.299f + pixels[i].y*0.587f + pixels[i].z*0.114f));
                     }
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R16G16B16:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16:
                 {
                     image->data = (unsigned short *)RL_MALLOC(image->width*image->height*3*sizeof(unsigned short));
 
@@ -1517,7 +1517,7 @@ void ImageFormat(Image *image, int newFormat)
                         ((unsigned short *)image->data)[i + 2] = FloatToHalf(pixels[k].z);
                     }
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R16G16B16A16:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16:
                 {
                     image->data = (unsigned short *)RL_MALLOC(image->width*image->height*4*sizeof(unsigned short));
 
@@ -1540,55 +1540,55 @@ void ImageFormat(Image *image, int newFormat)
             if (image->mipmaps > 1)
             {
                 image->mipmaps = 1;
-            #if defined(SUPPORT_IMAGE_MANIPULATION)
-                if (image->data != NULL) ImageMipmaps(image);
+            #if defined(RAYLIB_SUPPORT_IMAGE_MANIPULATION)
+                if (image->data != NULL) RaylibImageMipmaps(image);
             #endif
             }
         }
-        else TRACELOG(LOG_WARNING, "IMAGE: Data format is compressed, can not be converted");
+        else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Data format is compressed, can not be converted");
     }
 }
 
 // Create an image from text (default font)
-Image ImageText(const char *text, int fontSize, Color color)
+RaylibImage RaylibImageText(const char *text, int fontSize, RaylibColor color)
 {
-    Image imText = { 0 };
-#if defined(SUPPORT_MODULE_RTEXT)
-    int defaultFontSize = 10;   // Default Font chars height in pixel
+    RaylibImage imText = { 0 };
+#if defined(RAYLIB_SUPPORT_MODULE_RTEXT)
+    int defaultFontSize = 10;   // Default RaylibFont chars height in pixel
     if (fontSize < defaultFontSize) fontSize = defaultFontSize;
     int spacing = fontSize/defaultFontSize;
-    imText = ImageTextEx(GetFontDefault(), text, (float)fontSize, (float)spacing, color);   // WARNING: Module required: rtext
+    imText = RaylibImageTextEx(RaylibGetFontDefault(), text, (float)fontSize, (float)spacing, color);   // WARNING: Module required: rtext
 #else
-    imText = GenImageColor(200, 60, BLACK);     // Generating placeholder black image rectangle
-    TRACELOG(LOG_WARNING, "IMAGE: ImageTextEx() requires module: rtext");
+    imText = RaylibGenImageColor(200, 60, RAYLIB_BLACK);     // Generating placeholder black image rectangle
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: RaylibImageTextEx() requires module: rtext");
 #endif
     return imText;
 }
 
 // Create an image from text (custom sprite font)
 // WARNING: Module required: rtext
-Image ImageTextEx(Font font, const char *text, float fontSize, float spacing, Color tint)
+RaylibImage RaylibImageTextEx(RaylibFont font, const char *text, float fontSize, float spacing, RaylibColor tint)
 {
-    Image imText = { 0 };
-#if defined(SUPPORT_MODULE_RTEXT)
+    RaylibImage imText = { 0 };
+#if defined(RAYLIB_SUPPORT_MODULE_RTEXT)
     int size = (int)strlen(text);   // Get size in bytes of text
 
-    int textOffsetX = 0;            // Image drawing position X
+    int textOffsetX = 0;            // RaylibImage drawing position X
     int textOffsetY = 0;            // Offset between lines (on linebreak '\n')
 
     // NOTE: Text image is generated at font base size, later scaled to desired font size
-    Vector2 imSize = MeasureTextEx(font, text, (float)font.baseSize, spacing);  // WARNING: Module required: rtext
-    Vector2 textSize = MeasureTextEx(font, text, fontSize, spacing);
+    RaylibVector2 imSize = RaylibMeasureTextEx(font, text, (float)font.baseSize, spacing);  // WARNING: Module required: rtext
+    RaylibVector2 textSize = RaylibMeasureTextEx(font, text, fontSize, spacing);
 
     // Create image to store text
-    imText = GenImageColor((int)imSize.x, (int)imSize.y, BLANK);
+    imText = RaylibGenImageColor((int)imSize.x, (int)imSize.y, RAYLIB_BLANK);
 
     for (int i = 0; i < size;)
     {
         // Get next codepoint from byte string and glyph index in font
         int codepointByteCount = 0;
-        int codepoint = GetCodepointNext(&text[i], &codepointByteCount);    // WARNING: Module required: rtext
-        int index = GetGlyphIndex(font, codepoint);                         // WARNING: Module required: rtext
+        int codepoint = RaylibGetCodepointNext(&text[i], &codepointByteCount);    // WARNING: Module required: rtext
+        int index = RaylibGetGlyphIndex(font, codepoint);                         // WARNING: Module required: rtext
 
         if (codepoint == '\n')
         {
@@ -1601,8 +1601,8 @@ Image ImageTextEx(Font font, const char *text, float fontSize, float spacing, Co
         {
             if ((codepoint != ' ') && (codepoint != '\t'))
             {
-                Rectangle rec = { (float)(textOffsetX + font.glyphs[index].offsetX), (float)(textOffsetY + font.glyphs[index].offsetY), (float)font.recs[index].width, (float)font.recs[index].height };
-                ImageDraw(&imText, font.glyphs[index].image, (Rectangle){ 0, 0, (float)font.glyphs[index].image.width, (float)font.glyphs[index].image.height }, rec, tint);
+                RaylibRectangle rec = { (float)(textOffsetX + font.glyphs[index].offsetX), (float)(textOffsetY + font.glyphs[index].offsetY), (float)font.recs[index].width, (float)font.recs[index].height };
+                RaylibImageDraw(&imText, font.glyphs[index].image, (RaylibRectangle){ 0, 0, (float)font.glyphs[index].image.width, (float)font.glyphs[index].image.height }, rec, tint);
             }
 
             if (font.glyphs[index].advanceX == 0) textOffsetX += (int)(font.recs[index].width + spacing);
@@ -1616,28 +1616,28 @@ Image ImageTextEx(Font font, const char *text, float fontSize, float spacing, Co
     if (textSize.y != imSize.y)
     {
         float scaleFactor = textSize.y/imSize.y;
-        TRACELOG(LOG_INFO, "IMAGE: Text scaled by factor: %f", scaleFactor);
+        RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "IMAGE: Text scaled by factor: %f", scaleFactor);
 
         // Using nearest-neighbor scaling algorithm for default font
         // TODO: Allow defining the preferred scaling mechanism externally
-        if (font.texture.id == GetFontDefault().texture.id) ImageResizeNN(&imText, (int)(imSize.x*scaleFactor), (int)(imSize.y*scaleFactor));
-        else ImageResize(&imText, (int)(imSize.x*scaleFactor), (int)(imSize.y*scaleFactor));
+        if (font.texture.id == RaylibGetFontDefault().texture.id) RaylibImageResizeNN(&imText, (int)(imSize.x*scaleFactor), (int)(imSize.y*scaleFactor));
+        else RaylibImageResize(&imText, (int)(imSize.x*scaleFactor), (int)(imSize.y*scaleFactor));
     }
 #else
-    imText = GenImageColor(200, 60, BLACK);     // Generating placeholder black image rectangle
-    TRACELOG(LOG_WARNING, "IMAGE: ImageTextEx() requires module: rtext");
+    imText = RaylibGenImageColor(200, 60, RAYLIB_BLACK);     // Generating placeholder black image rectangle
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: RaylibImageTextEx() requires module: rtext");
 #endif
     return imText;
 }
 
 // Resize and image to new size using Nearest-Neighbor scaling algorithm
-void ImageResizeNN(Image *image,int newWidth,int newHeight)
+void RaylibImageResizeNN(RaylibImage *image,int newWidth,int newHeight)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
 
-    Color *pixels = LoadImageColors(*image);
-    Color *output = (Color *)RL_MALLOC(newWidth*newHeight*sizeof(Color));
+    RaylibColor *pixels = RaylibLoadImageColors(*image);
+    RaylibColor *output = (RaylibColor *)RL_MALLOC(newWidth*newHeight*sizeof(RaylibColor));
 
     // EDIT: added +1 to account for an early rounding problem
     int xRatio = (int)((image->width << 16)/newWidth) + 1;
@@ -1662,38 +1662,38 @@ void ImageResizeNN(Image *image,int newWidth,int newHeight)
     image->data = output;
     image->width = newWidth;
     image->height = newHeight;
-    image->format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+    image->format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
 
-    ImageFormat(image, format);  // Reformat 32bit RGBA image to original format
+    RaylibImageFormat(image, format);  // Reformat 32bit RGBA image to original format
 
-    UnloadImageColors(pixels);
+    RaylibUnloadImageColors(pixels);
 }
 
 // Resize and image to new size
 // NOTE: Uses stb default scaling filters (both bicubic):
 // STBIR_DEFAULT_FILTER_UPSAMPLE    STBIR_FILTER_CATMULLROM
 // STBIR_DEFAULT_FILTER_DOWNSAMPLE  STBIR_FILTER_MITCHELL   (high-quality Catmull-Rom)
-void ImageResize(Image *image, int newWidth, int newHeight)
+void RaylibImageResize(RaylibImage *image, int newWidth, int newHeight)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
 
     // Check if we can use a fast path on image scaling
     // It can be for 8 bit per channel images with 1 to 4 channels per pixel
-    if ((image->format == PIXELFORMAT_UNCOMPRESSED_GRAYSCALE) ||
-        (image->format == PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA) ||
-        (image->format == PIXELFORMAT_UNCOMPRESSED_R8G8B8) ||
-        (image->format == PIXELFORMAT_UNCOMPRESSED_R8G8B8A8))
+    if ((image->format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE) ||
+        (image->format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA) ||
+        (image->format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8) ||
+        (image->format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8))
     {
-        int bytesPerPixel = GetPixelDataSize(1, 1, image->format);
+        int bytesPerPixel = RaylibGetPixelDataSize(1, 1, image->format);
         unsigned char *output = (unsigned char *)RL_MALLOC(newWidth*newHeight*bytesPerPixel);
 
         switch (image->format)
         {
-            case PIXELFORMAT_UNCOMPRESSED_GRAYSCALE: stbir_resize_uint8_linear((unsigned char *)image->data, image->width, image->height, 0, output, newWidth, newHeight, 0, (stbir_pixel_layout)1); break;
-            case PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA: stbir_resize_uint8_linear((unsigned char *)image->data, image->width, image->height, 0, output, newWidth, newHeight, 0, (stbir_pixel_layout)2); break;
-            case PIXELFORMAT_UNCOMPRESSED_R8G8B8: stbir_resize_uint8_linear((unsigned char *)image->data, image->width, image->height, 0, output, newWidth, newHeight, 0, (stbir_pixel_layout)3); break;
-            case PIXELFORMAT_UNCOMPRESSED_R8G8B8A8: stbir_resize_uint8_linear((unsigned char *)image->data, image->width, image->height, 0, output, newWidth, newHeight, 0, (stbir_pixel_layout)4); break;
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE: stbir_resize_uint8_linear((unsigned char *)image->data, image->width, image->height, 0, output, newWidth, newHeight, 0, (stbir_pixel_layout)1); break;
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA: stbir_resize_uint8_linear((unsigned char *)image->data, image->width, image->height, 0, output, newWidth, newHeight, 0, (stbir_pixel_layout)2); break;
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8: stbir_resize_uint8_linear((unsigned char *)image->data, image->width, image->height, 0, output, newWidth, newHeight, 0, (stbir_pixel_layout)3); break;
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8: stbir_resize_uint8_linear((unsigned char *)image->data, image->width, image->height, 0, output, newWidth, newHeight, 0, (stbir_pixel_layout)4); break;
             default: break;
         }
 
@@ -1704,40 +1704,40 @@ void ImageResize(Image *image, int newWidth, int newHeight)
     }
     else
     {
-        // Get data as Color pixels array to work with it
-        Color *pixels = LoadImageColors(*image);
-        Color *output = (Color *)RL_MALLOC(newWidth*newHeight*sizeof(Color));
+        // Get data as RaylibColor pixels array to work with it
+        RaylibColor *pixels = RaylibLoadImageColors(*image);
+        RaylibColor *output = (RaylibColor *)RL_MALLOC(newWidth*newHeight*sizeof(RaylibColor));
 
-        // NOTE: Color data is cast to (unsigned char *), there shouldn't been any problem...
+        // NOTE: RaylibColor data is cast to (unsigned char *), there shouldn't been any problem...
         stbir_resize_uint8_linear((unsigned char *)pixels, image->width, image->height, 0, (unsigned char *)output, newWidth, newHeight, 0, (stbir_pixel_layout)4);
 
         int format = image->format;
 
-        UnloadImageColors(pixels);
+        RaylibUnloadImageColors(pixels);
         RL_FREE(image->data);
 
         image->data = output;
         image->width = newWidth;
         image->height = newHeight;
-        image->format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+        image->format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
 
-        ImageFormat(image, format);  // Reformat 32bit RGBA image to original format
+        RaylibImageFormat(image, format);  // Reformat 32bit RGBA image to original format
     }
 }
 
 // Resize canvas and fill with color
 // NOTE: Resize offset is relative to the top-left corner of the original image
-void ImageResizeCanvas(Image *image, int newWidth, int newHeight, int offsetX, int offsetY, Color fill)
+void RaylibImageResizeCanvas(RaylibImage *image, int newWidth, int newHeight, int offsetX, int offsetY, RaylibColor fill)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
 
-    if (image->mipmaps > 1) TRACELOG(LOG_WARNING, "Image manipulation only applied to base mipmap level");
-    if (image->format >= PIXELFORMAT_COMPRESSED_DXT1_RGB) TRACELOG(LOG_WARNING, "Image manipulation not supported for compressed formats");
+    if (image->mipmaps > 1) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibImage manipulation only applied to base mipmap level");
+    if (image->format >= RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibImage manipulation not supported for compressed formats");
     else if ((newWidth != image->width) || (newHeight != image->height))
     {
-        Rectangle srcRec = { 0, 0, (float)image->width, (float)image->height };
-        Vector2 dstPos = { (float)offsetX, (float)offsetY };
+        RaylibRectangle srcRec = { 0, 0, (float)image->width, (float)image->height };
+        RaylibVector2 dstPos = { (float)offsetX, (float)offsetY };
 
         if (offsetX < 0)
         {
@@ -1758,12 +1758,12 @@ void ImageResizeCanvas(Image *image, int newWidth, int newHeight, int offsetX, i
         if (newWidth < srcRec.width) srcRec.width = (float)newWidth;
         if (newHeight < srcRec.height) srcRec.height = (float)newHeight;
 
-        int bytesPerPixel = GetPixelDataSize(1, 1, image->format);
+        int bytesPerPixel = RaylibGetPixelDataSize(1, 1, image->format);
         unsigned char *resizedData = (unsigned char *)RL_CALLOC(newWidth*newHeight*bytesPerPixel, 1);
 
         // Fill resized canvas with fill color
         // Set first pixel with image->format
-        SetPixelColor(resizedData, fill, image->format);
+        RaylibSetPixelColor(resizedData, fill, image->format);
 
         // Fill remaining bytes of first row
         for (int x = 1; x < newWidth; x++)
@@ -1792,10 +1792,10 @@ void ImageResizeCanvas(Image *image, int newWidth, int newHeight, int offsetX, i
     }
 }
 
-#if defined(SUPPORT_IMAGE_MANIPULATION)
+#if defined(RAYLIB_SUPPORT_IMAGE_MANIPULATION)
 // Convert image to POT (power-of-two)
 // NOTE: It could be useful on OpenGL ES 2.0 (RPI, HTML5)
-void ImageToPOT(Image *image, Color fill)
+void RaylibImageToPOT(RaylibImage *image, RaylibColor fill)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
@@ -1806,36 +1806,36 @@ void ImageToPOT(Image *image, Color fill)
     int potHeight = (int)powf(2, ceilf(logf((float)image->height)/logf(2)));
 
     // Check if POT texture generation is required (if texture is not already POT)
-    if ((potWidth != image->width) || (potHeight != image->height)) ImageResizeCanvas(image, potWidth, potHeight, 0, 0, fill);
+    if ((potWidth != image->width) || (potHeight != image->height)) RaylibImageResizeCanvas(image, potWidth, potHeight, 0, 0, fill);
 }
 
 // Crop image depending on alpha value
 // NOTE: Threshold is defined as a percentage: 0.0f -> 1.0f
-void ImageAlphaCrop(Image *image, float threshold)
+void RaylibImageAlphaCrop(RaylibImage *image, float threshold)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
 
-    Rectangle crop = GetImageAlphaBorder(*image, threshold);
+    RaylibRectangle crop = RaylibGetImageAlphaBorder(*image, threshold);
 
     // Crop if rectangle is valid
-    if (((int)crop.width != 0) && ((int)crop.height != 0)) ImageCrop(image, crop);
+    if (((int)crop.width != 0) && ((int)crop.height != 0)) RaylibImageCrop(image, crop);
 }
 
 // Clear alpha channel to desired color
 // NOTE: Threshold defines the alpha limit, 0.0f to 1.0f
-void ImageAlphaClear(Image *image, Color color, float threshold)
+void RaylibImageAlphaClear(RaylibImage *image, RaylibColor color, float threshold)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
 
-    if (image->mipmaps > 1) TRACELOG(LOG_WARNING, "Image manipulation only applied to base mipmap level");
-    if (image->format >= PIXELFORMAT_COMPRESSED_DXT1_RGB) TRACELOG(LOG_WARNING, "Image manipulation not supported for compressed formats");
+    if (image->mipmaps > 1) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibImage manipulation only applied to base mipmap level");
+    if (image->format >= RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibImage manipulation not supported for compressed formats");
     else
     {
         switch (image->format)
         {
-            case PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
             {
                 unsigned char thresholdValue = (unsigned char)(threshold*255.0f);
                 for (int i = 1; i < image->width*image->height*2; i += 2)
@@ -1847,7 +1847,7 @@ void ImageAlphaClear(Image *image, Color color, float threshold)
                     }
                 }
             } break;
-            case PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
             {
                 unsigned char thresholdValue = ((threshold < 0.5f)? 0 : 1);
 
@@ -1864,7 +1864,7 @@ void ImageAlphaClear(Image *image, Color color, float threshold)
                     }
                 }
             } break;
-            case PIXELFORMAT_UNCOMPRESSED_R4G4B4A4:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4:
             {
                 unsigned char thresholdValue = (unsigned char)(threshold*15.0f);
 
@@ -1881,7 +1881,7 @@ void ImageAlphaClear(Image *image, Color color, float threshold)
                     }
                 }
             } break;
-            case PIXELFORMAT_UNCOMPRESSED_R8G8B8A8:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8:
             {
                 unsigned char thresholdValue = (unsigned char)(threshold*255.0f);
                 for (int i = 3; i < image->width*image->height*4; i += 4)
@@ -1895,7 +1895,7 @@ void ImageAlphaClear(Image *image, Color color, float threshold)
                     }
                 }
             } break;
-            case PIXELFORMAT_UNCOMPRESSED_R32G32B32A32:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32:
             {
                 for (int i = 3; i < image->width*image->height*4; i += 4)
                 {
@@ -1908,7 +1908,7 @@ void ImageAlphaClear(Image *image, Color color, float threshold)
                     }
                 }
             } break;
-            case PIXELFORMAT_UNCOMPRESSED_R16G16B16A16:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16:
             {
                 for (int i = 3; i < image->width*image->height*4; i += 4)
                 {
@@ -1929,24 +1929,24 @@ void ImageAlphaClear(Image *image, Color color, float threshold)
 // Apply alpha mask to image
 // NOTE 1: Returned image is GRAY_ALPHA (16bit) or RGBA (32bit)
 // NOTE 2: alphaMask should be same size as image
-void ImageAlphaMask(Image *image, Image alphaMask)
+void RaylibImageAlphaMask(RaylibImage *image, RaylibImage alphaMask)
 {
     if ((image->width != alphaMask.width) || (image->height != alphaMask.height))
     {
-        TRACELOG(LOG_WARNING, "IMAGE: Alpha mask must be same size as image");
+        RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Alpha mask must be same size as image");
     }
-    else if (image->format >= PIXELFORMAT_COMPRESSED_DXT1_RGB)
+    else if (image->format >= RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB)
     {
-        TRACELOG(LOG_WARNING, "IMAGE: Alpha mask can not be applied to compressed data formats");
+        RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Alpha mask can not be applied to compressed data formats");
     }
     else
     {
         // Force mask to be Grayscale
-        Image mask = ImageCopy(alphaMask);
-        if (mask.format != PIXELFORMAT_UNCOMPRESSED_GRAYSCALE) ImageFormat(&mask, PIXELFORMAT_UNCOMPRESSED_GRAYSCALE);
+        RaylibImage mask = RaylibImageCopy(alphaMask);
+        if (mask.format != RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE) RaylibImageFormat(&mask, RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE);
 
         // In case image is only grayscale, we just add alpha channel
-        if (image->format == PIXELFORMAT_UNCOMPRESSED_GRAYSCALE)
+        if (image->format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE)
         {
             unsigned char *data = (unsigned char *)RL_MALLOC(image->width*image->height*2);
 
@@ -1959,12 +1959,12 @@ void ImageAlphaMask(Image *image, Image alphaMask)
 
             RL_FREE(image->data);
             image->data = data;
-            image->format = PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA;
+            image->format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA;
         }
         else
         {
             // Convert image to RGBA
-            if (image->format != PIXELFORMAT_UNCOMPRESSED_R8G8B8A8) ImageFormat(image, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+            if (image->format != RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8) RaylibImageFormat(image, RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 
             // Apply alpha mask to alpha channel
             for (int i = 0, k = 3; (i < mask.width*mask.height) || (i < image->width*image->height); i++, k += 4)
@@ -1973,18 +1973,18 @@ void ImageAlphaMask(Image *image, Image alphaMask)
             }
         }
 
-        UnloadImage(mask);
+        RaylibUnloadImage(mask);
     }
 }
 
 // Premultiply alpha channel
-void ImageAlphaPremultiply(Image *image)
+void RaylibImageAlphaPremultiply(RaylibImage *image)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
 
     float alpha = 0.0f;
-    Color *pixels = LoadImageColors(*image);
+    RaylibColor *pixels = RaylibLoadImageColors(*image);
 
     for (int i = 0; i < image->width*image->height; i++)
     {
@@ -2007,24 +2007,24 @@ void ImageAlphaPremultiply(Image *image)
 
     int format = image->format;
     image->data = pixels;
-    image->format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+    image->format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
 
-    ImageFormat(image, format);
+    RaylibImageFormat(image, format);
 }
 
 // Apply box blur to image
-void ImageBlurGaussian(Image *image, int blurSize)
+void RaylibImageBlurGaussian(RaylibImage *image, int blurSize)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
 
-    ImageAlphaPremultiply(image);
+    RaylibImageAlphaPremultiply(image);
 
-    Color *pixels = LoadImageColors(*image);
+    RaylibColor *pixels = RaylibLoadImageColors(*image);
 
     // Loop switches between pixelsCopy1 and pixelsCopy2
-    Vector4 *pixelsCopy1 = RL_MALLOC((image->height)*(image->width)*sizeof(Vector4));
-    Vector4 *pixelsCopy2 = RL_MALLOC((image->height)*(image->width)*sizeof(Vector4));
+    RaylibVector4 *pixelsCopy1 = RL_MALLOC((image->height)*(image->width)*sizeof(RaylibVector4));
+    RaylibVector4 *pixelsCopy2 = RL_MALLOC((image->height)*(image->width)*sizeof(RaylibVector4));
 
     for (int i = 0; i < (image->height*image->width); i++)
     {
@@ -2151,13 +2151,13 @@ void ImageBlurGaussian(Image *image, int blurSize)
     RL_FREE(pixelsCopy2);
 
     image->data = pixels;
-    image->format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+    image->format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
 
-    ImageFormat(image, format);
+    RaylibImageFormat(image, format);
 }
 
 // The kernel matrix is assumed to be square. Only supply the width of the kernel
-void ImageKernelConvolution(Image *image, float* kernel, int kernelSize)
+void RaylibImageKernelConvolution(RaylibImage *image, float* kernel, int kernelSize)
 {
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0) || kernel == NULL) return;
 
@@ -2165,14 +2165,14 @@ void ImageKernelConvolution(Image *image, float* kernel, int kernelSize)
 
     if (kernelWidth*kernelWidth != kernelSize)
     {
-        TRACELOG(LOG_WARNING, "IMAGE: Convolution kernel must be square to be applied");
+        RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Convolution kernel must be square to be applied");
         return;
     }
 
-    Color *pixels = LoadImageColors(*image);
+    RaylibColor *pixels = RaylibLoadImageColors(*image);
 
-    Vector4 *imageCopy2 = RL_MALLOC((image->height)*(image->width)*sizeof(Vector4));
-    Vector4 *temp = RL_MALLOC(kernelSize*sizeof(Vector4));
+    RaylibVector4 *imageCopy2 = RL_MALLOC((image->height)*(image->width)*sizeof(RaylibVector4));
+    RaylibVector4 *temp = RL_MALLOC(kernelSize*sizeof(RaylibVector4));
 
     for (int i = 0; i < kernelSize; i++)
     {
@@ -2281,15 +2281,15 @@ void ImageKernelConvolution(Image *image, float* kernel, int kernelSize)
     RL_FREE(temp);
 
     image->data = pixels;
-    image->format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
-    ImageFormat(image, format);
+    image->format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+    RaylibImageFormat(image, format);
 }
 
 // Generate all mipmap levels for a provided image
 // NOTE 1: Supports POT and NPOT images
 // NOTE 2: image.data is scaled to include mipmap levels
 // NOTE 3: Mipmaps format is the same as base image
-void ImageMipmaps(Image *image)
+void RaylibImageMipmaps(RaylibImage *image)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
@@ -2297,7 +2297,7 @@ void ImageMipmaps(Image *image)
     int mipCount = 1;                   // Required mipmap levels count (including base level)
     int mipWidth = image->width;        // Base image width
     int mipHeight = image->height;      // Base image height
-    int mipSize = GetPixelDataSize(mipWidth, mipHeight, image->format);  // Image data size (in bytes)
+    int mipSize = RaylibGetPixelDataSize(mipWidth, mipHeight, image->format);  // RaylibImage data size (in bytes)
 
     // Count mipmap levels required
     while ((mipWidth != 1) || (mipHeight != 1))
@@ -2309,10 +2309,10 @@ void ImageMipmaps(Image *image)
         if (mipWidth < 1) mipWidth = 1;
         if (mipHeight < 1) mipHeight = 1;
 
-        TRACELOGD("IMAGE: Next mipmap level: %i x %i - current size %i", mipWidth, mipHeight, mipSize);
+        RAYLIB_TRACELOGD("IMAGE: Next mipmap level: %i x %i - current size %i", mipWidth, mipHeight, mipSize);
 
         mipCount++;
-        mipSize += GetPixelDataSize(mipWidth, mipHeight, image->format);       // Add mipmap size (in bytes)
+        mipSize += RaylibGetPixelDataSize(mipWidth, mipHeight, image->format);       // Add mipmap size (in bytes)
     }
 
     if (image->mipmaps < mipCount)
@@ -2320,21 +2320,21 @@ void ImageMipmaps(Image *image)
         void *temp = RL_REALLOC(image->data, mipSize);
 
         if (temp != NULL) image->data = temp;      // Assign new pointer (new size) to store mipmaps data
-        else TRACELOG(LOG_WARNING, "IMAGE: Mipmaps required memory could not be allocated");
+        else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Mipmaps required memory could not be allocated");
 
         // Pointer to allocated memory point where store next mipmap level data
-        unsigned char *nextmip = (unsigned char *)image->data + GetPixelDataSize(image->width, image->height, image->format);
+        unsigned char *nextmip = (unsigned char *)image->data + RaylibGetPixelDataSize(image->width, image->height, image->format);
 
         mipWidth = image->width/2;
         mipHeight = image->height/2;
-        mipSize = GetPixelDataSize(mipWidth, mipHeight, image->format);
-        Image imCopy = ImageCopy(*image);
+        mipSize = RaylibGetPixelDataSize(mipWidth, mipHeight, image->format);
+        RaylibImage imCopy = RaylibImageCopy(*image);
 
         for (int i = 1; i < mipCount; i++)
         {
-            TRACELOGD("IMAGE: Generating mipmap level: %i (%i x %i) - size: %i - offset: 0x%x", i, mipWidth, mipHeight, mipSize, nextmip);
+            RAYLIB_TRACELOGD("IMAGE: Generating mipmap level: %i (%i x %i) - size: %i - offset: 0x%x", i, mipWidth, mipHeight, mipSize, nextmip);
 
-            ImageResize(&imCopy, mipWidth, mipHeight);  // Uses internally Mitchell cubic downscale filter
+            RaylibImageResize(&imCopy, mipWidth, mipHeight);  // Uses internally Mitchell cubic downscale filter
 
             memcpy(nextmip, imCopy.data, mipSize);
             nextmip += mipSize;
@@ -2347,63 +2347,63 @@ void ImageMipmaps(Image *image)
             if (mipWidth < 1) mipWidth = 1;
             if (mipHeight < 1) mipHeight = 1;
 
-            mipSize = GetPixelDataSize(mipWidth, mipHeight, image->format);
+            mipSize = RaylibGetPixelDataSize(mipWidth, mipHeight, image->format);
         }
 
-        UnloadImage(imCopy);
+        RaylibUnloadImage(imCopy);
     }
-    else TRACELOG(LOG_WARNING, "IMAGE: Mipmaps already available");
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Mipmaps already available");
 }
 
 // Dither image data to 16bpp or lower (Floyd-Steinberg dithering)
 // NOTE: In case selected bpp do not represent a known 16bit format,
 // dithered data is stored in the LSB part of the unsigned short
-void ImageDither(Image *image, int rBpp, int gBpp, int bBpp, int aBpp)
+void RaylibImageDither(RaylibImage *image, int rBpp, int gBpp, int bBpp, int aBpp)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
 
-    if (image->format >= PIXELFORMAT_COMPRESSED_DXT1_RGB)
+    if (image->format >= RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB)
     {
-        TRACELOG(LOG_WARNING, "IMAGE: Compressed data formats can not be dithered");
+        RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Compressed data formats can not be dithered");
         return;
     }
 
     if ((rBpp + gBpp + bBpp + aBpp) > 16)
     {
-        TRACELOG(LOG_WARNING, "IMAGE: Unsupported dithering bpps (%ibpp), only 16bpp or lower modes supported", (rBpp+gBpp+bBpp+aBpp));
+        RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Unsupported dithering bpps (%ibpp), only 16bpp or lower modes supported", (rBpp+gBpp+bBpp+aBpp));
     }
     else
     {
-        Color *pixels = LoadImageColors(*image);
+        RaylibColor *pixels = RaylibLoadImageColors(*image);
 
         RL_FREE(image->data);      // free old image data
 
-        if ((image->format != PIXELFORMAT_UNCOMPRESSED_R8G8B8) && (image->format != PIXELFORMAT_UNCOMPRESSED_R8G8B8A8))
+        if ((image->format != RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8) && (image->format != RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8))
         {
-            TRACELOG(LOG_WARNING, "IMAGE: Format is already 16bpp or lower, dithering could have no effect");
+            RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Format is already 16bpp or lower, dithering could have no effect");
         }
 
         // Define new image format, check if desired bpp match internal known format
-        if ((rBpp == 5) && (gBpp == 6) && (bBpp == 5) && (aBpp == 0)) image->format = PIXELFORMAT_UNCOMPRESSED_R5G6B5;
-        else if ((rBpp == 5) && (gBpp == 5) && (bBpp == 5) && (aBpp == 1)) image->format = PIXELFORMAT_UNCOMPRESSED_R5G5B5A1;
-        else if ((rBpp == 4) && (gBpp == 4) && (bBpp == 4) && (aBpp == 4)) image->format = PIXELFORMAT_UNCOMPRESSED_R4G4B4A4;
+        if ((rBpp == 5) && (gBpp == 6) && (bBpp == 5) && (aBpp == 0)) image->format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G6B5;
+        else if ((rBpp == 5) && (gBpp == 5) && (bBpp == 5) && (aBpp == 1)) image->format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1;
+        else if ((rBpp == 4) && (gBpp == 4) && (bBpp == 4) && (aBpp == 4)) image->format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4;
         else
         {
             image->format = 0;
-            TRACELOG(LOG_WARNING, "IMAGE: Unsupported dithered OpenGL internal format: %ibpp (R%iG%iB%iA%i)", (rBpp+gBpp+bBpp+aBpp), rBpp, gBpp, bBpp, aBpp);
+            RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Unsupported dithered OpenGL internal format: %ibpp (R%iG%iB%iA%i)", (rBpp+gBpp+bBpp+aBpp), rBpp, gBpp, bBpp, aBpp);
         }
 
         // NOTE: We will store the dithered data as unsigned short (16bpp)
         image->data = (unsigned short *)RL_MALLOC(image->width*image->height*sizeof(unsigned short));
 
-        Color oldPixel = WHITE;
-        Color newPixel = WHITE;
+        RaylibColor oldPixel = RAYLIB_WHITE;
+        RaylibColor newPixel = RAYLIB_WHITE;
 
         int rError, gError, bError;
         unsigned short rPixel, gPixel, bPixel, aPixel;   // Used for 16bit pixel composition
 
-        #define MIN(a,b) (((a)<(b))?(a):(b))
+        #define RAYLIB_MIN(a,b) (((a)<(b))?(a):(b))
 
         for (int y = 0; y < image->height; y++)
         {
@@ -2411,7 +2411,7 @@ void ImageDither(Image *image, int rBpp, int gBpp, int bBpp, int aBpp)
             {
                 oldPixel = pixels[y*image->width + x];
 
-                // NOTE: New pixel obtained by bits truncate, it would be better to round values (check ImageFormat())
+                // NOTE: New pixel obtained by bits truncate, it would be better to round values (check RaylibImageFormat())
                 newPixel.r = oldPixel.r >> (8 - rBpp);     // R bits
                 newPixel.g = oldPixel.g >> (8 - gBpp);     // G bits
                 newPixel.b = oldPixel.b >> (8 - bBpp);     // B bits
@@ -2428,30 +2428,30 @@ void ImageDither(Image *image, int rBpp, int gBpp, int bBpp, int aBpp)
                 // NOTE: Some cases are out of the array and should be ignored
                 if (x < (image->width - 1))
                 {
-                    pixels[y*image->width + x+1].r = MIN((int)pixels[y*image->width + x+1].r + (int)((float)rError*7.0f/16), 0xff);
-                    pixels[y*image->width + x+1].g = MIN((int)pixels[y*image->width + x+1].g + (int)((float)gError*7.0f/16), 0xff);
-                    pixels[y*image->width + x+1].b = MIN((int)pixels[y*image->width + x+1].b + (int)((float)bError*7.0f/16), 0xff);
+                    pixels[y*image->width + x+1].r = RAYLIB_MIN((int)pixels[y*image->width + x+1].r + (int)((float)rError*7.0f/16), 0xff);
+                    pixels[y*image->width + x+1].g = RAYLIB_MIN((int)pixels[y*image->width + x+1].g + (int)((float)gError*7.0f/16), 0xff);
+                    pixels[y*image->width + x+1].b = RAYLIB_MIN((int)pixels[y*image->width + x+1].b + (int)((float)bError*7.0f/16), 0xff);
                 }
 
                 if ((x > 0) && (y < (image->height - 1)))
                 {
-                    pixels[(y+1)*image->width + x-1].r = MIN((int)pixels[(y+1)*image->width + x-1].r + (int)((float)rError*3.0f/16), 0xff);
-                    pixels[(y+1)*image->width + x-1].g = MIN((int)pixels[(y+1)*image->width + x-1].g + (int)((float)gError*3.0f/16), 0xff);
-                    pixels[(y+1)*image->width + x-1].b = MIN((int)pixels[(y+1)*image->width + x-1].b + (int)((float)bError*3.0f/16), 0xff);
+                    pixels[(y+1)*image->width + x-1].r = RAYLIB_MIN((int)pixels[(y+1)*image->width + x-1].r + (int)((float)rError*3.0f/16), 0xff);
+                    pixels[(y+1)*image->width + x-1].g = RAYLIB_MIN((int)pixels[(y+1)*image->width + x-1].g + (int)((float)gError*3.0f/16), 0xff);
+                    pixels[(y+1)*image->width + x-1].b = RAYLIB_MIN((int)pixels[(y+1)*image->width + x-1].b + (int)((float)bError*3.0f/16), 0xff);
                 }
 
                 if (y < (image->height - 1))
                 {
-                    pixels[(y+1)*image->width + x].r = MIN((int)pixels[(y+1)*image->width + x].r + (int)((float)rError*5.0f/16), 0xff);
-                    pixels[(y+1)*image->width + x].g = MIN((int)pixels[(y+1)*image->width + x].g + (int)((float)gError*5.0f/16), 0xff);
-                    pixels[(y+1)*image->width + x].b = MIN((int)pixels[(y+1)*image->width + x].b + (int)((float)bError*5.0f/16), 0xff);
+                    pixels[(y+1)*image->width + x].r = RAYLIB_MIN((int)pixels[(y+1)*image->width + x].r + (int)((float)rError*5.0f/16), 0xff);
+                    pixels[(y+1)*image->width + x].g = RAYLIB_MIN((int)pixels[(y+1)*image->width + x].g + (int)((float)gError*5.0f/16), 0xff);
+                    pixels[(y+1)*image->width + x].b = RAYLIB_MIN((int)pixels[(y+1)*image->width + x].b + (int)((float)bError*5.0f/16), 0xff);
                 }
 
                 if ((x < (image->width - 1)) && (y < (image->height - 1)))
                 {
-                    pixels[(y+1)*image->width + x+1].r = MIN((int)pixels[(y+1)*image->width + x+1].r + (int)((float)rError*1.0f/16), 0xff);
-                    pixels[(y+1)*image->width + x+1].g = MIN((int)pixels[(y+1)*image->width + x+1].g + (int)((float)gError*1.0f/16), 0xff);
-                    pixels[(y+1)*image->width + x+1].b = MIN((int)pixels[(y+1)*image->width + x+1].b + (int)((float)bError*1.0f/16), 0xff);
+                    pixels[(y+1)*image->width + x+1].r = RAYLIB_MIN((int)pixels[(y+1)*image->width + x+1].r + (int)((float)rError*1.0f/16), 0xff);
+                    pixels[(y+1)*image->width + x+1].g = RAYLIB_MIN((int)pixels[(y+1)*image->width + x+1].g + (int)((float)gError*1.0f/16), 0xff);
+                    pixels[(y+1)*image->width + x+1].b = RAYLIB_MIN((int)pixels[(y+1)*image->width + x+1].b + (int)((float)bError*1.0f/16), 0xff);
                 }
 
                 rPixel = (unsigned short)newPixel.r;
@@ -2463,21 +2463,21 @@ void ImageDither(Image *image, int rBpp, int gBpp, int bBpp, int aBpp)
             }
         }
 
-        UnloadImageColors(pixels);
+        RaylibUnloadImageColors(pixels);
     }
 }
 
 // Flip image vertically
-void ImageFlipVertical(Image *image)
+void RaylibImageFlipVertical(RaylibImage *image)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
 
-    if (image->mipmaps > 1) TRACELOG(LOG_WARNING, "Image manipulation only applied to base mipmap level");
-    if (image->format >= PIXELFORMAT_COMPRESSED_DXT1_RGB) TRACELOG(LOG_WARNING, "Image manipulation not supported for compressed formats");
+    if (image->mipmaps > 1) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibImage manipulation only applied to base mipmap level");
+    if (image->format >= RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibImage manipulation not supported for compressed formats");
     else
     {
-        int bytesPerPixel = GetPixelDataSize(1, 1, image->format);
+        int bytesPerPixel = RaylibGetPixelDataSize(1, 1, image->format);
         unsigned char *flippedData = (unsigned char *)RL_MALLOC(image->width*image->height*bytesPerPixel);
 
         for (int i = (image->height - 1), offsetSize = 0; i >= 0; i--)
@@ -2492,16 +2492,16 @@ void ImageFlipVertical(Image *image)
 }
 
 // Flip image horizontally
-void ImageFlipHorizontal(Image *image)
+void RaylibImageFlipHorizontal(RaylibImage *image)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
 
-    if (image->mipmaps > 1) TRACELOG(LOG_WARNING, "Image manipulation only applied to base mipmap level");
-    if (image->format >= PIXELFORMAT_COMPRESSED_DXT1_RGB) TRACELOG(LOG_WARNING, "Image manipulation not supported for compressed formats");
+    if (image->mipmaps > 1) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibImage manipulation only applied to base mipmap level");
+    if (image->format >= RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibImage manipulation not supported for compressed formats");
     else
     {
-        int bytesPerPixel = GetPixelDataSize(1, 1, image->format);
+        int bytesPerPixel = RaylibGetPixelDataSize(1, 1, image->format);
         unsigned char *flippedData = (unsigned char *)RL_MALLOC(image->width*image->height*bytesPerPixel);
 
         for (int y = 0; y < image->height; y++)
@@ -2537,23 +2537,23 @@ void ImageFlipHorizontal(Image *image)
 }
 
 // Rotate image in degrees
-void ImageRotate(Image *image, int degrees)
+void RaylibImageRotate(RaylibImage *image, int degrees)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
 
-    if (image->mipmaps > 1) TRACELOG(LOG_WARNING, "Image manipulation only applied to base mipmap level");
-    if (image->format >= PIXELFORMAT_COMPRESSED_DXT1_RGB) TRACELOG(LOG_WARNING, "Image manipulation not supported for compressed formats");
+    if (image->mipmaps > 1) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibImage manipulation only applied to base mipmap level");
+    if (image->format >= RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibImage manipulation not supported for compressed formats");
     else
     {
-        float rad = degrees*PI/180.0f;
+        float rad = degrees*RAYLIB_PI/180.0f;
         float sinRadius = sinf(rad);
         float cosRadius = cosf(rad);
 
         int width = (int)(fabsf(image->width*cosRadius) + fabsf(image->height*sinRadius));
         int height = (int)(fabsf(image->height*cosRadius) + fabsf(image->width*sinRadius));
 
-        int bytesPerPixel = GetPixelDataSize(1, 1, image->format);
+        int bytesPerPixel = RaylibGetPixelDataSize(1, 1, image->format);
         unsigned char *rotatedData = (unsigned char *)RL_CALLOC(width*height, bytesPerPixel);
 
         for (int y = 0; y < height; y++)
@@ -2567,8 +2567,8 @@ void ImageRotate(Image *image, int degrees)
                 {
                     int x1 = (int)floorf(oldX);
                     int y1 = (int)floorf(oldY);
-                    int x2 = MIN(x1 + 1, image->width - 1);
-                    int y2 = MIN(y1 + 1, image->height - 1);
+                    int x2 = RAYLIB_MIN(x1 + 1, image->width - 1);
+                    int y2 = RAYLIB_MIN(y1 + 1, image->height - 1);
 
                     float px = oldX - x1;
                     float py = oldY - y1;
@@ -2596,16 +2596,16 @@ void ImageRotate(Image *image, int degrees)
 }
 
 // Rotate image clockwise 90deg
-void ImageRotateCW(Image *image)
+void RaylibImageRotateCW(RaylibImage *image)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
 
-    if (image->mipmaps > 1) TRACELOG(LOG_WARNING, "Image manipulation only applied to base mipmap level");
-    if (image->format >= PIXELFORMAT_COMPRESSED_DXT1_RGB) TRACELOG(LOG_WARNING, "Image manipulation not supported for compressed formats");
+    if (image->mipmaps > 1) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibImage manipulation only applied to base mipmap level");
+    if (image->format >= RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibImage manipulation not supported for compressed formats");
     else
     {
-        int bytesPerPixel = GetPixelDataSize(1, 1, image->format);
+        int bytesPerPixel = RaylibGetPixelDataSize(1, 1, image->format);
         unsigned char *rotatedData = (unsigned char *)RL_MALLOC(image->width*image->height*bytesPerPixel);
 
         for (int y = 0; y < image->height; y++)
@@ -2628,16 +2628,16 @@ void ImageRotateCW(Image *image)
 }
 
 // Rotate image counter-clockwise 90deg
-void ImageRotateCCW(Image *image)
+void RaylibImageRotateCCW(RaylibImage *image)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
 
-    if (image->mipmaps > 1) TRACELOG(LOG_WARNING, "Image manipulation only applied to base mipmap level");
-    if (image->format >= PIXELFORMAT_COMPRESSED_DXT1_RGB) TRACELOG(LOG_WARNING, "Image manipulation not supported for compressed formats");
+    if (image->mipmaps > 1) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibImage manipulation only applied to base mipmap level");
+    if (image->format >= RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibImage manipulation not supported for compressed formats");
     else
     {
-        int bytesPerPixel = GetPixelDataSize(1, 1, image->format);
+        int bytesPerPixel = RaylibGetPixelDataSize(1, 1, image->format);
         unsigned char *rotatedData = (unsigned char *)RL_MALLOC(image->width*image->height*bytesPerPixel);
 
         for (int y = 0; y < image->height; y++)
@@ -2660,12 +2660,12 @@ void ImageRotateCCW(Image *image)
 }
 
 // Modify image color: tint
-void ImageColorTint(Image *image, Color color)
+void RaylibImageColorTint(RaylibImage *image, RaylibColor color)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
 
-    Color *pixels = LoadImageColors(*image);
+    RaylibColor *pixels = RaylibLoadImageColors(*image);
 
     for (int i = 0; i < image->width*image->height; i++)
     {
@@ -2684,18 +2684,18 @@ void ImageColorTint(Image *image, Color color)
     RL_FREE(image->data);
 
     image->data = pixels;
-    image->format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+    image->format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
 
-    ImageFormat(image, format);
+    RaylibImageFormat(image, format);
 }
 
 // Modify image color: invert
-void ImageColorInvert(Image *image)
+void RaylibImageColorInvert(RaylibImage *image)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
 
-    Color *pixels = LoadImageColors(*image);
+    RaylibColor *pixels = RaylibLoadImageColors(*image);
 
     for (int i = 0; i < image->width*image->height; i++)
     {
@@ -2708,20 +2708,20 @@ void ImageColorInvert(Image *image)
     RL_FREE(image->data);
 
     image->data = pixels;
-    image->format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+    image->format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
 
-    ImageFormat(image, format);
+    RaylibImageFormat(image, format);
 }
 
 // Modify image color: grayscale
-void ImageColorGrayscale(Image *image)
+void RaylibImageColorGrayscale(RaylibImage *image)
 {
-    ImageFormat(image, PIXELFORMAT_UNCOMPRESSED_GRAYSCALE);
+    RaylibImageFormat(image, RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE);
 }
 
 // Modify image color: contrast
 // NOTE: Contrast values between -100 and 100
-void ImageColorContrast(Image *image, float contrast)
+void RaylibImageColorContrast(RaylibImage *image, float contrast)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
@@ -2732,7 +2732,7 @@ void ImageColorContrast(Image *image, float contrast)
     contrast = (100.0f + contrast)/100.0f;
     contrast *= contrast;
 
-    Color *pixels = LoadImageColors(*image);
+    RaylibColor *pixels = RaylibLoadImageColors(*image);
 
     for (int i = 0; i < image->width*image->height; i++)
     {
@@ -2769,14 +2769,14 @@ void ImageColorContrast(Image *image, float contrast)
     RL_FREE(image->data);
 
     image->data = pixels;
-    image->format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+    image->format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
 
-    ImageFormat(image, format);
+    RaylibImageFormat(image, format);
 }
 
 // Modify image color: brightness
 // NOTE: Brightness values between -255 and 255
-void ImageColorBrightness(Image *image, int brightness)
+void RaylibImageColorBrightness(RaylibImage *image, int brightness)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
@@ -2784,7 +2784,7 @@ void ImageColorBrightness(Image *image, int brightness)
     if (brightness < -255) brightness = -255;
     if (brightness > 255) brightness = 255;
 
-    Color *pixels = LoadImageColors(*image);
+    RaylibColor *pixels = RaylibLoadImageColors(*image);
 
     for (int i = 0; i < image->width*image->height; i++)
     {
@@ -2810,18 +2810,18 @@ void ImageColorBrightness(Image *image, int brightness)
     RL_FREE(image->data);
 
     image->data = pixels;
-    image->format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+    image->format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
 
-    ImageFormat(image, format);
+    RaylibImageFormat(image, format);
 }
 
 // Modify image color: replace color
-void ImageColorReplace(Image *image, Color color, Color replace)
+void RaylibImageColorReplace(RaylibImage *image, RaylibColor color, RaylibColor replace)
 {
     // Security check to avoid program crash
     if ((image->data == NULL) || (image->width == 0) || (image->height == 0)) return;
 
-    Color *pixels = LoadImageColors(*image);
+    RaylibColor *pixels = RaylibLoadImageColors(*image);
 
     for (int i = 0; i < image->width*image->height; i++)
     {
@@ -2841,36 +2841,36 @@ void ImageColorReplace(Image *image, Color color, Color replace)
     RL_FREE(image->data);
 
     image->data = pixels;
-    image->format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+    image->format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
 
-    ImageFormat(image, format);
+    RaylibImageFormat(image, format);
 }
-#endif      // SUPPORT_IMAGE_MANIPULATION
+#endif      // RAYLIB_SUPPORT_IMAGE_MANIPULATION
 
-// Load color data from image as a Color array (RGBA - 32bit)
-// NOTE: Memory allocated should be freed using UnloadImageColors();
-Color *LoadImageColors(Image image)
+// Load color data from image as a RaylibColor array (RGBA - 32bit)
+// NOTE: Memory allocated should be freed using RaylibUnloadImageColors();
+RaylibColor *RaylibLoadImageColors(RaylibImage image)
 {
     if ((image.width == 0) || (image.height == 0)) return NULL;
 
-    Color *pixels = (Color *)RL_MALLOC(image.width*image.height*sizeof(Color));
+    RaylibColor *pixels = (RaylibColor *)RL_MALLOC(image.width*image.height*sizeof(RaylibColor));
 
-    if (image.format >= PIXELFORMAT_COMPRESSED_DXT1_RGB) TRACELOG(LOG_WARNING, "IMAGE: Pixel data retrieval not supported for compressed image formats");
+    if (image.format >= RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Pixel data retrieval not supported for compressed image formats");
     else
     {
-        if ((image.format == PIXELFORMAT_UNCOMPRESSED_R32) ||
-            (image.format == PIXELFORMAT_UNCOMPRESSED_R32G32B32) ||
-            (image.format == PIXELFORMAT_UNCOMPRESSED_R32G32B32A32)) TRACELOG(LOG_WARNING, "IMAGE: Pixel format converted from 32bit to 8bit per channel");
+        if ((image.format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32) ||
+            (image.format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32) ||
+            (image.format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32)) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Pixel format converted from 32bit to 8bit per channel");
 
-        if ((image.format == PIXELFORMAT_UNCOMPRESSED_R16) ||
-            (image.format == PIXELFORMAT_UNCOMPRESSED_R16G16B16) ||
-            (image.format == PIXELFORMAT_UNCOMPRESSED_R16G16B16A16)) TRACELOG(LOG_WARNING, "IMAGE: Pixel format converted from 16bit to 8bit per channel");
+        if ((image.format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16) ||
+            (image.format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16) ||
+            (image.format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16)) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Pixel format converted from 16bit to 8bit per channel");
 
         for (int i = 0, k = 0; i < image.width*image.height; i++)
         {
             switch (image.format)
             {
-                case PIXELFORMAT_UNCOMPRESSED_GRAYSCALE:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE:
                 {
                     pixels[i].r = ((unsigned char *)image.data)[i];
                     pixels[i].g = ((unsigned char *)image.data)[i];
@@ -2878,7 +2878,7 @@ Color *LoadImageColors(Image image)
                     pixels[i].a = 255;
 
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
                 {
                     pixels[i].r = ((unsigned char *)image.data)[k];
                     pixels[i].g = ((unsigned char *)image.data)[k];
@@ -2887,7 +2887,7 @@ Color *LoadImageColors(Image image)
 
                     k += 2;
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
                 {
                     unsigned short pixel = ((unsigned short *)image.data)[i];
 
@@ -2897,7 +2897,7 @@ Color *LoadImageColors(Image image)
                     pixels[i].a = (unsigned char)((pixel & 0b0000000000000001)*255);
 
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R5G6B5:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G6B5:
                 {
                     unsigned short pixel = ((unsigned short *)image.data)[i];
 
@@ -2907,7 +2907,7 @@ Color *LoadImageColors(Image image)
                     pixels[i].a = 255;
 
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R4G4B4A4:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4:
                 {
                     unsigned short pixel = ((unsigned short *)image.data)[i];
 
@@ -2917,7 +2917,7 @@ Color *LoadImageColors(Image image)
                     pixels[i].a = (unsigned char)((float)(pixel & 0b0000000000001111)*(255/15));
 
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R8G8B8A8:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8:
                 {
                     pixels[i].r = ((unsigned char *)image.data)[k];
                     pixels[i].g = ((unsigned char *)image.data)[k + 1];
@@ -2926,7 +2926,7 @@ Color *LoadImageColors(Image image)
 
                     k += 4;
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R8G8B8:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8:
                 {
                     pixels[i].r = (unsigned char)((unsigned char *)image.data)[k];
                     pixels[i].g = (unsigned char)((unsigned char *)image.data)[k + 1];
@@ -2935,7 +2935,7 @@ Color *LoadImageColors(Image image)
 
                     k += 3;
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R32:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32:
                 {
                     pixels[i].r = (unsigned char)(((float *)image.data)[k]*255.0f);
                     pixels[i].g = 0;
@@ -2943,7 +2943,7 @@ Color *LoadImageColors(Image image)
                     pixels[i].a = 255;
 
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R32G32B32:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32:
                 {
                     pixels[i].r = (unsigned char)(((float *)image.data)[k]*255.0f);
                     pixels[i].g = (unsigned char)(((float *)image.data)[k + 1]*255.0f);
@@ -2952,7 +2952,7 @@ Color *LoadImageColors(Image image)
 
                     k += 3;
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R32G32B32A32:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32:
                 {
                     pixels[i].r = (unsigned char)(((float *)image.data)[k]*255.0f);
                     pixels[i].g = (unsigned char)(((float *)image.data)[k]*255.0f);
@@ -2961,7 +2961,7 @@ Color *LoadImageColors(Image image)
 
                     k += 4;
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R16:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16:
                 {
                     pixels[i].r = (unsigned char)(HalfToFloat(((unsigned short *)image.data)[k])*255.0f);
                     pixels[i].g = 0;
@@ -2969,7 +2969,7 @@ Color *LoadImageColors(Image image)
                     pixels[i].a = 255;
 
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R16G16B16:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16:
                 {
                     pixels[i].r = (unsigned char)(HalfToFloat(((unsigned short *)image.data)[k])*255.0f);
                     pixels[i].g = (unsigned char)(HalfToFloat(((unsigned short *)image.data)[k + 1])*255.0f);
@@ -2978,7 +2978,7 @@ Color *LoadImageColors(Image image)
 
                     k += 3;
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R16G16B16A16:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16:
                 {
                     pixels[i].r = (unsigned char)(HalfToFloat(((unsigned short *)image.data)[k])*255.0f);
                     pixels[i].g = (unsigned char)(HalfToFloat(((unsigned short *)image.data)[k])*255.0f);
@@ -2995,21 +2995,21 @@ Color *LoadImageColors(Image image)
     return pixels;
 }
 
-// Load colors palette from image as a Color array (RGBA - 32bit)
-// NOTE: Memory allocated should be freed using UnloadImagePalette()
-Color *LoadImagePalette(Image image, int maxPaletteSize, int *colorCount)
+// Load colors palette from image as a RaylibColor array (RGBA - 32bit)
+// NOTE: Memory allocated should be freed using RaylibUnloadImagePalette()
+RaylibColor *RaylibLoadImagePalette(RaylibImage image, int maxPaletteSize, int *colorCount)
 {
     #define COLOR_EQUAL(col1, col2) ((col1.r == col2.r)&&(col1.g == col2.g)&&(col1.b == col2.b)&&(col1.a == col2.a))
 
     int palCount = 0;
-    Color *palette = NULL;
-    Color *pixels = LoadImageColors(image);
+    RaylibColor *palette = NULL;
+    RaylibColor *pixels = RaylibLoadImageColors(image);
 
     if (pixels != NULL)
     {
-        palette = (Color *)RL_MALLOC(maxPaletteSize*sizeof(Color));
+        palette = (RaylibColor *)RL_MALLOC(maxPaletteSize*sizeof(RaylibColor));
 
-        for (int i = 0; i < maxPaletteSize; i++) palette[i] = BLANK;   // Set all colors to BLANK
+        for (int i = 0; i < maxPaletteSize; i++) palette[i] = RAYLIB_BLANK;   // Set all colors to RAYLIB_BLANK
 
         for (int i = 0; i < image.width*image.height; i++)
         {
@@ -3037,13 +3037,13 @@ Color *LoadImagePalette(Image image, int maxPaletteSize, int *colorCount)
                     if (palCount >= maxPaletteSize)
                     {
                         i = image.width*image.height;   // Finish palette get
-                        TRACELOG(LOG_WARNING, "IMAGE: Palette is greater than %i colors", maxPaletteSize);
+                        RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Palette is greater than %i colors", maxPaletteSize);
                     }
                 }
             }
         }
 
-        UnloadImageColors(pixels);
+        RaylibUnloadImageColors(pixels);
     }
 
     *colorCount = palCount;
@@ -3051,25 +3051,25 @@ Color *LoadImagePalette(Image image, int maxPaletteSize, int *colorCount)
     return palette;
 }
 
-// Unload color data loaded with LoadImageColors()
-void UnloadImageColors(Color *colors)
+// Unload color data loaded with RaylibLoadImageColors()
+void RaylibUnloadImageColors(RaylibColor *colors)
 {
     RL_FREE(colors);
 }
 
-// Unload colors palette loaded with LoadImagePalette()
-void UnloadImagePalette(Color *colors)
+// Unload colors palette loaded with RaylibLoadImagePalette()
+void RaylibUnloadImagePalette(RaylibColor *colors)
 {
     RL_FREE(colors);
 }
 
 // Get image alpha border rectangle
 // NOTE: Threshold is defined as a percentage: 0.0f -> 1.0f
-Rectangle GetImageAlphaBorder(Image image, float threshold)
+RaylibRectangle RaylibGetImageAlphaBorder(RaylibImage image, float threshold)
 {
-    Rectangle crop = { 0 };
+    RaylibRectangle crop = { 0 };
 
-    Color *pixels = LoadImageColors(image);
+    RaylibColor *pixels = RaylibLoadImageColors(image);
 
     if (pixels != NULL)
     {
@@ -3095,25 +3095,25 @@ Rectangle GetImageAlphaBorder(Image image, float threshold)
         // Check for empty blank image
         if ((xMin != 65536) && (xMax != 65536))
         {
-            crop = (Rectangle){ (float)xMin, (float)yMin, (float)((xMax + 1) - xMin), (float)((yMax + 1) - yMin) };
+            crop = (RaylibRectangle){ (float)xMin, (float)yMin, (float)((xMax + 1) - xMin), (float)((yMax + 1) - yMin) };
         }
 
-        UnloadImageColors(pixels);
+        RaylibUnloadImageColors(pixels);
     }
 
     return crop;
 }
 
 // Get image pixel color at (x, y) position
-Color GetImageColor(Image image, int x, int y)
+RaylibColor RaylibGetImageColor(RaylibImage image, int x, int y)
 {
-    Color color = { 0 };
+    RaylibColor color = { 0 };
 
     if ((x >=0) && (x < image.width) && (y >= 0) && (y < image.height))
     {
         switch (image.format)
         {
-            case PIXELFORMAT_UNCOMPRESSED_GRAYSCALE:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE:
             {
                 color.r = ((unsigned char *)image.data)[y*image.width + x];
                 color.g = ((unsigned char *)image.data)[y*image.width + x];
@@ -3121,7 +3121,7 @@ Color GetImageColor(Image image, int x, int y)
                 color.a = 255;
 
             } break;
-            case PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
             {
                 color.r = ((unsigned char *)image.data)[(y*image.width + x)*2];
                 color.g = ((unsigned char *)image.data)[(y*image.width + x)*2];
@@ -3129,7 +3129,7 @@ Color GetImageColor(Image image, int x, int y)
                 color.a = ((unsigned char *)image.data)[(y*image.width + x)*2 + 1];
 
             } break;
-            case PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
             {
                 unsigned short pixel = ((unsigned short *)image.data)[y*image.width + x];
 
@@ -3139,7 +3139,7 @@ Color GetImageColor(Image image, int x, int y)
                 color.a = (unsigned char)((pixel & 0b0000000000000001)*255);
 
             } break;
-            case PIXELFORMAT_UNCOMPRESSED_R5G6B5:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G6B5:
             {
                 unsigned short pixel = ((unsigned short *)image.data)[y*image.width + x];
 
@@ -3149,7 +3149,7 @@ Color GetImageColor(Image image, int x, int y)
                 color.a = 255;
 
             } break;
-            case PIXELFORMAT_UNCOMPRESSED_R4G4B4A4:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4:
             {
                 unsigned short pixel = ((unsigned short *)image.data)[y*image.width + x];
 
@@ -3159,7 +3159,7 @@ Color GetImageColor(Image image, int x, int y)
                 color.a = (unsigned char)((float)(pixel & 0b0000000000001111)*(255/15));
 
             } break;
-            case PIXELFORMAT_UNCOMPRESSED_R8G8B8A8:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8:
             {
                 color.r = ((unsigned char *)image.data)[(y*image.width + x)*4];
                 color.g = ((unsigned char *)image.data)[(y*image.width + x)*4 + 1];
@@ -3167,7 +3167,7 @@ Color GetImageColor(Image image, int x, int y)
                 color.a = ((unsigned char *)image.data)[(y*image.width + x)*4 + 3];
 
             } break;
-            case PIXELFORMAT_UNCOMPRESSED_R8G8B8:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8:
             {
                 color.r = (unsigned char)((unsigned char *)image.data)[(y*image.width + x)*3];
                 color.g = (unsigned char)((unsigned char *)image.data)[(y*image.width + x)*3 + 1];
@@ -3175,7 +3175,7 @@ Color GetImageColor(Image image, int x, int y)
                 color.a = 255;
 
             } break;
-            case PIXELFORMAT_UNCOMPRESSED_R32:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32:
             {
                 color.r = (unsigned char)(((float *)image.data)[y*image.width + x]*255.0f);
                 color.g = 0;
@@ -3183,7 +3183,7 @@ Color GetImageColor(Image image, int x, int y)
                 color.a = 255;
 
             } break;
-            case PIXELFORMAT_UNCOMPRESSED_R32G32B32:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32:
             {
                 color.r = (unsigned char)(((float *)image.data)[(y*image.width + x)*3]*255.0f);
                 color.g = (unsigned char)(((float *)image.data)[(y*image.width + x)*3 + 1]*255.0f);
@@ -3191,7 +3191,7 @@ Color GetImageColor(Image image, int x, int y)
                 color.a = 255;
 
             } break;
-            case PIXELFORMAT_UNCOMPRESSED_R32G32B32A32:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32:
             {
                 color.r = (unsigned char)(((float *)image.data)[(y*image.width + x)*4]*255.0f);
                 color.g = (unsigned char)(((float *)image.data)[(y*image.width + x)*4]*255.0f);
@@ -3199,7 +3199,7 @@ Color GetImageColor(Image image, int x, int y)
                 color.a = (unsigned char)(((float *)image.data)[(y*image.width + x)*4]*255.0f);
 
             } break;
-            case PIXELFORMAT_UNCOMPRESSED_R16:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16:
             {
                 color.r = (unsigned char)(HalfToFloat(((unsigned short *)image.data)[y*image.width + x])*255.0f);
                 color.g = 0;
@@ -3207,7 +3207,7 @@ Color GetImageColor(Image image, int x, int y)
                 color.a = 255;
 
             } break;
-            case PIXELFORMAT_UNCOMPRESSED_R16G16B16:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16:
             {
                 color.r = (unsigned char)(HalfToFloat(((unsigned short *)image.data)[(y*image.width + x)*3])*255.0f);
                 color.g = (unsigned char)(HalfToFloat(((unsigned short *)image.data)[(y*image.width + x)*3 + 1])*255.0f);
@@ -3215,7 +3215,7 @@ Color GetImageColor(Image image, int x, int y)
                 color.a = 255;
 
             } break;
-            case PIXELFORMAT_UNCOMPRESSED_R16G16B16A16:
+            case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16:
             {
                 color.r = (unsigned char)(HalfToFloat(((unsigned short *)image.data)[(y*image.width + x)*4])*255.0f);
                 color.g = (unsigned char)(HalfToFloat(((unsigned short *)image.data)[(y*image.width + x)*4])*255.0f);
@@ -3223,28 +3223,28 @@ Color GetImageColor(Image image, int x, int y)
                 color.a = (unsigned char)(HalfToFloat(((unsigned short *)image.data)[(y*image.width + x)*4])*255.0f);
 
             } break;
-            default: TRACELOG(LOG_WARNING, "Compressed image format does not support color reading"); break;
+            default: RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "Compressed image format does not support color reading"); break;
         }
     }
-    else TRACELOG(LOG_WARNING, "Requested image pixel (%i, %i) out of bounds", x, y);
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "Requested image pixel (%i, %i) out of bounds", x, y);
 
     return color;
 }
 
 //------------------------------------------------------------------------------------
-// Image drawing functions
+// RaylibImage drawing functions
 //------------------------------------------------------------------------------------
 // Clear image background with given color
-void ImageClearBackground(Image *dst, Color color)
+void RaylibImageClearBackground(RaylibImage *dst, RaylibColor color)
 {
     // Security check to avoid program crash
     if ((dst->data == NULL) || (dst->width == 0) || (dst->height == 0)) return;
 
     // Fill in first pixel based on image format
-    ImageDrawPixel(dst, 0, 0, color);
+    RaylibImageDrawPixel(dst, 0, 0, color);
 
     unsigned char *pSrcPixel = (unsigned char *)dst->data;
-    int bytesPerPixel = GetPixelDataSize(1, 1, dst->format);
+    int bytesPerPixel = RaylibGetPixelDataSize(1, 1, dst->format);
 
     // Repeat the first pixel data throughout the image
     for (int i = 1; i < dst->width*dst->height; i++)
@@ -3255,36 +3255,36 @@ void ImageClearBackground(Image *dst, Color color)
 
 // Draw pixel within an image
 // NOTE: Compressed image formats not supported
-void ImageDrawPixel(Image *dst, int x, int y, Color color)
+void RaylibImageDrawPixel(RaylibImage *dst, int x, int y, RaylibColor color)
 {
     // Security check to avoid program crash
     if ((dst->data == NULL) || (x < 0) || (x >= dst->width) || (y < 0) || (y >= dst->height)) return;
 
     switch (dst->format)
     {
-        case PIXELFORMAT_UNCOMPRESSED_GRAYSCALE:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE:
         {
             // NOTE: Calculate grayscale equivalent color
-            Vector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
+            RaylibVector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
             unsigned char gray = (unsigned char)((coln.x*0.299f + coln.y*0.587f + coln.z*0.114f)*255.0f);
 
             ((unsigned char *)dst->data)[y*dst->width + x] = gray;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
         {
             // NOTE: Calculate grayscale equivalent color
-            Vector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
+            RaylibVector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
             unsigned char gray = (unsigned char)((coln.x*0.299f + coln.y*0.587f + coln.z*0.114f)*255.0f);
 
             ((unsigned char *)dst->data)[(y*dst->width + x)*2] = gray;
             ((unsigned char *)dst->data)[(y*dst->width + x)*2 + 1] = color.a;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R5G6B5:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G6B5:
         {
             // NOTE: Calculate R5G6B5 equivalent color
-            Vector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
+            RaylibVector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
 
             unsigned char r = (unsigned char)(round(coln.x*31.0f));
             unsigned char g = (unsigned char)(round(coln.y*63.0f));
@@ -3293,10 +3293,10 @@ void ImageDrawPixel(Image *dst, int x, int y, Color color)
             ((unsigned short *)dst->data)[y*dst->width + x] = (unsigned short)r << 11 | (unsigned short)g << 5 | (unsigned short)b;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
         {
             // NOTE: Calculate R5G5B5A1 equivalent color
-            Vector4 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f, (float)color.a/255.0f };
+            RaylibVector4 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f, (float)color.a/255.0f };
 
             unsigned char r = (unsigned char)(round(coln.x*31.0f));
             unsigned char g = (unsigned char)(round(coln.y*31.0f));
@@ -3306,10 +3306,10 @@ void ImageDrawPixel(Image *dst, int x, int y, Color color)
             ((unsigned short *)dst->data)[y*dst->width + x] = (unsigned short)r << 11 | (unsigned short)g << 6 | (unsigned short)b << 1 | (unsigned short)a;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R4G4B4A4:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4:
         {
             // NOTE: Calculate R5G5B5A1 equivalent color
-            Vector4 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f, (float)color.a/255.0f };
+            RaylibVector4 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f, (float)color.a/255.0f };
 
             unsigned char r = (unsigned char)(round(coln.x*15.0f));
             unsigned char g = (unsigned char)(round(coln.y*15.0f));
@@ -3319,14 +3319,14 @@ void ImageDrawPixel(Image *dst, int x, int y, Color color)
             ((unsigned short *)dst->data)[y*dst->width + x] = (unsigned short)r << 12 | (unsigned short)g << 8 | (unsigned short)b << 4 | (unsigned short)a;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R8G8B8:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8:
         {
             ((unsigned char *)dst->data)[(y*dst->width + x)*3] = color.r;
             ((unsigned char *)dst->data)[(y*dst->width + x)*3 + 1] = color.g;
             ((unsigned char *)dst->data)[(y*dst->width + x)*3 + 2] = color.b;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R8G8B8A8:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8:
         {
             ((unsigned char *)dst->data)[(y*dst->width + x)*4] = color.r;
             ((unsigned char *)dst->data)[(y*dst->width + x)*4 + 1] = color.g;
@@ -3334,27 +3334,27 @@ void ImageDrawPixel(Image *dst, int x, int y, Color color)
             ((unsigned char *)dst->data)[(y*dst->width + x)*4 + 3] = color.a;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R32:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32:
         {
             // NOTE: Calculate grayscale equivalent color (normalized to 32bit)
-            Vector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
+            RaylibVector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
 
             ((float *)dst->data)[y*dst->width + x] = coln.x*0.299f + coln.y*0.587f + coln.z*0.114f;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R32G32B32:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32:
         {
             // NOTE: Calculate R32G32B32 equivalent color (normalized to 32bit)
-            Vector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
+            RaylibVector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
 
             ((float *)dst->data)[(y*dst->width + x)*3] = coln.x;
             ((float *)dst->data)[(y*dst->width + x)*3 + 1] = coln.y;
             ((float *)dst->data)[(y*dst->width + x)*3 + 2] = coln.z;
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R32G32B32A32:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32:
         {
             // NOTE: Calculate R32G32B32A32 equivalent color (normalized to 32bit)
-            Vector4 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f, (float)color.a/255.0f };
+            RaylibVector4 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f, (float)color.a/255.0f };
 
             ((float *)dst->data)[(y*dst->width + x)*4] = coln.x;
             ((float *)dst->data)[(y*dst->width + x)*4 + 1] = coln.y;
@@ -3362,27 +3362,27 @@ void ImageDrawPixel(Image *dst, int x, int y, Color color)
             ((float *)dst->data)[(y*dst->width + x)*4 + 3] = coln.w;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R16:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16:
         {
             // NOTE: Calculate grayscale equivalent color (normalized to 32bit)
-            Vector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
+            RaylibVector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
 
             ((unsigned short*)dst->data)[y*dst->width + x] = FloatToHalf(coln.x*0.299f + coln.y*0.587f + coln.z*0.114f);
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R16G16B16:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16:
         {
             // NOTE: Calculate R32G32B32 equivalent color (normalized to 32bit)
-            Vector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
+            RaylibVector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
 
             ((unsigned short *)dst->data)[(y*dst->width + x)*3] = FloatToHalf(coln.x);
             ((unsigned short *)dst->data)[(y*dst->width + x)*3 + 1] = FloatToHalf(coln.y);
             ((unsigned short *)dst->data)[(y*dst->width + x)*3 + 2] = FloatToHalf(coln.z);
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R16G16B16A16:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16:
         {
             // NOTE: Calculate R32G32B32A32 equivalent color (normalized to 32bit)
-            Vector4 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f, (float)color.a/255.0f };
+            RaylibVector4 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f, (float)color.a/255.0f };
 
             ((unsigned short *)dst->data)[(y*dst->width + x)*4] = FloatToHalf(coln.x);
             ((unsigned short *)dst->data)[(y*dst->width + x)*4 + 1] = FloatToHalf(coln.y);
@@ -3395,13 +3395,13 @@ void ImageDrawPixel(Image *dst, int x, int y, Color color)
 }
 
 // Draw pixel within an image (Vector version)
-void ImageDrawPixelV(Image *dst, Vector2 position, Color color)
+void RaylibImageDrawPixelV(RaylibImage *dst, RaylibVector2 position, RaylibColor color)
 {
-    ImageDrawPixel(dst, (int)position.x, (int)position.y, color);
+    RaylibImageDrawPixel(dst, (int)position.x, (int)position.y, color);
 }
 
 // Draw line within an image
-void ImageDrawLine(Image *dst, int startPosX, int startPosY, int endPosX, int endPosY, Color color)
+void RaylibImageDrawLine(RaylibImage *dst, int startPosX, int startPosY, int endPosX, int endPosY, RaylibColor color)
 {
     // Using Bresenham's algorithm as described in
     // Drawing Lines with Pixels - Joshua Scott - March 2012
@@ -3444,7 +3444,7 @@ void ImageDrawLine(Image *dst, int startPosX, int startPosY, int endPosX, int en
 
         stepV = (changeInY < 0)? -1 : 1;
 
-        ImageDrawPixel(dst, startU, startV, color);     // At this point they are correctly ordered...
+        RaylibImageDrawPixel(dst, startU, startV, color);     // At this point they are correctly ordered...
     }
     else
     {
@@ -3473,7 +3473,7 @@ void ImageDrawLine(Image *dst, int startPosX, int startPosY, int endPosX, int en
 
         stepV = (changeInX < 0)? -1 : 1;
 
-        ImageDrawPixel(dst, startV, startU, color);     // ... but need to be reversed here. Repeated in the main loop below
+        RaylibImageDrawPixel(dst, startV, startU, color);     // ... but need to be reversed here. Repeated in the main loop below
     }
 
     // We already drew the start point. If we started at startU + 0, the line would be crooked and too short
@@ -3486,19 +3486,19 @@ void ImageDrawLine(Image *dst, int startPosX, int startPosY, int endPosX, int en
         }
         else P += A;        // Remembers how far we are from the direct line
 
-        if (reversedXY) ImageDrawPixel(dst, u, v, color);
-        else ImageDrawPixel(dst, v, u, color);
+        if (reversedXY) RaylibImageDrawPixel(dst, u, v, color);
+        else RaylibImageDrawPixel(dst, v, u, color);
     }
 }
 
 // Draw line within an image (Vector version)
-void ImageDrawLineV(Image *dst, Vector2 start, Vector2 end, Color color)
+void RaylibImageDrawLineV(RaylibImage *dst, RaylibVector2 start, RaylibVector2 end, RaylibColor color)
 {
-    ImageDrawLine(dst, (int)start.x, (int)start.y, (int)end.x, (int)end.y, color);
+    RaylibImageDrawLine(dst, (int)start.x, (int)start.y, (int)end.x, (int)end.y, color);
 }
 
 // Draw circle within an image
-void ImageDrawCircle(Image* dst, int centerX, int centerY, int radius, Color color)
+void RaylibImageDrawCircle(RaylibImage* dst, int centerX, int centerY, int radius, RaylibColor color)
 {
     int x = 0;
     int y = radius;
@@ -3506,10 +3506,10 @@ void ImageDrawCircle(Image* dst, int centerX, int centerY, int radius, Color col
 
     while (y >= x)
     {
-        ImageDrawRectangle(dst, centerX - x, centerY + y, x*2, 1, color);
-        ImageDrawRectangle(dst, centerX - x, centerY - y, x*2, 1, color);
-        ImageDrawRectangle(dst, centerX - y, centerY + x, y*2, 1, color);
-        ImageDrawRectangle(dst, centerX - y, centerY - x, y*2, 1, color);
+        RaylibImageDrawRectangle(dst, centerX - x, centerY + y, x*2, 1, color);
+        RaylibImageDrawRectangle(dst, centerX - x, centerY - y, x*2, 1, color);
+        RaylibImageDrawRectangle(dst, centerX - y, centerY + x, y*2, 1, color);
+        RaylibImageDrawRectangle(dst, centerX - y, centerY - x, y*2, 1, color);
         x++;
 
         if (decesionParameter > 0)
@@ -3522,13 +3522,13 @@ void ImageDrawCircle(Image* dst, int centerX, int centerY, int radius, Color col
 }
 
 // Draw circle within an image (Vector version)
-void ImageDrawCircleV(Image* dst, Vector2 center, int radius, Color color)
+void RaylibImageDrawCircleV(RaylibImage* dst, RaylibVector2 center, int radius, RaylibColor color)
 {
-    ImageDrawCircle(dst, (int)center.x, (int)center.y, radius, color);
+    RaylibImageDrawCircle(dst, (int)center.x, (int)center.y, radius, color);
 }
 
 // Draw circle outline within an image
-void ImageDrawCircleLines(Image *dst, int centerX, int centerY, int radius, Color color)
+void RaylibImageDrawCircleLines(RaylibImage *dst, int centerX, int centerY, int radius, RaylibColor color)
 {
     int x = 0;
     int y = radius;
@@ -3536,14 +3536,14 @@ void ImageDrawCircleLines(Image *dst, int centerX, int centerY, int radius, Colo
 
     while (y >= x)
     {
-        ImageDrawPixel(dst, centerX + x, centerY + y, color);
-        ImageDrawPixel(dst, centerX - x, centerY + y, color);
-        ImageDrawPixel(dst, centerX + x, centerY - y, color);
-        ImageDrawPixel(dst, centerX - x, centerY - y, color);
-        ImageDrawPixel(dst, centerX + y, centerY + x, color);
-        ImageDrawPixel(dst, centerX - y, centerY + x, color);
-        ImageDrawPixel(dst, centerX + y, centerY - x, color);
-        ImageDrawPixel(dst, centerX - y, centerY - x, color);
+        RaylibImageDrawPixel(dst, centerX + x, centerY + y, color);
+        RaylibImageDrawPixel(dst, centerX - x, centerY + y, color);
+        RaylibImageDrawPixel(dst, centerX + x, centerY - y, color);
+        RaylibImageDrawPixel(dst, centerX - x, centerY - y, color);
+        RaylibImageDrawPixel(dst, centerX + y, centerY + x, color);
+        RaylibImageDrawPixel(dst, centerX - y, centerY + x, color);
+        RaylibImageDrawPixel(dst, centerX + y, centerY - x, color);
+        RaylibImageDrawPixel(dst, centerX - y, centerY - x, color);
         x++;
 
         if (decesionParameter > 0)
@@ -3556,25 +3556,25 @@ void ImageDrawCircleLines(Image *dst, int centerX, int centerY, int radius, Colo
 }
 
 // Draw circle outline within an image (Vector version)
-void ImageDrawCircleLinesV(Image *dst, Vector2 center, int radius, Color color)
+void RaylibImageDrawCircleLinesV(RaylibImage *dst, RaylibVector2 center, int radius, RaylibColor color)
 {
-    ImageDrawCircleLines(dst, (int)center.x, (int)center.y, radius, color);
+    RaylibImageDrawCircleLines(dst, (int)center.x, (int)center.y, radius, color);
 }
 
 // Draw rectangle within an image
-void ImageDrawRectangle(Image *dst, int posX, int posY, int width, int height, Color color)
+void RaylibImageDrawRectangle(RaylibImage *dst, int posX, int posY, int width, int height, RaylibColor color)
 {
-    ImageDrawRectangleRec(dst, (Rectangle){ (float)posX, (float)posY, (float)width, (float)height }, color);
+    RaylibImageDrawRectangleRec(dst, (RaylibRectangle){ (float)posX, (float)posY, (float)width, (float)height }, color);
 }
 
 // Draw rectangle within an image (Vector version)
-void ImageDrawRectangleV(Image *dst, Vector2 position, Vector2 size, Color color)
+void RaylibImageDrawRectangleV(RaylibImage *dst, RaylibVector2 position, RaylibVector2 size, RaylibColor color)
 {
-    ImageDrawRectangle(dst, (int)position.x, (int)position.y, (int)size.x, (int)size.y, color);
+    RaylibImageDrawRectangle(dst, (int)position.x, (int)position.y, (int)size.x, (int)size.y, color);
 }
 
 // Draw rectangle within an image
-void ImageDrawRectangleRec(Image *dst, Rectangle rec, Color color)
+void RaylibImageDrawRectangleRec(RaylibImage *dst, RaylibRectangle rec, RaylibColor color)
 {
     // Security check to avoid program crash
     if ((dst->data == NULL) || (dst->width == 0) || (dst->height == 0)) return;
@@ -3585,7 +3585,7 @@ void ImageDrawRectangleRec(Image *dst, Rectangle rec, Color color)
     if (rec.width < 0) rec.width = 0;
     if (rec.height < 0) rec.height = 0;
 
-    // Clamp the size the the image bounds
+    // RaylibClamp the size the the image bounds
     if ((rec.x + rec.width) >= dst->width) rec.width = dst->width - rec.x;
     if ((rec.y + rec.height) >= dst->height) rec.height = dst->height - rec.y;
 
@@ -3596,10 +3596,10 @@ void ImageDrawRectangleRec(Image *dst, Rectangle rec, Color color)
     int sy = (int)rec.y;
     int sx = (int)rec.x;
 
-    int bytesPerPixel = GetPixelDataSize(1, 1, dst->format);
+    int bytesPerPixel = RaylibGetPixelDataSize(1, 1, dst->format);
 
     // Fill in the first pixel of the first row based on image format
-    ImageDrawPixel(dst, sx, sy, color);
+    RaylibImageDrawPixel(dst, sx, sy, color);
 
     int bytesOffset = ((sy*dst->width) + sx)*bytesPerPixel;
     unsigned char *pSrcPixel = (unsigned char *)dst->data + bytesOffset;
@@ -3619,28 +3619,28 @@ void ImageDrawRectangleRec(Image *dst, Rectangle rec, Color color)
 }
 
 // Draw rectangle lines within an image
-void ImageDrawRectangleLines(Image *dst, Rectangle rec, int thick, Color color)
+void RaylibImageDrawRectangleLines(RaylibImage *dst, RaylibRectangle rec, int thick, RaylibColor color)
 {
-    ImageDrawRectangle(dst, (int)rec.x, (int)rec.y, (int)rec.width, thick, color);
-    ImageDrawRectangle(dst, (int)rec.x, (int)(rec.y + thick), thick, (int)(rec.height - thick*2), color);
-    ImageDrawRectangle(dst, (int)(rec.x + rec.width - thick), (int)(rec.y + thick), thick, (int)(rec.height - thick*2), color);
-    ImageDrawRectangle(dst, (int)rec.x, (int)(rec.y + rec.height - thick), (int)rec.width, thick, color);
+    RaylibImageDrawRectangle(dst, (int)rec.x, (int)rec.y, (int)rec.width, thick, color);
+    RaylibImageDrawRectangle(dst, (int)rec.x, (int)(rec.y + thick), thick, (int)(rec.height - thick*2), color);
+    RaylibImageDrawRectangle(dst, (int)(rec.x + rec.width - thick), (int)(rec.y + thick), thick, (int)(rec.height - thick*2), color);
+    RaylibImageDrawRectangle(dst, (int)rec.x, (int)(rec.y + rec.height - thick), (int)rec.width, thick, color);
 }
 
 // Draw an image (source) within an image (destination)
-// NOTE: Color tint is applied to source image
-void ImageDraw(Image *dst, Image src, Rectangle srcRec, Rectangle dstRec, Color tint)
+// NOTE: RaylibColor tint is applied to source image
+void RaylibImageDraw(RaylibImage *dst, RaylibImage src, RaylibRectangle srcRec, RaylibRectangle dstRec, RaylibColor tint)
 {
     // Security check to avoid program crash
     if ((dst->data == NULL) || (dst->width == 0) || (dst->height == 0) ||
         (src.data == NULL) || (src.width == 0) || (src.height == 0)) return;
 
-    if (dst->mipmaps > 1) TRACELOG(LOG_WARNING, "Image drawing only applied to base mipmap level");
-    if (dst->format >= PIXELFORMAT_COMPRESSED_DXT1_RGB) TRACELOG(LOG_WARNING, "Image drawing not supported for compressed formats");
+    if (dst->mipmaps > 1) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibImage drawing only applied to base mipmap level");
+    if (dst->format >= RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibImage drawing not supported for compressed formats");
     else
     {
-        Image srcMod = { 0 };       // Source copy (in case it was required)
-        Image *srcPtr = &src;       // Pointer to source image
+        RaylibImage srcMod = { 0 };       // Source copy (in case it was required)
+        RaylibImage *srcPtr = &src;       // Pointer to source image
         bool useSrcMod = false;     // Track source copy required
 
         // Source rectangle out-of-bounds security checks
@@ -3653,9 +3653,9 @@ void ImageDraw(Image *dst, Image src, Rectangle srcRec, Rectangle dstRec, Color 
         // In that case, we make a copy of source, and we apply all required transform
         if (((int)srcRec.width != (int)dstRec.width) || ((int)srcRec.height != (int)dstRec.height))
         {
-            srcMod = ImageFromImage(src, srcRec);   // Create image from another image
-            ImageResize(&srcMod, (int)dstRec.width, (int)dstRec.height);   // Resize to destination rectangle
-            srcRec = (Rectangle){ 0, 0, (float)srcMod.width, (float)srcMod.height };
+            srcMod = RaylibImageFromImage(src, srcRec);   // Create image from another image
+            RaylibImageResize(&srcMod, (int)dstRec.width, (int)dstRec.height);   // Resize to destination rectangle
+            srcRec = (RaylibRectangle){ 0, 0, (float)srcMod.width, (float)srcMod.height };
 
             srcPtr = &srcMod;
             useSrcMod = true;
@@ -3685,26 +3685,26 @@ void ImageDraw(Image *dst, Image src, Rectangle srcRec, Rectangle dstRec, Color 
         // for every pixel -> [get_src_format/get_dst_format -> blend -> format_to_dst]
         // Some optimization ideas:
         //    [x] Avoid creating source copy if not required (no resize required)
-        //    [x] Optimize ImageResize() for pixel format (alternative: ImageResizeNN())
-        //    [x] Optimize ColorAlphaBlend() to avoid processing (alpha = 0) and (alpha = 1)
-        //    [x] Optimize ColorAlphaBlend() for faster operations (maybe avoiding divs?)
+        //    [x] Optimize RaylibImageResize() for pixel format (alternative: RaylibImageResizeNN())
+        //    [x] Optimize RaylibColorAlphaBlend() to avoid processing (alpha = 0) and (alpha = 1)
+        //    [x] Optimize RaylibColorAlphaBlend() for faster operations (maybe avoiding divs?)
         //    [x] Consider fast path: no alpha blending required cases (src has no alpha)
         //    [x] Consider fast path: same src/dst format with no alpha -> direct line copy
-        //    [-] GetPixelColor(): Get Vector4 instead of Color, easier for ColorAlphaBlend()
+        //    [-] RaylibGetPixelColor(): Get RaylibVector4 instead of RaylibColor, easier for RaylibColorAlphaBlend()
         //    [ ] Support f32bit channels drawing
 
-        // TODO: Support PIXELFORMAT_UNCOMPRESSED_R32, PIXELFORMAT_UNCOMPRESSED_R32G32B32, PIXELFORMAT_UNCOMPRESSED_R32G32B32A32 and 16-bit equivalents
+        // TODO: Support RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32, RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32, RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32 and 16-bit equivalents
 
-        Color colSrc, colDst, blend;
+        RaylibColor colSrc, colDst, blend;
         bool blendRequired = true;
 
         // Fast path: Avoid blend if source has no alpha to blend
-        if ((tint.a == 255) && ((srcPtr->format == PIXELFORMAT_UNCOMPRESSED_GRAYSCALE) || (srcPtr->format == PIXELFORMAT_UNCOMPRESSED_R8G8B8) || (srcPtr->format == PIXELFORMAT_UNCOMPRESSED_R5G6B5))) blendRequired = false;
+        if ((tint.a == 255) && ((srcPtr->format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE) || (srcPtr->format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8) || (srcPtr->format == RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G6B5))) blendRequired = false;
 
-        int strideDst = GetPixelDataSize(dst->width, 1, dst->format);
+        int strideDst = RaylibGetPixelDataSize(dst->width, 1, dst->format);
         int bytesPerPixelDst = strideDst/(dst->width);
 
-        int strideSrc = GetPixelDataSize(srcPtr->width, 1, srcPtr->format);
+        int strideSrc = RaylibGetPixelDataSize(srcPtr->width, 1, srcPtr->format);
         int bytesPerPixelSrc = strideSrc/(srcPtr->width);
 
         unsigned char *pSrcBase = (unsigned char *)srcPtr->data + ((int)srcRec.y*srcPtr->width + (int)srcRec.x)*bytesPerPixelSrc;
@@ -3721,14 +3721,14 @@ void ImageDraw(Image *dst, Image src, Rectangle srcRec, Rectangle dstRec, Color 
             {
                 for (int x = 0; x < (int)srcRec.width; x++)
                 {
-                    colSrc = GetPixelColor(pSrc, srcPtr->format);
-                    colDst = GetPixelColor(pDst, dst->format);
+                    colSrc = RaylibGetPixelColor(pSrc, srcPtr->format);
+                    colDst = RaylibGetPixelColor(pDst, dst->format);
 
                     // Fast path: Avoid blend if source has no alpha to blend
-                    if (blendRequired) blend = ColorAlphaBlend(colDst, colSrc, tint);
+                    if (blendRequired) blend = RaylibColorAlphaBlend(colDst, colSrc, tint);
                     else blend = colSrc;
 
-                    SetPixelColor(pDst, blend, dst->format);
+                    RaylibSetPixelColor(pDst, blend, dst->format);
 
                     pDst += bytesPerPixelDst;
                     pSrc += bytesPerPixelSrc;
@@ -3739,51 +3739,51 @@ void ImageDraw(Image *dst, Image src, Rectangle srcRec, Rectangle dstRec, Color 
             pDstBase += strideDst;
         }
 
-        if (useSrcMod) UnloadImage(srcMod);     // Unload source modified image
+        if (useSrcMod) RaylibUnloadImage(srcMod);     // Unload source modified image
     }
 }
 
 // Draw text (default font) within an image (destination)
-void ImageDrawText(Image *dst, const char *text, int posX, int posY, int fontSize, Color color)
+void RaylibImageDrawText(RaylibImage *dst, const char *text, int posX, int posY, int fontSize, RaylibColor color)
 {
-#if defined(SUPPORT_MODULE_RTEXT) && defined(SUPPORT_DEFAULT_FONT)
+#if defined(RAYLIB_SUPPORT_MODULE_RTEXT) && defined(RAYLIB_SUPPORT_DEFAULT_FONT)
     // Make sure default font is loaded to be used on image text drawing
-    if (GetFontDefault().texture.id == 0) LoadFontDefault();
+    if (RaylibGetFontDefault().texture.id == 0) LoadFontDefault();
 
-    Vector2 position = { (float)posX, (float)posY };
-    ImageDrawTextEx(dst, GetFontDefault(), text, position, (float)fontSize, 1.0f, color);   // WARNING: Module required: rtext
+    RaylibVector2 position = { (float)posX, (float)posY };
+    RaylibImageDrawTextEx(dst, RaylibGetFontDefault(), text, position, (float)fontSize, 1.0f, color);   // WARNING: Module required: rtext
 #else
-    TRACELOG(LOG_WARNING, "IMAGE: ImageDrawText() requires module: rtext");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: RaylibImageDrawText() requires module: rtext");
 #endif
 }
 
 // Draw text (custom sprite font) within an image (destination)
-void ImageDrawTextEx(Image *dst, Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint)
+void RaylibImageDrawTextEx(RaylibImage *dst, RaylibFont font, const char *text, RaylibVector2 position, float fontSize, float spacing, RaylibColor tint)
 {
-    Image imText = ImageTextEx(font, text, fontSize, spacing, tint);
+    RaylibImage imText = RaylibImageTextEx(font, text, fontSize, spacing, tint);
 
-    Rectangle srcRec = { 0.0f, 0.0f, (float)imText.width, (float)imText.height };
-    Rectangle dstRec = { position.x, position.y, (float)imText.width, (float)imText.height };
+    RaylibRectangle srcRec = { 0.0f, 0.0f, (float)imText.width, (float)imText.height };
+    RaylibRectangle dstRec = { position.x, position.y, (float)imText.width, (float)imText.height };
 
-    ImageDraw(dst, imText, srcRec, dstRec, WHITE);
+    RaylibImageDraw(dst, imText, srcRec, dstRec, RAYLIB_WHITE);
 
-    UnloadImage(imText);
+    RaylibUnloadImage(imText);
 }
 
 //------------------------------------------------------------------------------------
-// Texture loading functions
+// RaylibTexture loading functions
 //------------------------------------------------------------------------------------
 // Load texture from file into GPU memory (VRAM)
-Texture2D LoadTexture(const char *fileName)
+Texture2D RaylibLoadTexture(const char *fileName)
 {
     Texture2D texture = { 0 };
 
-    Image image = LoadImage(fileName);
+    RaylibImage image = RaylibLoadImage(fileName);
 
     if (image.data != NULL)
     {
-        texture = LoadTextureFromImage(image);
-        UnloadImage(image);
+        texture = RaylibLoadTextureFromImage(image);
+        RaylibUnloadImage(image);
     }
 
     return texture;
@@ -3791,7 +3791,7 @@ Texture2D LoadTexture(const char *fileName)
 
 // Load a texture from image data
 // NOTE: image is not unloaded, it must be done manually
-Texture2D LoadTextureFromImage(Image image)
+Texture2D RaylibLoadTextureFromImage(RaylibImage image)
 {
     Texture2D texture = { 0 };
 
@@ -3799,7 +3799,7 @@ Texture2D LoadTextureFromImage(Image image)
     {
         texture.id = rlLoadTexture(image.data, image.width, image.height, image.format, image.mipmaps);
     }
-    else TRACELOG(LOG_WARNING, "IMAGE: Data is not valid to load texture");
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Data is not valid to load texture");
 
     texture.width = image.width;
     texture.height = image.height;
@@ -3810,59 +3810,59 @@ Texture2D LoadTextureFromImage(Image image)
 }
 
 // Load cubemap from image, multiple image cubemap layouts supported
-TextureCubemap LoadTextureCubemap(Image image, int layout)
+TextureCubemap RaylibLoadTextureCubemap(RaylibImage image, int layout)
 {
     TextureCubemap cubemap = { 0 };
 
-    if (layout == CUBEMAP_LAYOUT_AUTO_DETECT)      // Try to automatically guess layout type
+    if (layout == RAYLIB_CUBEMAP_LAYOUT_AUTO_DETECT)      // Try to automatically guess layout type
     {
         // Check image width/height to determine the type of cubemap provided
         if (image.width > image.height)
         {
-            if ((image.width/6) == image.height) { layout = CUBEMAP_LAYOUT_LINE_HORIZONTAL; cubemap.width = image.width/6; }
-            else if ((image.width/4) == (image.height/3)) { layout = CUBEMAP_LAYOUT_CROSS_FOUR_BY_THREE; cubemap.width = image.width/4; }
-            else if (image.width >= (int)((float)image.height*1.85f)) { layout = CUBEMAP_LAYOUT_PANORAMA; cubemap.width = image.width/4; }
+            if ((image.width/6) == image.height) { layout = RAYLIB_CUBEMAP_LAYOUT_LINE_HORIZONTAL; cubemap.width = image.width/6; }
+            else if ((image.width/4) == (image.height/3)) { layout = RAYLIB_CUBEMAP_LAYOUT_CROSS_FOUR_BY_THREE; cubemap.width = image.width/4; }
+            else if (image.width >= (int)((float)image.height*1.85f)) { layout = RAYLIB_CUBEMAP_LAYOUT_PANORAMA; cubemap.width = image.width/4; }
         }
         else if (image.height > image.width)
         {
-            if ((image.height/6) == image.width) { layout = CUBEMAP_LAYOUT_LINE_VERTICAL; cubemap.width = image.height/6; }
-            else if ((image.width/3) == (image.height/4)) { layout = CUBEMAP_LAYOUT_CROSS_THREE_BY_FOUR; cubemap.width = image.width/3; }
+            if ((image.height/6) == image.width) { layout = RAYLIB_CUBEMAP_LAYOUT_LINE_VERTICAL; cubemap.width = image.height/6; }
+            else if ((image.width/3) == (image.height/4)) { layout = RAYLIB_CUBEMAP_LAYOUT_CROSS_THREE_BY_FOUR; cubemap.width = image.width/3; }
         }
     }
     else
     {
-        if (layout == CUBEMAP_LAYOUT_LINE_VERTICAL) cubemap.width = image.height/6;
-        if (layout == CUBEMAP_LAYOUT_LINE_HORIZONTAL) cubemap.width = image.width/6;
-        if (layout == CUBEMAP_LAYOUT_CROSS_THREE_BY_FOUR) cubemap.width = image.width/3;
-        if (layout == CUBEMAP_LAYOUT_CROSS_FOUR_BY_THREE) cubemap.width = image.width/4;
-        if (layout == CUBEMAP_LAYOUT_PANORAMA) cubemap.width = image.width/4;
+        if (layout == RAYLIB_CUBEMAP_LAYOUT_LINE_VERTICAL) cubemap.width = image.height/6;
+        if (layout == RAYLIB_CUBEMAP_LAYOUT_LINE_HORIZONTAL) cubemap.width = image.width/6;
+        if (layout == RAYLIB_CUBEMAP_LAYOUT_CROSS_THREE_BY_FOUR) cubemap.width = image.width/3;
+        if (layout == RAYLIB_CUBEMAP_LAYOUT_CROSS_FOUR_BY_THREE) cubemap.width = image.width/4;
+        if (layout == RAYLIB_CUBEMAP_LAYOUT_PANORAMA) cubemap.width = image.width/4;
     }
 
     cubemap.height = cubemap.width;
 
     // Layout provided or already auto-detected
-    if (layout != CUBEMAP_LAYOUT_AUTO_DETECT)
+    if (layout != RAYLIB_CUBEMAP_LAYOUT_AUTO_DETECT)
     {
         int size = cubemap.width;
 
-        Image faces = { 0 };                // Vertical column image
-        Rectangle faceRecs[6] = { 0 };      // Face source rectangles
+        RaylibImage faces = { 0 };                // Vertical column image
+        RaylibRectangle faceRecs[6] = { 0 };      // Face source rectangles
 
-        for (int i = 0; i < 6; i++) faceRecs[i] = (Rectangle){ 0, 0, (float)size, (float)size };
+        for (int i = 0; i < 6; i++) faceRecs[i] = (RaylibRectangle){ 0, 0, (float)size, (float)size };
 
-        if (layout == CUBEMAP_LAYOUT_LINE_VERTICAL)
+        if (layout == RAYLIB_CUBEMAP_LAYOUT_LINE_VERTICAL)
         {
-            faces = ImageCopy(image);       // Image data already follows expected convention
+            faces = RaylibImageCopy(image);       // RaylibImage data already follows expected convention
         }
-        else if (layout == CUBEMAP_LAYOUT_PANORAMA)
+        else if (layout == RAYLIB_CUBEMAP_LAYOUT_PANORAMA)
         {
             // TODO: Convert panorama image to square faces...
             // Ref: https://github.com/denivip/panorama/blob/master/panorama.cpp
         }
         else
         {
-            if (layout == CUBEMAP_LAYOUT_LINE_HORIZONTAL) for (int i = 0; i < 6; i++) faceRecs[i].x = (float)size*i;
-            else if (layout == CUBEMAP_LAYOUT_CROSS_THREE_BY_FOUR)
+            if (layout == RAYLIB_CUBEMAP_LAYOUT_LINE_HORIZONTAL) for (int i = 0; i < 6; i++) faceRecs[i].x = (float)size*i;
+            else if (layout == RAYLIB_CUBEMAP_LAYOUT_CROSS_THREE_BY_FOUR)
             {
                 faceRecs[0].x = (float)size; faceRecs[0].y = (float)size;
                 faceRecs[1].x = (float)size; faceRecs[1].y = (float)size*3;
@@ -3871,7 +3871,7 @@ TextureCubemap LoadTextureCubemap(Image image, int layout)
                 faceRecs[4].x = 0; faceRecs[4].y = (float)size;
                 faceRecs[5].x = (float)size*2; faceRecs[5].y = (float)size;
             }
-            else if (layout == CUBEMAP_LAYOUT_CROSS_FOUR_BY_THREE)
+            else if (layout == RAYLIB_CUBEMAP_LAYOUT_CROSS_FOUR_BY_THREE)
             {
                 faceRecs[0].x = (float)size*2; faceRecs[0].y = (float)size;
                 faceRecs[1].x = 0; faceRecs[1].y = (float)size;
@@ -3882,12 +3882,12 @@ TextureCubemap LoadTextureCubemap(Image image, int layout)
             }
 
             // Convert image data to 6 faces in a vertical column, that's the optimum layout for loading
-            faces = GenImageColor(size, size*6, MAGENTA);
-            ImageFormat(&faces, image.format);
+            faces = RaylibGenImageColor(size, size*6, RAYLIB_MAGENTA);
+            RaylibImageFormat(&faces, image.format);
 
-            // NOTE: Image formatting does not work with compressed textures
+            // NOTE: RaylibImage formatting does not work with compressed textures
 
-            for (int i = 0; i < 6; i++) ImageDraw(&faces, image, faceRecs[i], (Rectangle){ 0, (float)size*i, (float)size, (float)size }, WHITE);
+            for (int i = 0; i < 6; i++) RaylibImageDraw(&faces, image, faceRecs[i], (RaylibRectangle){ 0, (float)size*i, (float)size, (float)size }, RAYLIB_WHITE);
         }
 
         // NOTE: Cubemap data is expected to be provided as 6 images in a single data array,
@@ -3899,18 +3899,18 @@ TextureCubemap LoadTextureCubemap(Image image, int layout)
             cubemap.format = faces.format;
             cubemap.mipmaps = 1;
         }
-        else TRACELOG(LOG_WARNING, "IMAGE: Failed to load cubemap image");
+        else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Failed to load cubemap image");
 
-        UnloadImage(faces);
+        RaylibUnloadImage(faces);
     }
-    else TRACELOG(LOG_WARNING, "IMAGE: Failed to detect cubemap image layout");
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Failed to detect cubemap image layout");
 
     return cubemap;
 }
 
 // Load texture for rendering (framebuffer)
 // NOTE: Render texture is loaded by default with RGBA color attachment and depth RenderBuffer
-RenderTexture2D LoadRenderTexture(int width, int height)
+RenderTexture2D RaylibLoadRenderTexture(int width, int height)
 {
     RenderTexture2D target = { 0 };
 
@@ -3921,10 +3921,10 @@ RenderTexture2D LoadRenderTexture(int width, int height)
         rlEnableFramebuffer(target.id);
 
         // Create color texture (default to RGBA)
-        target.texture.id = rlLoadTexture(NULL, width, height, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
+        target.texture.id = rlLoadTexture(NULL, width, height, RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
         target.texture.width = width;
         target.texture.height = height;
-        target.texture.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+        target.texture.format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
         target.texture.mipmaps = 1;
 
         // Create depth renderbuffer/texture
@@ -3939,17 +3939,17 @@ RenderTexture2D LoadRenderTexture(int width, int height)
         rlFramebufferAttach(target.id, target.depth.id, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_RENDERBUFFER, 0);
 
         // Check if fbo is complete with attachments (valid)
-        if (rlFramebufferComplete(target.id)) TRACELOG(LOG_INFO, "FBO: [ID %i] Framebuffer object created successfully", target.id);
+        if (rlFramebufferComplete(target.id)) RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "FBO: [ID %i] Framebuffer object created successfully", target.id);
 
         rlDisableFramebuffer();
     }
-    else TRACELOG(LOG_WARNING, "FBO: Framebuffer object can not be created");
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FBO: Framebuffer object can not be created");
 
     return target;
 }
 
 // Check if a texture is ready
-bool IsTextureReady(Texture2D texture)
+bool RaylibIsTextureReady(Texture2D texture)
 {
     bool result = false;
 
@@ -3965,36 +3965,36 @@ bool IsTextureReady(Texture2D texture)
 }
 
 // Unload texture from GPU memory (VRAM)
-void UnloadTexture(Texture2D texture)
+void RaylibUnloadTexture(Texture2D texture)
 {
     if (texture.id > 0)
     {
         rlUnloadTexture(texture.id);
 
-        TRACELOG(LOG_INFO, "TEXTURE: [ID %i] Unloaded texture data from VRAM (GPU)", texture.id);
+        RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "TEXTURE: [ID %i] Unloaded texture data from VRAM (GPU)", texture.id);
     }
 }
 
 // Check if a render texture is ready
-bool IsRenderTextureReady(RenderTexture2D target)
+bool RaylibIsRenderTextureReady(RenderTexture2D target)
 {
     bool result = false;
 
     if ((target.id > 0) &&                  // Validate OpenGL id
-        IsTextureReady(target.depth) &&     // Validate FBO depth texture/renderbuffer
-        IsTextureReady(target.texture)) result = true;    // Validate FBO texture
+        RaylibIsTextureReady(target.depth) &&     // Validate FBO depth texture/renderbuffer
+        RaylibIsTextureReady(target.texture)) result = true;    // Validate FBO texture
 
     return result;
 }
 
 // Unload render texture from GPU memory (VRAM)
-void UnloadRenderTexture(RenderTexture2D target)
+void RaylibUnloadRenderTexture(RenderTexture2D target)
 {
     if (target.id > 0)
     {
         if (target.texture.id > 0)
         {
-            // Color texture attached to FBO is deleted
+            // RaylibColor texture attached to FBO is deleted
             rlUnloadTexture(target.texture.id);
         }
 
@@ -4006,23 +4006,23 @@ void UnloadRenderTexture(RenderTexture2D target)
 
 // Update GPU texture with new data
 // NOTE: pixels data must match texture.format
-void UpdateTexture(Texture2D texture, const void *pixels)
+void RaylibUpdateTexture(Texture2D texture, const void *pixels)
 {
     rlUpdateTexture(texture.id, 0, 0, texture.width, texture.height, texture.format, pixels);
 }
 
 // Update GPU texture rectangle with new data
 // NOTE: pixels data must match texture.format
-void UpdateTextureRec(Texture2D texture, Rectangle rec, const void *pixels)
+void RaylibUpdateTextureRec(Texture2D texture, RaylibRectangle rec, const void *pixels)
 {
     rlUpdateTexture(texture.id, (int)rec.x, (int)rec.y, (int)rec.width, (int)rec.height, texture.format, pixels);
 }
 
 //------------------------------------------------------------------------------------
-// Texture configuration functions
+// RaylibTexture configuration functions
 //------------------------------------------------------------------------------------
 // Generate GPU mipmaps for a texture
-void GenTextureMipmaps(Texture2D *texture)
+void RaylibGenTextureMipmaps(Texture2D *texture)
 {
     // NOTE: NPOT textures support check inside function
     // On WebGL (OpenGL ES 2.0) NPOT textures support is limited
@@ -4030,11 +4030,11 @@ void GenTextureMipmaps(Texture2D *texture)
 }
 
 // Set texture scaling filter mode
-void SetTextureFilter(Texture2D texture, int filter)
+void RaylibSetTextureFilter(Texture2D texture, int filter)
 {
     switch (filter)
     {
-        case TEXTURE_FILTER_POINT:
+        case RAYLIB_TEXTURE_FILTER_POINT:
         {
             if (texture.mipmaps > 1)
             {
@@ -4051,7 +4051,7 @@ void SetTextureFilter(Texture2D texture, int filter)
                 rlTextureParameters(texture.id, RL_TEXTURE_MAG_FILTER, RL_TEXTURE_FILTER_NEAREST);
             }
         } break;
-        case TEXTURE_FILTER_BILINEAR:
+        case RAYLIB_TEXTURE_FILTER_BILINEAR:
         {
             if (texture.mipmaps > 1)
             {
@@ -4069,7 +4069,7 @@ void SetTextureFilter(Texture2D texture, int filter)
                 rlTextureParameters(texture.id, RL_TEXTURE_MAG_FILTER, RL_TEXTURE_FILTER_LINEAR);
             }
         } break;
-        case TEXTURE_FILTER_TRILINEAR:
+        case RAYLIB_TEXTURE_FILTER_TRILINEAR:
         {
             if (texture.mipmaps > 1)
             {
@@ -4081,42 +4081,42 @@ void SetTextureFilter(Texture2D texture, int filter)
             }
             else
             {
-                TRACELOG(LOG_WARNING, "TEXTURE: [ID %i] No mipmaps available for TRILINEAR texture filtering", texture.id);
+                RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "TEXTURE: [ID %i] No mipmaps available for TRILINEAR texture filtering", texture.id);
 
                 // RL_TEXTURE_FILTER_LINEAR - tex filter: BILINEAR, no mipmaps
                 rlTextureParameters(texture.id, RL_TEXTURE_MIN_FILTER, RL_TEXTURE_FILTER_LINEAR);
                 rlTextureParameters(texture.id, RL_TEXTURE_MAG_FILTER, RL_TEXTURE_FILTER_LINEAR);
             }
         } break;
-        case TEXTURE_FILTER_ANISOTROPIC_4X: rlTextureParameters(texture.id, RL_TEXTURE_FILTER_ANISOTROPIC, 4); break;
-        case TEXTURE_FILTER_ANISOTROPIC_8X: rlTextureParameters(texture.id, RL_TEXTURE_FILTER_ANISOTROPIC, 8); break;
-        case TEXTURE_FILTER_ANISOTROPIC_16X: rlTextureParameters(texture.id, RL_TEXTURE_FILTER_ANISOTROPIC, 16); break;
+        case RAYLIB_TEXTURE_FILTER_ANISOTROPIC_4X: rlTextureParameters(texture.id, RL_TEXTURE_FILTER_ANISOTROPIC, 4); break;
+        case RAYLIB_TEXTURE_FILTER_ANISOTROPIC_8X: rlTextureParameters(texture.id, RL_TEXTURE_FILTER_ANISOTROPIC, 8); break;
+        case RAYLIB_TEXTURE_FILTER_ANISOTROPIC_16X: rlTextureParameters(texture.id, RL_TEXTURE_FILTER_ANISOTROPIC, 16); break;
         default: break;
     }
 }
 
 // Set texture wrapping mode
-void SetTextureWrap(Texture2D texture, int wrap)
+void RaylibSetTextureWrap(Texture2D texture, int wrap)
 {
     switch (wrap)
     {
-        case TEXTURE_WRAP_REPEAT:
+        case RAYLIB_TEXTURE_WRAP_REPEAT:
         {
             // NOTE: It only works if NPOT textures are supported, i.e. OpenGL ES 2.0 could not support it
             rlTextureParameters(texture.id, RL_TEXTURE_WRAP_S, RL_TEXTURE_WRAP_REPEAT);
             rlTextureParameters(texture.id, RL_TEXTURE_WRAP_T, RL_TEXTURE_WRAP_REPEAT);
         } break;
-        case TEXTURE_WRAP_CLAMP:
+        case RAYLIB_TEXTURE_WRAP_CLAMP:
         {
             rlTextureParameters(texture.id, RL_TEXTURE_WRAP_S, RL_TEXTURE_WRAP_CLAMP);
             rlTextureParameters(texture.id, RL_TEXTURE_WRAP_T, RL_TEXTURE_WRAP_CLAMP);
         } break;
-        case TEXTURE_WRAP_MIRROR_REPEAT:
+        case RAYLIB_TEXTURE_WRAP_MIRROR_REPEAT:
         {
             rlTextureParameters(texture.id, RL_TEXTURE_WRAP_S, RL_TEXTURE_WRAP_MIRROR_REPEAT);
             rlTextureParameters(texture.id, RL_TEXTURE_WRAP_T, RL_TEXTURE_WRAP_MIRROR_REPEAT);
         } break;
-        case TEXTURE_WRAP_MIRROR_CLAMP:
+        case RAYLIB_TEXTURE_WRAP_MIRROR_CLAMP:
         {
             rlTextureParameters(texture.id, RL_TEXTURE_WRAP_S, RL_TEXTURE_WRAP_MIRROR_CLAMP);
             rlTextureParameters(texture.id, RL_TEXTURE_WRAP_T, RL_TEXTURE_WRAP_MIRROR_CLAMP);
@@ -4126,42 +4126,42 @@ void SetTextureWrap(Texture2D texture, int wrap)
 }
 
 //------------------------------------------------------------------------------------
-// Texture drawing functions
+// RaylibTexture drawing functions
 //------------------------------------------------------------------------------------
 // Draw a texture
-void DrawTexture(Texture2D texture, int posX, int posY, Color tint)
+void RaylibDrawTexture(Texture2D texture, int posX, int posY, RaylibColor tint)
 {
-    DrawTextureEx(texture, (Vector2){ (float)posX, (float)posY }, 0.0f, 1.0f, tint);
+    RaylibDrawTextureEx(texture, (RaylibVector2){ (float)posX, (float)posY }, 0.0f, 1.0f, tint);
 }
 
-// Draw a texture with position defined as Vector2
-void DrawTextureV(Texture2D texture, Vector2 position, Color tint)
+// Draw a texture with position defined as RaylibVector2
+void RaylibDrawTextureV(Texture2D texture, RaylibVector2 position, RaylibColor tint)
 {
-    DrawTextureEx(texture, position, 0, 1.0f, tint);
+    RaylibDrawTextureEx(texture, position, 0, 1.0f, tint);
 }
 
 // Draw a texture with extended parameters
-void DrawTextureEx(Texture2D texture, Vector2 position, float rotation, float scale, Color tint)
+void RaylibDrawTextureEx(Texture2D texture, RaylibVector2 position, float rotation, float scale, RaylibColor tint)
 {
-    Rectangle source = { 0.0f, 0.0f, (float)texture.width, (float)texture.height };
-    Rectangle dest = { position.x, position.y, (float)texture.width*scale, (float)texture.height*scale };
-    Vector2 origin = { 0.0f, 0.0f };
+    RaylibRectangle source = { 0.0f, 0.0f, (float)texture.width, (float)texture.height };
+    RaylibRectangle dest = { position.x, position.y, (float)texture.width*scale, (float)texture.height*scale };
+    RaylibVector2 origin = { 0.0f, 0.0f };
 
-    DrawTexturePro(texture, source, dest, origin, rotation, tint);
+    RaylibDrawTexturePro(texture, source, dest, origin, rotation, tint);
 }
 
 // Draw a part of a texture (defined by a rectangle)
-void DrawTextureRec(Texture2D texture, Rectangle source, Vector2 position, Color tint)
+void RaylibDrawTextureRec(Texture2D texture, RaylibRectangle source, RaylibVector2 position, RaylibColor tint)
 {
-    Rectangle dest = { position.x, position.y, fabsf(source.width), fabsf(source.height) };
-    Vector2 origin = { 0.0f, 0.0f };
+    RaylibRectangle dest = { position.x, position.y, fabsf(source.width), fabsf(source.height) };
+    RaylibVector2 origin = { 0.0f, 0.0f };
 
-    DrawTexturePro(texture, source, dest, origin, 0.0f, tint);
+    RaylibDrawTexturePro(texture, source, dest, origin, 0.0f, tint);
 }
 
 // Draw a part of a texture (defined by a rectangle) with 'pro' parameters
 // NOTE: origin is relative to destination rectangle size
-void DrawTexturePro(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Color tint)
+void RaylibDrawTexturePro(Texture2D texture, RaylibRectangle source, RaylibRectangle dest, RaylibVector2 origin, float rotation, RaylibColor tint)
 {
     // Check if texture is valid
     if (texture.id > 0)
@@ -4174,25 +4174,25 @@ void DrawTexturePro(Texture2D texture, Rectangle source, Rectangle dest, Vector2
         if (source.width < 0) { flipX = true; source.width *= -1; }
         if (source.height < 0) source.y -= source.height;
 
-        Vector2 topLeft = { 0 };
-        Vector2 topRight = { 0 };
-        Vector2 bottomLeft = { 0 };
-        Vector2 bottomRight = { 0 };
+        RaylibVector2 topLeft = { 0 };
+        RaylibVector2 topRight = { 0 };
+        RaylibVector2 bottomLeft = { 0 };
+        RaylibVector2 bottomRight = { 0 };
 
         // Only calculate rotation if needed
         if (rotation == 0.0f)
         {
             float x = dest.x - origin.x;
             float y = dest.y - origin.y;
-            topLeft = (Vector2){ x, y };
-            topRight = (Vector2){ x + dest.width, y };
-            bottomLeft = (Vector2){ x, y + dest.height };
-            bottomRight = (Vector2){ x + dest.width, y + dest.height };
+            topLeft = (RaylibVector2){ x, y };
+            topRight = (RaylibVector2){ x + dest.width, y };
+            bottomLeft = (RaylibVector2){ x, y + dest.height };
+            bottomRight = (RaylibVector2){ x + dest.width, y + dest.height };
         }
         else
         {
-            float sinRotation = sinf(rotation*DEG2RAD);
-            float cosRotation = cosf(rotation*DEG2RAD);
+            float sinRotation = sinf(rotation*RAYLIB_DEG2RAD);
+            float cosRotation = cosf(rotation*RAYLIB_DEG2RAD);
             float x = dest.x;
             float y = dest.y;
             float dx = -origin.x;
@@ -4283,7 +4283,7 @@ void DrawTexturePro(Texture2D texture, Rectangle source, Rectangle dest, Vector2
 }
 
 // Draws a texture (or part of it) that stretches or shrinks nicely using n-patch info
-void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest, Vector2 origin, float rotation, Color tint)
+void RaylibDrawTextureNPatch(Texture2D texture, RaylibNPatchInfo nPatchInfo, RaylibRectangle dest, RaylibVector2 origin, float rotation, RaylibColor tint)
 {
     if (texture.id > 0)
     {
@@ -4295,8 +4295,8 @@ void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest,
 
         if (nPatchInfo.source.width < 0) nPatchInfo.source.x -= nPatchInfo.source.width;
         if (nPatchInfo.source.height < 0) nPatchInfo.source.y -= nPatchInfo.source.height;
-        if (nPatchInfo.layout == NPATCH_THREE_PATCH_HORIZONTAL) patchHeight = nPatchInfo.source.height;
-        if (nPatchInfo.layout == NPATCH_THREE_PATCH_VERTICAL) patchWidth = nPatchInfo.source.width;
+        if (nPatchInfo.layout == RAYLIB_NPATCH_THREE_PATCH_HORIZONTAL) patchHeight = nPatchInfo.source.height;
+        if (nPatchInfo.layout == RAYLIB_NPATCH_THREE_PATCH_VERTICAL) patchWidth = nPatchInfo.source.width;
 
         bool drawCenter = true;
         bool drawMiddle = true;
@@ -4306,7 +4306,7 @@ void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest,
         float bottomBorder = (float)nPatchInfo.bottom;
 
         // Adjust the lateral (left and right) border widths in case patchWidth < texture.width
-        if (patchWidth <= (leftBorder + rightBorder) && nPatchInfo.layout != NPATCH_THREE_PATCH_VERTICAL)
+        if (patchWidth <= (leftBorder + rightBorder) && nPatchInfo.layout != RAYLIB_NPATCH_THREE_PATCH_VERTICAL)
         {
             drawCenter = false;
             leftBorder = (leftBorder/(leftBorder + rightBorder))*patchWidth;
@@ -4314,14 +4314,14 @@ void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest,
         }
 
         // Adjust the lateral (top and bottom) border heights in case patchHeight < texture.height
-        if (patchHeight <= (topBorder + bottomBorder) && nPatchInfo.layout != NPATCH_THREE_PATCH_HORIZONTAL)
+        if (patchHeight <= (topBorder + bottomBorder) && nPatchInfo.layout != RAYLIB_NPATCH_THREE_PATCH_HORIZONTAL)
         {
             drawMiddle = false;
             topBorder = (topBorder/(topBorder + bottomBorder))*patchHeight;
             bottomBorder = patchHeight - topBorder;
         }
 
-        Vector2 vertA, vertB, vertC, vertD;
+        RaylibVector2 vertA, vertB, vertC, vertD;
         vertA.x = 0.0f;                             // outer left
         vertA.y = 0.0f;                             // outer top
         vertB.x = leftBorder;                       // inner left
@@ -4331,7 +4331,7 @@ void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest,
         vertD.x = patchWidth;                       // outer right
         vertD.y = patchHeight;                      // outer bottom
 
-        Vector2 coordA, coordB, coordC, coordD;
+        RaylibVector2 coordA, coordB, coordC, coordD;
         coordA.x = nPatchInfo.source.x/width;
         coordA.y = nPatchInfo.source.y/height;
         coordB.x = (nPatchInfo.source.x + leftBorder)/width;
@@ -4352,7 +4352,7 @@ void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest,
                 rlColor4ub(tint.r, tint.g, tint.b, tint.a);
                 rlNormal3f(0.0f, 0.0f, 1.0f);               // Normal vector pointing towards viewer
 
-                if (nPatchInfo.layout == NPATCH_NINE_PATCH)
+                if (nPatchInfo.layout == RAYLIB_NPATCH_NINE_PATCH)
                 {
                     // ------------------------------------------------------------
                     // TOP-LEFT QUAD
@@ -4418,11 +4418,11 @@ void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest,
                     rlTexCoord2f(coordD.x, coordC.y); rlVertex2f(vertD.x, vertC.y);  // Top-right corner for texture and quad
                     rlTexCoord2f(coordC.x, coordC.y); rlVertex2f(vertC.x, vertC.y);  // Top-left corner for texture and quad
                 }
-                else if (nPatchInfo.layout == NPATCH_THREE_PATCH_VERTICAL)
+                else if (nPatchInfo.layout == RAYLIB_NPATCH_THREE_PATCH_VERTICAL)
                 {
                     // TOP QUAD
                     // -----------------------------------------------------------
-                    // Texture coords                 Vertices
+                    // RaylibTexture coords                 Vertices
                     rlTexCoord2f(coordA.x, coordB.y); rlVertex2f(vertA.x, vertB.y);  // Bottom-left corner for texture and quad
                     rlTexCoord2f(coordD.x, coordB.y); rlVertex2f(vertD.x, vertB.y);  // Bottom-right corner for texture and quad
                     rlTexCoord2f(coordD.x, coordA.y); rlVertex2f(vertD.x, vertA.y);  // Top-right corner for texture and quad
@@ -4431,7 +4431,7 @@ void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest,
                     {
                         // MIDDLE QUAD
                         // -----------------------------------------------------------
-                        // Texture coords                 Vertices
+                        // RaylibTexture coords                 Vertices
                         rlTexCoord2f(coordA.x, coordC.y); rlVertex2f(vertA.x, vertC.y);  // Bottom-left corner for texture and quad
                         rlTexCoord2f(coordD.x, coordC.y); rlVertex2f(vertD.x, vertC.y);  // Bottom-right corner for texture and quad
                         rlTexCoord2f(coordD.x, coordB.y); rlVertex2f(vertD.x, vertB.y);  // Top-right corner for texture and quad
@@ -4439,17 +4439,17 @@ void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest,
                     }
                     // BOTTOM QUAD
                     // -----------------------------------------------------------
-                    // Texture coords                 Vertices
+                    // RaylibTexture coords                 Vertices
                     rlTexCoord2f(coordA.x, coordD.y); rlVertex2f(vertA.x, vertD.y);  // Bottom-left corner for texture and quad
                     rlTexCoord2f(coordD.x, coordD.y); rlVertex2f(vertD.x, vertD.y);  // Bottom-right corner for texture and quad
                     rlTexCoord2f(coordD.x, coordC.y); rlVertex2f(vertD.x, vertC.y);  // Top-right corner for texture and quad
                     rlTexCoord2f(coordA.x, coordC.y); rlVertex2f(vertA.x, vertC.y);  // Top-left corner for texture and quad
                 }
-                else if (nPatchInfo.layout == NPATCH_THREE_PATCH_HORIZONTAL)
+                else if (nPatchInfo.layout == RAYLIB_NPATCH_THREE_PATCH_HORIZONTAL)
                 {
                     // LEFT QUAD
                     // -----------------------------------------------------------
-                    // Texture coords                 Vertices
+                    // RaylibTexture coords                 Vertices
                     rlTexCoord2f(coordA.x, coordD.y); rlVertex2f(vertA.x, vertD.y);  // Bottom-left corner for texture and quad
                     rlTexCoord2f(coordB.x, coordD.y); rlVertex2f(vertB.x, vertD.y);  // Bottom-right corner for texture and quad
                     rlTexCoord2f(coordB.x, coordA.y); rlVertex2f(vertB.x, vertA.y);  // Top-right corner for texture and quad
@@ -4458,7 +4458,7 @@ void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest,
                     {
                         // CENTER QUAD
                         // -----------------------------------------------------------
-                        // Texture coords                 Vertices
+                        // RaylibTexture coords                 Vertices
                         rlTexCoord2f(coordB.x, coordD.y); rlVertex2f(vertB.x, vertD.y);  // Bottom-left corner for texture and quad
                         rlTexCoord2f(coordC.x, coordD.y); rlVertex2f(vertC.x, vertD.y);  // Bottom-right corner for texture and quad
                         rlTexCoord2f(coordC.x, coordA.y); rlVertex2f(vertC.x, vertA.y);  // Top-right corner for texture and quad
@@ -4466,7 +4466,7 @@ void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest,
                     }
                     // RIGHT QUAD
                     // -----------------------------------------------------------
-                    // Texture coords                 Vertices
+                    // RaylibTexture coords                 Vertices
                     rlTexCoord2f(coordC.x, coordD.y); rlVertex2f(vertC.x, vertD.y);  // Bottom-left corner for texture and quad
                     rlTexCoord2f(coordD.x, coordD.y); rlVertex2f(vertD.x, vertD.y);  // Bottom-right corner for texture and quad
                     rlTexCoord2f(coordD.x, coordA.y); rlVertex2f(vertD.x, vertA.y);  // Top-right corner for texture and quad
@@ -4480,7 +4480,7 @@ void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest,
 }
 
 // Check if two colors are equal
-bool ColorIsEqual(Color col1, Color col2)
+bool RaylibColorIsEqual(RaylibColor col1, RaylibColor col2)
 {
     bool result = false;
 
@@ -4490,9 +4490,9 @@ bool ColorIsEqual(Color col1, Color col2)
 }
 
 // Get color with alpha applied, alpha goes from 0.0f to 1.0f
-Color Fade(Color color, float alpha)
+RaylibColor RaylibFade(RaylibColor color, float alpha)
 {
-    Color result = color;
+    RaylibColor result = color;
 
     if (alpha < 0.0f) alpha = 0.0f;
     else if (alpha > 1.0f) alpha = 1.0f;
@@ -4502,8 +4502,8 @@ Color Fade(Color color, float alpha)
     return result;
 }
 
-// Get hexadecimal value for a Color
-int ColorToInt(Color color)
+// Get hexadecimal value for a RaylibColor
+int RaylibColorToInt(RaylibColor color)
 {
     int result = 0;
     
@@ -4516,9 +4516,9 @@ int ColorToInt(Color color)
 }
 
 // Get color normalized as float [0..1]
-Vector4 ColorNormalize(Color color)
+RaylibVector4 RaylibColorNormalize(RaylibColor color)
 {
-    Vector4 result;
+    RaylibVector4 result;
 
     result.x = (float)color.r/255.0f;
     result.y = (float)color.g/255.0f;
@@ -4529,9 +4529,9 @@ Vector4 ColorNormalize(Color color)
 }
 
 // Get color from normalized values [0..1]
-Color ColorFromNormalized(Vector4 normalized)
+RaylibColor RaylibColorFromNormalized(RaylibVector4 normalized)
 {
-    Color result;
+    RaylibColor result;
 
     result.r = (unsigned char)(normalized.x*255.0f);
     result.g = (unsigned char)(normalized.y*255.0f);
@@ -4541,12 +4541,12 @@ Color ColorFromNormalized(Vector4 normalized)
     return result;
 }
 
-// Get HSV values for a Color
+// Get HSV values for a RaylibColor
 // NOTE: Hue is returned as degrees [0..360]
-Vector3 ColorToHSV(Color color)
+RaylibVector3 RaylibColorToHSV(RaylibColor color)
 {
-    Vector3 hsv = { 0 };
-    Vector3 rgb = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
+    RaylibVector3 hsv = { 0 };
+    RaylibVector3 rgb = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
     float min, max, delta;
 
     min = rgb.x < rgb.y? rgb.x : rgb.y;
@@ -4593,14 +4593,14 @@ Vector3 ColorToHSV(Color color)
     return hsv;
 }
 
-// Get a Color from HSV values
+// Get a RaylibColor from HSV values
 // Implementation reference: https://en.wikipedia.org/wiki/HSL_and_HSV#Alternative_HSV_conversion
-// NOTE: Color->HSV->Color conversion will not yield exactly the same color due to rounding errors
+// NOTE: RaylibColor->HSV->Color conversion will not yield exactly the same color due to rounding errors
 // Hue is provided in degrees: [0..360]
 // Saturation/Value are provided normalized: [0.0f..1.0f]
-Color ColorFromHSV(float hue, float saturation, float value)
+RaylibColor RaylibColorFromHSV(float hue, float saturation, float value)
 {
-    Color color = { 0, 0, 0, 255 };
+    RaylibColor color = { 0, 0, 0, 255 };
 
     // Red channel
     float k = fmodf((5.0f + hue/60.0f), 6);
@@ -4630,9 +4630,9 @@ Color ColorFromHSV(float hue, float saturation, float value)
 }
 
 // Get color multiplied with another color
-Color ColorTint(Color color, Color tint)
+RaylibColor RaylibColorTint(RaylibColor color, RaylibColor tint)
 {
-    Color result = color;
+    RaylibColor result = color;
 
     unsigned char r = (unsigned char)(((int)color.r*(int)tint.r)/255);
     unsigned char g = (unsigned char)(((int)color.g*(int)tint.g)/255);
@@ -4648,9 +4648,9 @@ Color ColorTint(Color color, Color tint)
 }
 
 // Get color with brightness correction, brightness factor goes from -1.0f to 1.0f
-Color ColorBrightness(Color color, float factor)
+RaylibColor RaylibColorBrightness(RaylibColor color, float factor)
 {
-    Color result = color;
+    RaylibColor result = color;
 
     if (factor > 1.0f) factor = 1.0f;
     else if (factor < -1.0f) factor = -1.0f;
@@ -4682,9 +4682,9 @@ Color ColorBrightness(Color color, float factor)
 
 // Get color with contrast correction
 // NOTE: Contrast values between -1.0f and 1.0f
-Color ColorContrast(Color color, float contrast)
+RaylibColor RaylibColorContrast(RaylibColor color, float contrast)
 {
-    Color result = color;
+    RaylibColor result = color;
 
     if (contrast < -1.0f) contrast = -1.0f;
     else if (contrast > 1.0f) contrast = 1.0f;
@@ -4724,9 +4724,9 @@ Color ColorContrast(Color color, float contrast)
 }
 
 // Get color with alpha applied, alpha goes from 0.0f to 1.0f
-Color ColorAlpha(Color color, float alpha)
+RaylibColor RaylibColorAlpha(RaylibColor color, float alpha)
 {
-    Color result = color;
+    RaylibColor result = color;
 
     if (alpha < 0.0f) alpha = 0.0f;
     else if (alpha > 1.0f) alpha = 1.0f;
@@ -4737,9 +4737,9 @@ Color ColorAlpha(Color color, float alpha)
 }
 
 // Get src alpha-blended into dst color with tint
-Color ColorAlphaBlend(Color dst, Color src, Color tint)
+RaylibColor RaylibColorAlphaBlend(RaylibColor dst, RaylibColor src, RaylibColor tint)
 {
-    Color out = WHITE;
+    RaylibColor out = RAYLIB_WHITE;
 
     // Apply color tint to source color
     src.r = (unsigned char)(((unsigned int)src.r*((unsigned int)tint.r+1)) >> 8);
@@ -4770,10 +4770,10 @@ Color ColorAlphaBlend(Color dst, Color src, Color tint)
     else if (src.a == 255) out = src;
     else
     {
-        Vector4 fdst = ColorNormalize(dst);
-        Vector4 fsrc = ColorNormalize(src);
-        Vector4 ftint = ColorNormalize(tint);
-        Vector4 fout = { 0 };
+        RaylibVector4 fdst = RaylibColorNormalize(dst);
+        RaylibVector4 fsrc = RaylibColorNormalize(src);
+        RaylibVector4 ftint = RaylibColorNormalize(tint);
+        RaylibVector4 fout = { 0 };
 
         fout.w = fsrc.w + fdst.w*(1.0f - fsrc.w);
 
@@ -4784,17 +4784,17 @@ Color ColorAlphaBlend(Color dst, Color src, Color tint)
             fout.z = (fsrc.z*fsrc.w + fdst.z*fdst.w*(1 - fsrc.w))/fout.w;
         }
 
-        out = (Color){ (unsigned char)(fout.x*255.0f), (unsigned char)(fout.y*255.0f), (unsigned char)(fout.z*255.0f), (unsigned char)(fout.w*255.0f) };
+        out = (RaylibColor){ (unsigned char)(fout.x*255.0f), (unsigned char)(fout.y*255.0f), (unsigned char)(fout.z*255.0f), (unsigned char)(fout.w*255.0f) };
     }
 #endif
 
     return out;
 }
 
-// Get a Color struct from hexadecimal value
-Color GetColor(unsigned int hexValue)
+// Get a RaylibColor struct from hexadecimal value
+RaylibColor RaylibGetColor(unsigned int hexValue)
 {
-    Color color;
+    RaylibColor color;
 
     color.r = (unsigned char)(hexValue >> 24) & 0xFF;
     color.g = (unsigned char)(hexValue >> 16) & 0xFF;
@@ -4805,15 +4805,15 @@ Color GetColor(unsigned int hexValue)
 }
 
 // Get color from a pixel from certain format
-Color GetPixelColor(void *srcPtr, int format)
+RaylibColor RaylibGetPixelColor(void *srcPtr, int format)
 {
-    Color color = { 0 };
+    RaylibColor color = { 0 };
 
     switch (format)
     {
-        case PIXELFORMAT_UNCOMPRESSED_GRAYSCALE: color = (Color){ ((unsigned char *)srcPtr)[0], ((unsigned char *)srcPtr)[0], ((unsigned char *)srcPtr)[0], 255 }; break;
-        case PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA: color = (Color){ ((unsigned char *)srcPtr)[0], ((unsigned char *)srcPtr)[0], ((unsigned char *)srcPtr)[0], ((unsigned char *)srcPtr)[1] }; break;
-        case PIXELFORMAT_UNCOMPRESSED_R5G6B5:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE: color = (RaylibColor){ ((unsigned char *)srcPtr)[0], ((unsigned char *)srcPtr)[0], ((unsigned char *)srcPtr)[0], 255 }; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA: color = (RaylibColor){ ((unsigned char *)srcPtr)[0], ((unsigned char *)srcPtr)[0], ((unsigned char *)srcPtr)[0], ((unsigned char *)srcPtr)[1] }; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G6B5:
         {
             color.r = (unsigned char)((((unsigned short *)srcPtr)[0] >> 11)*255/31);
             color.g = (unsigned char)(((((unsigned short *)srcPtr)[0] >> 5) & 0b0000000000111111)*255/63);
@@ -4821,7 +4821,7 @@ Color GetPixelColor(void *srcPtr, int format)
             color.a = 255;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
         {
             color.r = (unsigned char)((((unsigned short *)srcPtr)[0] >> 11)*255/31);
             color.g = (unsigned char)(((((unsigned short *)srcPtr)[0] >> 6) & 0b0000000000011111)*255/31);
@@ -4829,7 +4829,7 @@ Color GetPixelColor(void *srcPtr, int format)
             color.a = (((unsigned short *)srcPtr)[0] & 0b0000000000000001)? 255 : 0;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R4G4B4A4:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4:
         {
             color.r = (unsigned char)((((unsigned short *)srcPtr)[0] >> 12)*255/15);
             color.g = (unsigned char)(((((unsigned short *)srcPtr)[0] >> 8) & 0b0000000000001111)*255/15);
@@ -4837,9 +4837,9 @@ Color GetPixelColor(void *srcPtr, int format)
             color.a = (unsigned char)((((unsigned short *)srcPtr)[0] & 0b0000000000001111)*255/15);
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R8G8B8A8: color = (Color){ ((unsigned char *)srcPtr)[0], ((unsigned char *)srcPtr)[1], ((unsigned char *)srcPtr)[2], ((unsigned char *)srcPtr)[3] }; break;
-        case PIXELFORMAT_UNCOMPRESSED_R8G8B8: color = (Color){ ((unsigned char *)srcPtr)[0], ((unsigned char *)srcPtr)[1], ((unsigned char *)srcPtr)[2], 255 }; break;
-        case PIXELFORMAT_UNCOMPRESSED_R32:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8: color = (RaylibColor){ ((unsigned char *)srcPtr)[0], ((unsigned char *)srcPtr)[1], ((unsigned char *)srcPtr)[2], ((unsigned char *)srcPtr)[3] }; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8: color = (RaylibColor){ ((unsigned char *)srcPtr)[0], ((unsigned char *)srcPtr)[1], ((unsigned char *)srcPtr)[2], 255 }; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32:
         {
             // NOTE: Pixel normalized float value is converted to [0..255]
             color.r = (unsigned char)(((float *)srcPtr)[0]*255.0f);
@@ -4848,7 +4848,7 @@ Color GetPixelColor(void *srcPtr, int format)
             color.a = 255;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R32G32B32:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32:
         {
             // NOTE: Pixel normalized float value is converted to [0..255]
             color.r = (unsigned char)(((float *)srcPtr)[0]*255.0f);
@@ -4857,7 +4857,7 @@ Color GetPixelColor(void *srcPtr, int format)
             color.a = 255;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R32G32B32A32:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32:
         {
             // NOTE: Pixel normalized float value is converted to [0..255]
             color.r = (unsigned char)(((float *)srcPtr)[0]*255.0f);
@@ -4866,7 +4866,7 @@ Color GetPixelColor(void *srcPtr, int format)
             color.a = (unsigned char)(((float *)srcPtr)[3]*255.0f);
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R16:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16:
         {
             // NOTE: Pixel normalized float value is converted to [0..255]
             color.r = (unsigned char)(HalfToFloat(((unsigned short *)srcPtr)[0])*255.0f);
@@ -4875,7 +4875,7 @@ Color GetPixelColor(void *srcPtr, int format)
             color.a = 255;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R16G16B16:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16:
         {
             // NOTE: Pixel normalized float value is converted to [0..255]
             color.r = (unsigned char)(HalfToFloat(((unsigned short *)srcPtr)[0])*255.0f);
@@ -4884,7 +4884,7 @@ Color GetPixelColor(void *srcPtr, int format)
             color.a = 255;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R16G16B16A16:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16:
         {
             // NOTE: Pixel normalized float value is converted to [0..255]
             color.r = (unsigned char)(HalfToFloat(((unsigned short *)srcPtr)[0])*255.0f);
@@ -4900,33 +4900,33 @@ Color GetPixelColor(void *srcPtr, int format)
 }
 
 // Set pixel color formatted into destination pointer
-void SetPixelColor(void *dstPtr, Color color, int format)
+void RaylibSetPixelColor(void *dstPtr, RaylibColor color, int format)
 {
     switch (format)
     {
-        case PIXELFORMAT_UNCOMPRESSED_GRAYSCALE:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE:
         {
             // NOTE: Calculate grayscale equivalent color
-            Vector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
+            RaylibVector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
             unsigned char gray = (unsigned char)((coln.x*0.299f + coln.y*0.587f + coln.z*0.114f)*255.0f);
 
             ((unsigned char *)dstPtr)[0] = gray;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
         {
             // NOTE: Calculate grayscale equivalent color
-            Vector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
+            RaylibVector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
             unsigned char gray = (unsigned char)((coln.x*0.299f + coln.y*0.587f + coln.z*0.114f)*255.0f);
 
             ((unsigned char *)dstPtr)[0] = gray;
             ((unsigned char *)dstPtr)[1] = color.a;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R5G6B5:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G6B5:
         {
             // NOTE: Calculate R5G6B5 equivalent color
-            Vector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
+            RaylibVector3 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f };
 
             unsigned char r = (unsigned char)(round(coln.x*31.0f));
             unsigned char g = (unsigned char)(round(coln.y*63.0f));
@@ -4935,10 +4935,10 @@ void SetPixelColor(void *dstPtr, Color color, int format)
             ((unsigned short *)dstPtr)[0] = (unsigned short)r << 11 | (unsigned short)g << 5 | (unsigned short)b;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
         {
             // NOTE: Calculate R5G5B5A1 equivalent color
-            Vector4 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f, (float)color.a/255.0f };
+            RaylibVector4 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f, (float)color.a/255.0f };
 
             unsigned char r = (unsigned char)(round(coln.x*31.0f));
             unsigned char g = (unsigned char)(round(coln.y*31.0f));
@@ -4948,10 +4948,10 @@ void SetPixelColor(void *dstPtr, Color color, int format)
             ((unsigned short *)dstPtr)[0] = (unsigned short)r << 11 | (unsigned short)g << 6 | (unsigned short)b << 1 | (unsigned short)a;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R4G4B4A4:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4:
         {
             // NOTE: Calculate R5G5B5A1 equivalent color
-            Vector4 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f, (float)color.a/255.0f };
+            RaylibVector4 coln = { (float)color.r/255.0f, (float)color.g/255.0f, (float)color.b/255.0f, (float)color.a/255.0f };
 
             unsigned char r = (unsigned char)(round(coln.x*15.0f));
             unsigned char g = (unsigned char)(round(coln.y*15.0f));
@@ -4961,14 +4961,14 @@ void SetPixelColor(void *dstPtr, Color color, int format)
             ((unsigned short *)dstPtr)[0] = (unsigned short)r << 12 | (unsigned short)g << 8 | (unsigned short)b << 4 | (unsigned short)a;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R8G8B8:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8:
         {
             ((unsigned char *)dstPtr)[0] = color.r;
             ((unsigned char *)dstPtr)[1] = color.g;
             ((unsigned char *)dstPtr)[2] = color.b;
 
         } break;
-        case PIXELFORMAT_UNCOMPRESSED_R8G8B8A8:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8:
         {
             ((unsigned char *)dstPtr)[0] = color.r;
             ((unsigned char *)dstPtr)[1] = color.g;
@@ -4981,38 +4981,38 @@ void SetPixelColor(void *dstPtr, Color color, int format)
 }
 
 // Get pixel data size in bytes for certain format
-// NOTE: Size can be requested for Image or Texture data
-int GetPixelDataSize(int width, int height, int format)
+// NOTE: Size can be requested for RaylibImage or RaylibTexture data
+int RaylibGetPixelDataSize(int width, int height, int format)
 {
     int dataSize = 0;       // Size in bytes
     int bpp = 0;            // Bits per pixel
 
     switch (format)
     {
-        case PIXELFORMAT_UNCOMPRESSED_GRAYSCALE: bpp = 8; break;
-        case PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
-        case PIXELFORMAT_UNCOMPRESSED_R5G6B5:
-        case PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
-        case PIXELFORMAT_UNCOMPRESSED_R4G4B4A4: bpp = 16; break;
-        case PIXELFORMAT_UNCOMPRESSED_R8G8B8A8: bpp = 32; break;
-        case PIXELFORMAT_UNCOMPRESSED_R8G8B8: bpp = 24; break;
-        case PIXELFORMAT_UNCOMPRESSED_R32: bpp = 32; break;
-        case PIXELFORMAT_UNCOMPRESSED_R32G32B32: bpp = 32*3; break;
-        case PIXELFORMAT_UNCOMPRESSED_R32G32B32A32: bpp = 32*4; break;
-        case PIXELFORMAT_UNCOMPRESSED_R16: bpp = 16; break;
-        case PIXELFORMAT_UNCOMPRESSED_R16G16B16: bpp = 16*3; break;
-        case PIXELFORMAT_UNCOMPRESSED_R16G16B16A16: bpp = 16*4; break;
-        case PIXELFORMAT_COMPRESSED_DXT1_RGB:
-        case PIXELFORMAT_COMPRESSED_DXT1_RGBA:
-        case PIXELFORMAT_COMPRESSED_ETC1_RGB:
-        case PIXELFORMAT_COMPRESSED_ETC2_RGB:
-        case PIXELFORMAT_COMPRESSED_PVRT_RGB:
-        case PIXELFORMAT_COMPRESSED_PVRT_RGBA: bpp = 4; break;
-        case PIXELFORMAT_COMPRESSED_DXT3_RGBA:
-        case PIXELFORMAT_COMPRESSED_DXT5_RGBA:
-        case PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA:
-        case PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA: bpp = 8; break;
-        case PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA: bpp = 2; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE: bpp = 8; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G6B5:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4: bpp = 16; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8: bpp = 32; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8: bpp = 24; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32: bpp = 32; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32: bpp = 32*3; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32: bpp = 32*4; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16: bpp = 16; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16: bpp = 16*3; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16: bpp = 16*4; break;
+        case RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB:
+        case RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGBA:
+        case RAYLIB_PIXELFORMAT_COMPRESSED_ETC1_RGB:
+        case RAYLIB_PIXELFORMAT_COMPRESSED_ETC2_RGB:
+        case RAYLIB_PIXELFORMAT_COMPRESSED_PVRT_RGB:
+        case RAYLIB_PIXELFORMAT_COMPRESSED_PVRT_RGBA: bpp = 4; break;
+        case RAYLIB_PIXELFORMAT_COMPRESSED_DXT3_RGBA:
+        case RAYLIB_PIXELFORMAT_COMPRESSED_DXT5_RGBA:
+        case RAYLIB_PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA:
+        case RAYLIB_PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA: bpp = 8; break;
+        case RAYLIB_PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA: bpp = 2; break;
         default: break;
     }
 
@@ -5022,8 +5022,8 @@ int GetPixelDataSize(int width, int height, int format)
     // if texture is smaller, minimum dataSize is 8 or 16
     if ((width < 4) && (height < 4))
     {
-        if ((format >= PIXELFORMAT_COMPRESSED_DXT1_RGB) && (format < PIXELFORMAT_COMPRESSED_DXT3_RGBA)) dataSize = 8;
-        else if ((format >= PIXELFORMAT_COMPRESSED_DXT3_RGBA) && (format < PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA)) dataSize = 16;
+        if ((format >= RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB) && (format < RAYLIB_PIXELFORMAT_COMPRESSED_DXT3_RGBA)) dataSize = 8;
+        else if ((format >= RAYLIB_PIXELFORMAT_COMPRESSED_DXT3_RGBA) && (format < RAYLIB_PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA)) dataSize = 16;
     }
 
     return dataSize;
@@ -5063,19 +5063,19 @@ static unsigned short FloatToHalf(float x)
     return result;
 }
 
-// Get pixel data from image as Vector4 array (float normalized)
-static Vector4 *LoadImageDataNormalized(Image image)
+// Get pixel data from image as RaylibVector4 array (float normalized)
+static RaylibVector4 *LoadImageDataNormalized(RaylibImage image)
 {
-    Vector4 *pixels = (Vector4 *)RL_MALLOC(image.width*image.height*sizeof(Vector4));
+    RaylibVector4 *pixels = (RaylibVector4 *)RL_MALLOC(image.width*image.height*sizeof(RaylibVector4));
 
-    if (image.format >= PIXELFORMAT_COMPRESSED_DXT1_RGB) TRACELOG(LOG_WARNING, "IMAGE: Pixel data retrieval not supported for compressed image formats");
+    if (image.format >= RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "IMAGE: Pixel data retrieval not supported for compressed image formats");
     else
     {
         for (int i = 0, k = 0; i < image.width*image.height; i++)
         {
             switch (image.format)
             {
-                case PIXELFORMAT_UNCOMPRESSED_GRAYSCALE:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE:
                 {
                     pixels[i].x = (float)((unsigned char *)image.data)[i]/255.0f;
                     pixels[i].y = (float)((unsigned char *)image.data)[i]/255.0f;
@@ -5083,7 +5083,7 @@ static Vector4 *LoadImageDataNormalized(Image image)
                     pixels[i].w = 1.0f;
 
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
                 {
                     pixels[i].x = (float)((unsigned char *)image.data)[k]/255.0f;
                     pixels[i].y = (float)((unsigned char *)image.data)[k]/255.0f;
@@ -5092,7 +5092,7 @@ static Vector4 *LoadImageDataNormalized(Image image)
 
                     k += 2;
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
                 {
                     unsigned short pixel = ((unsigned short *)image.data)[i];
 
@@ -5102,7 +5102,7 @@ static Vector4 *LoadImageDataNormalized(Image image)
                     pixels[i].w = ((pixel & 0b0000000000000001) == 0)? 0.0f : 1.0f;
 
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R5G6B5:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G6B5:
                 {
                     unsigned short pixel = ((unsigned short *)image.data)[i];
 
@@ -5112,7 +5112,7 @@ static Vector4 *LoadImageDataNormalized(Image image)
                     pixels[i].w = 1.0f;
 
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R4G4B4A4:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4:
                 {
                     unsigned short pixel = ((unsigned short *)image.data)[i];
 
@@ -5122,7 +5122,7 @@ static Vector4 *LoadImageDataNormalized(Image image)
                     pixels[i].w = (float)(pixel & 0b0000000000001111)*(1.0f/15);
 
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R8G8B8A8:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8:
                 {
                     pixels[i].x = (float)((unsigned char *)image.data)[k]/255.0f;
                     pixels[i].y = (float)((unsigned char *)image.data)[k + 1]/255.0f;
@@ -5131,7 +5131,7 @@ static Vector4 *LoadImageDataNormalized(Image image)
 
                     k += 4;
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R8G8B8:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8:
                 {
                     pixels[i].x = (float)((unsigned char *)image.data)[k]/255.0f;
                     pixels[i].y = (float)((unsigned char *)image.data)[k + 1]/255.0f;
@@ -5140,7 +5140,7 @@ static Vector4 *LoadImageDataNormalized(Image image)
 
                     k += 3;
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R32:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32:
                 {
                     pixels[i].x = ((float *)image.data)[k];
                     pixels[i].y = 0.0f;
@@ -5148,7 +5148,7 @@ static Vector4 *LoadImageDataNormalized(Image image)
                     pixels[i].w = 1.0f;
 
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R32G32B32:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32:
                 {
                     pixels[i].x = ((float *)image.data)[k];
                     pixels[i].y = ((float *)image.data)[k + 1];
@@ -5157,7 +5157,7 @@ static Vector4 *LoadImageDataNormalized(Image image)
 
                     k += 3;
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R32G32B32A32:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32:
                 {
                     pixels[i].x = ((float *)image.data)[k];
                     pixels[i].y = ((float *)image.data)[k + 1];
@@ -5166,14 +5166,14 @@ static Vector4 *LoadImageDataNormalized(Image image)
 
                     k += 4;
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R16:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16:
                 {
                     pixels[i].x = HalfToFloat(((unsigned short *)image.data)[k]);
                     pixels[i].y = 0.0f;
                     pixels[i].z = 0.0f;
                     pixels[i].w = 1.0f;
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R16G16B16:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16:
                 {
                     pixels[i].x = HalfToFloat(((unsigned short *)image.data)[k]);
                     pixels[i].y = HalfToFloat(((unsigned short *)image.data)[k + 1]);
@@ -5182,7 +5182,7 @@ static Vector4 *LoadImageDataNormalized(Image image)
 
                     k += 3;
                 } break;
-                case PIXELFORMAT_UNCOMPRESSED_R16G16B16A16:
+                case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16:
                 {
                     pixels[i].x = HalfToFloat(((unsigned short *)image.data)[k]);
                     pixels[i].y = HalfToFloat(((unsigned short *)image.data)[k + 1]);
@@ -5199,4 +5199,4 @@ static Vector4 *LoadImageDataNormalized(Image image)
     return pixels;
 }
 
-#endif      // SUPPORT_MODULE_RTEXTURES
+#endif      // RAYLIB_SUPPORT_MODULE_RTEXTURES

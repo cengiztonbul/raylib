@@ -14,21 +14,21 @@
 *       - Full 3d support for 3d Shapes, Models, Billboards, Heightmaps and more!
 *       - Flexible Materials system, supporting classic maps and PBR maps
 *       - Animated 3D models supported (skeletal bones animation) (IQM)
-*       - Shaders support, including Model shaders and Postprocessing shaders
-*       - Powerful math module for Vector, Matrix and Quaternion operations: [raymath]
+*       - Shaders support, including RaylibModel shaders and Postprocessing shaders
+*       - Powerful math module for Vector, RaylibMatrix and Quaternion operations: [raymath]
 *       - Audio loading and playing with streaming support (WAV, OGG, MP3, FLAC, XM, MOD)
 *       - VR stereo rendering with configurable HMD device parameters
 *       - Bindings to multiple programming languages available!
 *
 *   NOTES:
-*       - One default Font is loaded on InitWindow()->LoadFontDefault() [core, text]
+*       - One default RaylibFont is loaded on RaylibInitWindow()->LoadFontDefault() [core, text]
 *       - One default Texture2D is loaded on rlglInit(), 1x1 white pixel R8G8B8A8 [rlgl] (OpenGL 3.3 or ES2)
-*       - One default Shader is loaded on rlglInit()->rlLoadShaderDefault() [rlgl] (OpenGL 3.3 or ES2)
+*       - One default RaylibShader is loaded on rlglInit()->rlLoadShaderDefault() [rlgl] (OpenGL 3.3 or ES2)
 *       - One default RenderBatch is loaded on rlglInit()->rlLoadRenderBatch() [rlgl] (OpenGL 3.3 or ES2)
 *
 *   DEPENDENCIES (included):
-*       [rcore] rglfw (Camilla Löwy - github.com/glfw/glfw) for window/context management and input (PLATFORM_DESKTOP)
-*       [rlgl] glad (David Herberth - github.com/Dav1dde/glad) for OpenGL 3.3 extensions loading (PLATFORM_DESKTOP)
+*       [rcore] rglfw (Camilla Löwy - github.com/glfw/glfw) for window/context management and input (RAYLIB_PLATFORM_DESKTOP)
+*       [rlgl] glad (David Herberth - github.com/Dav1dde/glad) for OpenGL 3.3 extensions loading (RAYLIB_PLATFORM_DESKTOP)
 *       [raudio] miniaudio (David Reid - github.com/mackron/miniaudio) for audio device/context management
 *
 *   OPTIONAL DEPENDENCIES (included):
@@ -79,7 +79,7 @@
 #ifndef RAYLIB_H
 #define RAYLIB_H
 
-#include <stdarg.h>     // Required for: va_list - Only used by TraceLogCallback
+#include <stdarg.h>     // Required for: va_list - Only used by RaylibTraceLogCallback
 
 #define RAYLIB_VERSION_MAJOR 5
 #define RAYLIB_VERSION_MINOR 1
@@ -94,31 +94,31 @@
         #define __declspec(x) __attribute__((x))
     #endif
     #if defined(BUILD_LIBTYPE_SHARED)
-        #define RLAPI __declspec(dllexport)     // We are building the library as a Win32 shared library (.dll)
+        #define RAYLIB_RLAPI __declspec(dllexport)     // We are building the library as a Win32 shared library (.dll)
     #elif defined(USE_LIBTYPE_SHARED)
-        #define RLAPI __declspec(dllimport)     // We are using the library as a Win32 shared library (.dll)
+        #define RAYLIB_RLAPI __declspec(dllimport)     // We are using the library as a Win32 shared library (.dll)
     #endif
 #else
     #if defined(BUILD_LIBTYPE_SHARED)
-        #define RLAPI __attribute__((visibility("default"))) // We are building as a Unix shared library (.so/.dylib)
+        #define RAYLIB_RLAPI __attribute__((visibility("default"))) // We are building as a Unix shared library (.so/.dylib)
     #endif
 #endif
 
-#ifndef RLAPI
-    #define RLAPI       // Functions defined as 'extern' by default (implicit specifiers)
+#ifndef RAYLIB_RLAPI
+    #define RAYLIB_RLAPI       // Functions defined as 'extern' by default (implicit specifiers)
 #endif
 
 //----------------------------------------------------------------------------------
 // Some basic Defines
 //----------------------------------------------------------------------------------
-#ifndef PI
-    #define PI 3.14159265358979323846f
+#ifndef RAYLIB_PI
+    #define RAYLIB_PI 3.14159265358979323846f
 #endif
-#ifndef DEG2RAD
-    #define DEG2RAD (PI/180.0f)
+#ifndef RAYLIB_DEG2RAD
+    #define RAYLIB_DEG2RAD (RAYLIB_PI/180.0f)
 #endif
-#ifndef RAD2DEG
-    #define RAD2DEG (180.0f/PI)
+#ifndef RAYLIB_RAD2DEG
+    #define RAYLIB_RAD2DEG (180.0f/RAYLIB_PI)
 #endif
 
 // Allow custom memory allocators
@@ -140,9 +140,9 @@
 // Plain structures in C++ (without constructors) can be initialized with { }
 // This is called aggregate initialization (C++11 feature)
 #if defined(__cplusplus)
-    #define CLITERAL(type)      type
+    #define RAYLIB_CLITERAL(type)      type
 #else
-    #define CLITERAL(type)      (type)
+    #define RAYLIB_CLITERAL(type)      (type)
 #endif
 
 // Some compilers (mostly macos clang) default to C++98,
@@ -165,34 +165,34 @@
 #define RL_MATRIX_TYPE
 
 // Some Basic Colors
-// NOTE: Custom raylib color palette for amazing visuals on WHITE background
-#define LIGHTGRAY  CLITERAL(Color){ 200, 200, 200, 255 }   // Light Gray
-#define GRAY       CLITERAL(Color){ 130, 130, 130, 255 }   // Gray
-#define DARKGRAY   CLITERAL(Color){ 80, 80, 80, 255 }      // Dark Gray
-#define YELLOW     CLITERAL(Color){ 253, 249, 0, 255 }     // Yellow
-#define GOLD       CLITERAL(Color){ 255, 203, 0, 255 }     // Gold
-#define ORANGE     CLITERAL(Color){ 255, 161, 0, 255 }     // Orange
-#define PINK       CLITERAL(Color){ 255, 109, 194, 255 }   // Pink
-#define RED        CLITERAL(Color){ 230, 41, 55, 255 }     // Red
-#define MAROON     CLITERAL(Color){ 190, 33, 55, 255 }     // Maroon
-#define GREEN      CLITERAL(Color){ 0, 228, 48, 255 }      // Green
-#define LIME       CLITERAL(Color){ 0, 158, 47, 255 }      // Lime
-#define DARKGREEN  CLITERAL(Color){ 0, 117, 44, 255 }      // Dark Green
-#define SKYBLUE    CLITERAL(Color){ 102, 191, 255, 255 }   // Sky Blue
-#define BLUE       CLITERAL(Color){ 0, 121, 241, 255 }     // Blue
-#define DARKBLUE   CLITERAL(Color){ 0, 82, 172, 255 }      // Dark Blue
-#define PURPLE     CLITERAL(Color){ 200, 122, 255, 255 }   // Purple
-#define VIOLET     CLITERAL(Color){ 135, 60, 190, 255 }    // Violet
-#define DARKPURPLE CLITERAL(Color){ 112, 31, 126, 255 }    // Dark Purple
-#define BEIGE      CLITERAL(Color){ 211, 176, 131, 255 }   // Beige
-#define BROWN      CLITERAL(Color){ 127, 106, 79, 255 }    // Brown
-#define DARKBROWN  CLITERAL(Color){ 76, 63, 47, 255 }      // Dark Brown
+// NOTE: Custom raylib color palette for amazing visuals on RAYLIB_WHITE background
+#define RAYLIB_LIGHTGRAY  RAYLIB_CLITERAL(RaylibColor){ 200, 200, 200, 255 }   // Light Gray
+#define RAYLIB_GRAY       RAYLIB_CLITERAL(RaylibColor){ 130, 130, 130, 255 }   // Gray
+#define RAYLIB_DARKGRAY   RAYLIB_CLITERAL(RaylibColor){ 80, 80, 80, 255 }      // Dark Gray
+#define RAYLIB_YELLOW     RAYLIB_CLITERAL(RaylibColor){ 253, 249, 0, 255 }     // Yellow
+#define RAYLIB_GOLD       RAYLIB_CLITERAL(RaylibColor){ 255, 203, 0, 255 }     // Gold
+#define RAYLIB_ORANGE     RAYLIB_CLITERAL(RaylibColor){ 255, 161, 0, 255 }     // Orange
+#define RAYLIB_PINK       RAYLIB_CLITERAL(RaylibColor){ 255, 109, 194, 255 }   // Pink
+#define RAYLIB_RED        RAYLIB_CLITERAL(RaylibColor){ 230, 41, 55, 255 }     // Red
+#define RAYLIB_MAROON     RAYLIB_CLITERAL(RaylibColor){ 190, 33, 55, 255 }     // Maroon
+#define RAYLIB_GREEN      RAYLIB_CLITERAL(RaylibColor){ 0, 228, 48, 255 }      // Green
+#define RAYLIB_LIME       RAYLIB_CLITERAL(RaylibColor){ 0, 158, 47, 255 }      // Lime
+#define RAYLIB_DARKGREEN  RAYLIB_CLITERAL(RaylibColor){ 0, 117, 44, 255 }      // Dark Green
+#define RAYLIB_SKYBLUE    RAYLIB_CLITERAL(RaylibColor){ 102, 191, 255, 255 }   // Sky Blue
+#define RAYLIB_BLUE       RAYLIB_CLITERAL(RaylibColor){ 0, 121, 241, 255 }     // Blue
+#define RAYLIB_DARKBLUE   RAYLIB_CLITERAL(RaylibColor){ 0, 82, 172, 255 }      // Dark Blue
+#define RAYLIB_PURPLE     RAYLIB_CLITERAL(RaylibColor){ 200, 122, 255, 255 }   // Purple
+#define RAYLIB_VIOLET     RAYLIB_CLITERAL(RaylibColor){ 135, 60, 190, 255 }    // Violet
+#define RAYLIB_DARKPURPLE RAYLIB_CLITERAL(RaylibColor){ 112, 31, 126, 255 }    // Dark Purple
+#define RAYLIB_BEIGE      RAYLIB_CLITERAL(RaylibColor){ 211, 176, 131, 255 }   // Beige
+#define RAYLIB_BROWN      RAYLIB_CLITERAL(RaylibColor){ 127, 106, 79, 255 }    // Brown
+#define RAYLIB_DARKBROWN  RAYLIB_CLITERAL(RaylibColor){ 76, 63, 47, 255 }      // Dark Brown
 
-#define WHITE      CLITERAL(Color){ 255, 255, 255, 255 }   // White
-#define BLACK      CLITERAL(Color){ 0, 0, 0, 255 }         // Black
-#define BLANK      CLITERAL(Color){ 0, 0, 0, 0 }           // Blank (Transparent)
-#define MAGENTA    CLITERAL(Color){ 255, 0, 255, 255 }     // Magenta
-#define RAYWHITE   CLITERAL(Color){ 245, 245, 245, 255 }   // My own White (raylib logo)
+#define RAYLIB_WHITE      RAYLIB_CLITERAL(RaylibColor){ 255, 255, 255, 255 }   // White
+#define RAYLIB_BLACK      RAYLIB_CLITERAL(RaylibColor){ 0, 0, 0, 255 }         // Black
+#define RAYLIB_BLANK      RAYLIB_CLITERAL(RaylibColor){ 0, 0, 0, 0 }           // Blank (Transparent)
+#define RAYLIB_MAGENTA    RAYLIB_CLITERAL(RaylibColor){ 255, 0, 255, 255 }     // Magenta
+#define RAYLIB_RAYWHITE   RAYLIB_CLITERAL(RaylibColor){ 245, 245, 245, 255 }   // My own White (raylib logo)
 
 //----------------------------------------------------------------------------------
 // Structures Definition
@@ -205,138 +205,138 @@
     #define RL_BOOL_TYPE
 #endif
 
-// Vector2, 2 components
-typedef struct Vector2 {
+// RaylibVector2, 2 components
+typedef struct RaylibVector2 {
     float x;                // Vector x component
     float y;                // Vector y component
-} Vector2;
+} RaylibVector2;
 
-// Vector3, 3 components
-typedef struct Vector3 {
+// RaylibVector3, 3 components
+typedef struct RaylibVector3 {
     float x;                // Vector x component
     float y;                // Vector y component
     float z;                // Vector z component
-} Vector3;
+} RaylibVector3;
 
-// Vector4, 4 components
-typedef struct Vector4 {
+// RaylibVector4, 4 components
+typedef struct RaylibVector4 {
     float x;                // Vector x component
     float y;                // Vector y component
     float z;                // Vector z component
     float w;                // Vector w component
-} Vector4;
+} RaylibVector4;
 
-// Quaternion, 4 components (Vector4 alias)
-typedef Vector4 Quaternion;
+// Quaternion, 4 components (RaylibVector4 alias)
+typedef RaylibVector4 Quaternion;
 
-// Matrix, 4x4 components, column major, OpenGL style, right-handed
-typedef struct Matrix {
-    float m0, m4, m8, m12;  // Matrix first row (4 components)
-    float m1, m5, m9, m13;  // Matrix second row (4 components)
-    float m2, m6, m10, m14; // Matrix third row (4 components)
-    float m3, m7, m11, m15; // Matrix fourth row (4 components)
-} Matrix;
+// RaylibMatrix, 4x4 components, column major, OpenGL style, right-handed
+typedef struct RaylibMatrix {
+    float m0, m4, m8, m12;  // RaylibMatrix first row (4 components)
+    float m1, m5, m9, m13;  // RaylibMatrix second row (4 components)
+    float m2, m6, m10, m14; // RaylibMatrix third row (4 components)
+    float m3, m7, m11, m15; // RaylibMatrix fourth row (4 components)
+} RaylibMatrix;
 
-// Color, 4 components, R8G8B8A8 (32bit)
-typedef struct Color {
-    unsigned char r;        // Color red value
-    unsigned char g;        // Color green value
-    unsigned char b;        // Color blue value
-    unsigned char a;        // Color alpha value
-} Color;
+// RaylibColor, 4 components, R8G8B8A8 (32bit)
+typedef struct RaylibColor {
+    unsigned char r;        // RaylibColor red value
+    unsigned char g;        // RaylibColor green value
+    unsigned char b;        // RaylibColor blue value
+    unsigned char a;        // RaylibColor alpha value
+} RaylibColor;
 
-// Rectangle, 4 components
-typedef struct Rectangle {
-    float x;                // Rectangle top-left corner position x
-    float y;                // Rectangle top-left corner position y
-    float width;            // Rectangle width
-    float height;           // Rectangle height
-} Rectangle;
+// RaylibRectangle, 4 components
+typedef struct RaylibRectangle {
+    float x;                // RaylibRectangle top-left corner position x
+    float y;                // RaylibRectangle top-left corner position y
+    float width;            // RaylibRectangle width
+    float height;           // RaylibRectangle height
+} RaylibRectangle;
 
-// Image, pixel data stored in CPU memory (RAM)
-typedef struct Image {
-    void *data;             // Image raw data
-    int width;              // Image base width
-    int height;             // Image base height
+// RaylibImage, pixel data stored in CPU memory (RAM)
+typedef struct RaylibImage {
+    void *data;             // RaylibImage raw data
+    int width;              // RaylibImage base width
+    int height;             // RaylibImage base height
     int mipmaps;            // Mipmap levels, 1 by default
-    int format;             // Data format (PixelFormat type)
-} Image;
+    int format;             // Data format (RaylibPixelFormat type)
+} RaylibImage;
 
-// Texture, tex data stored in GPU memory (VRAM)
-typedef struct Texture {
+// RaylibTexture, tex data stored in GPU memory (VRAM)
+typedef struct RaylibTexture {
     unsigned int id;        // OpenGL texture id
-    int width;              // Texture base width
-    int height;             // Texture base height
+    int width;              // RaylibTexture base width
+    int height;             // RaylibTexture base height
     int mipmaps;            // Mipmap levels, 1 by default
-    int format;             // Data format (PixelFormat type)
-} Texture;
+    int format;             // Data format (RaylibPixelFormat type)
+} RaylibTexture;
 
-// Texture2D, same as Texture
-typedef Texture Texture2D;
+// Texture2D, same as RaylibTexture
+typedef RaylibTexture Texture2D;
 
-// TextureCubemap, same as Texture
-typedef Texture TextureCubemap;
+// TextureCubemap, same as RaylibTexture
+typedef RaylibTexture TextureCubemap;
 
-// RenderTexture, fbo for texture rendering
-typedef struct RenderTexture {
+// RaylibRenderTexture, fbo for texture rendering
+typedef struct RaylibRenderTexture {
     unsigned int id;        // OpenGL framebuffer object id
-    Texture texture;        // Color buffer attachment texture
-    Texture depth;          // Depth buffer attachment texture
-} RenderTexture;
+    RaylibTexture texture;        // RaylibColor buffer attachment texture
+    RaylibTexture depth;          // Depth buffer attachment texture
+} RaylibRenderTexture;
 
-// RenderTexture2D, same as RenderTexture
-typedef RenderTexture RenderTexture2D;
+// RenderTexture2D, same as RaylibRenderTexture
+typedef RaylibRenderTexture RenderTexture2D;
 
-// NPatchInfo, n-patch layout info
-typedef struct NPatchInfo {
-    Rectangle source;       // Texture source rectangle
+// RaylibNPatchInfo, n-patch layout info
+typedef struct RaylibNPatchInfo {
+    RaylibRectangle source;       // RaylibTexture source rectangle
     int left;               // Left border offset
     int top;                // Top border offset
     int right;              // Right border offset
     int bottom;             // Bottom border offset
     int layout;             // Layout of the n-patch: 3x3, 1x3 or 3x1
-} NPatchInfo;
+} RaylibNPatchInfo;
 
-// GlyphInfo, font characters glyphs info
-typedef struct GlyphInfo {
+// RaylibGlyphInfo, font characters glyphs info
+typedef struct RaylibGlyphInfo {
     int value;              // Character value (Unicode)
     int offsetX;            // Character offset X when drawing
     int offsetY;            // Character offset Y when drawing
     int advanceX;           // Character advance position X
-    Image image;            // Character image data
-} GlyphInfo;
+    RaylibImage image;            // Character image data
+} RaylibGlyphInfo;
 
-// Font, font texture and GlyphInfo array data
-typedef struct Font {
+// RaylibFont, font texture and RaylibGlyphInfo array data
+typedef struct RaylibFont {
     int baseSize;           // Base size (default chars height)
     int glyphCount;         // Number of glyph characters
     int glyphPadding;       // Padding around the glyph characters
-    Texture2D texture;      // Texture atlas containing the glyphs
-    Rectangle *recs;        // Rectangles in texture for the glyphs
-    GlyphInfo *glyphs;      // Glyphs info data
-} Font;
+    Texture2D texture;      // RaylibTexture atlas containing the glyphs
+    RaylibRectangle *recs;        // Rectangles in texture for the glyphs
+    RaylibGlyphInfo *glyphs;      // Glyphs info data
+} RaylibFont;
 
 // Camera, defines position/orientation in 3d space
-typedef struct Camera3D {
-    Vector3 position;       // Camera position
-    Vector3 target;         // Camera target it looks-at
-    Vector3 up;             // Camera up vector (rotation over its axis)
+typedef struct RaylibCamera3D {
+    RaylibVector3 position;       // Camera position
+    RaylibVector3 target;         // Camera target it looks-at
+    RaylibVector3 up;             // Camera up vector (rotation over its axis)
     float fovy;             // Camera field-of-view aperture in Y (degrees) in perspective, used as near plane width in orthographic
-    int projection;         // Camera projection: CAMERA_PERSPECTIVE or CAMERA_ORTHOGRAPHIC
-} Camera3D;
+    int projection;         // Camera projection: RAYLIB_CAMERA_PERSPECTIVE or RAYLIB_CAMERA_ORTHOGRAPHIC
+} RaylibCamera3D;
 
-typedef Camera3D Camera;    // Camera type fallback, defaults to Camera3D
+typedef RaylibCamera3D Camera;    // Camera type fallback, defaults to RaylibCamera3D
 
-// Camera2D, defines position/orientation in 2d space
-typedef struct Camera2D {
-    Vector2 offset;         // Camera offset (displacement from target)
-    Vector2 target;         // Camera target (rotation and zoom origin)
+// RaylibCamera2D, defines position/orientation in 2d space
+typedef struct RaylibCamera2D {
+    RaylibVector2 offset;         // Camera offset (displacement from target)
+    RaylibVector2 target;         // Camera target (rotation and zoom origin)
     float rotation;         // Camera rotation in degrees
     float zoom;             // Camera zoom (scaling), should be 1.0f by default
-} Camera2D;
+} RaylibCamera2D;
 
-// Mesh, vertex data and vao/vbo
-typedef struct Mesh {
+// RaylibMesh, vertex data and vao/vbo
+typedef struct RaylibMesh {
     int vertexCount;        // Number of vertices stored in arrays
     int triangleCount;      // Number of triangles stored (indexed or not)
 
@@ -358,128 +358,128 @@ typedef struct Mesh {
     // OpenGL identifiers
     unsigned int vaoId;     // OpenGL Vertex Array Object id
     unsigned int *vboId;    // OpenGL Vertex Buffer Objects id (default vertex data)
-} Mesh;
+} RaylibMesh;
 
-// Shader
-typedef struct Shader {
-    unsigned int id;        // Shader program id
-    int *locs;              // Shader locations array (RL_MAX_SHADER_LOCATIONS)
-} Shader;
+// RaylibShader
+typedef struct RaylibShader {
+    unsigned int id;        // RaylibShader program id
+    int *locs;              // RaylibShader locations array (RL_MAX_SHADER_LOCATIONS)
+} RaylibShader;
 
-// MaterialMap
-typedef struct MaterialMap {
-    Texture2D texture;      // Material map texture
-    Color color;            // Material map color
-    float value;            // Material map value
-} MaterialMap;
+// RaylibMaterialMap
+typedef struct RaylibMaterialMap {
+    Texture2D texture;      // RaylibMaterial map texture
+    RaylibColor color;            // RaylibMaterial map color
+    float value;            // RaylibMaterial map value
+} RaylibMaterialMap;
 
-// Material, includes shader and maps
-typedef struct Material {
-    Shader shader;          // Material shader
-    MaterialMap *maps;      // Material maps array (MAX_MATERIAL_MAPS)
-    float params[4];        // Material generic parameters (if required)
-} Material;
+// RaylibMaterial, includes shader and maps
+typedef struct RaylibMaterial {
+    RaylibShader shader;          // RaylibMaterial shader
+    RaylibMaterialMap *maps;      // RaylibMaterial maps array (RAYLIB_MAX_MATERIAL_MAPS)
+    float params[4];        // RaylibMaterial generic parameters (if required)
+} RaylibMaterial;
 
-// Transform, vertex transformation data
-typedef struct Transform {
-    Vector3 translation;    // Translation
+// RaylibTransform, vertex transformation data
+typedef struct RaylibTransform {
+    RaylibVector3 translation;    // Translation
     Quaternion rotation;    // Rotation
-    Vector3 scale;          // Scale
-} Transform;
+    RaylibVector3 scale;          // Scale
+} RaylibTransform;
 
 // Bone, skeletal animation bone
-typedef struct BoneInfo {
+typedef struct RaylibBoneInfo {
     char name[32];          // Bone name
     int parent;             // Bone parent
-} BoneInfo;
+} RaylibBoneInfo;
 
-// Model, meshes, materials and animation data
-typedef struct Model {
-    Matrix transform;       // Local transform matrix
+// RaylibModel, meshes, materials and animation data
+typedef struct RaylibModel {
+    RaylibMatrix transform;       // Local transform matrix
 
     int meshCount;          // Number of meshes
     int materialCount;      // Number of materials
-    Mesh *meshes;           // Meshes array
-    Material *materials;    // Materials array
-    int *meshMaterial;      // Mesh material number
+    RaylibMesh *meshes;           // Meshes array
+    RaylibMaterial *materials;    // Materials array
+    int *meshMaterial;      // RaylibMesh material number
 
     // Animation data
     int boneCount;          // Number of bones
-    BoneInfo *bones;        // Bones information (skeleton)
-    Transform *bindPose;    // Bones base transformation (pose)
-} Model;
+    RaylibBoneInfo *bones;        // Bones information (skeleton)
+    RaylibTransform *bindPose;    // Bones base transformation (pose)
+} RaylibModel;
 
-// ModelAnimation
-typedef struct ModelAnimation {
+// RaylibModelAnimation
+typedef struct RaylibModelAnimation {
     int boneCount;          // Number of bones
     int frameCount;         // Number of animation frames
-    BoneInfo *bones;        // Bones information (skeleton)
-    Transform **framePoses; // Poses array by frame
+    RaylibBoneInfo *bones;        // Bones information (skeleton)
+    RaylibTransform **framePoses; // Poses array by frame
     char name[32];          // Animation name
-} ModelAnimation;
+} RaylibModelAnimation;
 
-// Ray, ray for raycasting
-typedef struct Ray {
-    Vector3 position;       // Ray position (origin)
-    Vector3 direction;      // Ray direction
-} Ray;
+// RaylibRay, ray for raycasting
+typedef struct RaylibRay {
+    RaylibVector3 position;       // RaylibRay position (origin)
+    RaylibVector3 direction;      // RaylibRay direction
+} RaylibRay;
 
-// RayCollision, ray hit information
-typedef struct RayCollision {
+// RaylibRayCollision, ray hit information
+typedef struct RaylibRayCollision {
     bool hit;               // Did the ray hit something?
     float distance;         // Distance to the nearest hit
-    Vector3 point;          // Point of the nearest hit
-    Vector3 normal;         // Surface normal of hit
-} RayCollision;
+    RaylibVector3 point;          // Point of the nearest hit
+    RaylibVector3 normal;         // Surface normal of hit
+} RaylibRayCollision;
 
-// BoundingBox
-typedef struct BoundingBox {
-    Vector3 min;            // Minimum vertex box-corner
-    Vector3 max;            // Maximum vertex box-corner
-} BoundingBox;
+// RaylibBoundingBox
+typedef struct RaylibBoundingBox {
+    RaylibVector3 min;            // Minimum vertex box-corner
+    RaylibVector3 max;            // Maximum vertex box-corner
+} RaylibBoundingBox;
 
-// Wave, audio wave data
-typedef struct Wave {
+// RaylibWave, audio wave data
+typedef struct RaylibWave {
     unsigned int frameCount;    // Total number of frames (considering channels)
     unsigned int sampleRate;    // Frequency (samples per second)
     unsigned int sampleSize;    // Bit depth (bits per sample): 8, 16, 32 (24 not supported)
     unsigned int channels;      // Number of channels (1-mono, 2-stereo, ...)
     void *data;                 // Buffer data pointer
-} Wave;
+} RaylibWave;
 
 // Opaque structs declaration
 // NOTE: Actual structs are defined internally in raudio module
-typedef struct rAudioBuffer rAudioBuffer;
-typedef struct rAudioProcessor rAudioProcessor;
+typedef struct RaylibrAudioBuffer RaylibrAudioBuffer;
+typedef struct RaylibrAudioProcessor RaylibrAudioProcessor;
 
-// AudioStream, custom audio stream
-typedef struct AudioStream {
-    rAudioBuffer *buffer;       // Pointer to internal data used by the audio system
-    rAudioProcessor *processor; // Pointer to internal data processor, useful for audio effects
+// RaylibAudioStream, custom audio stream
+typedef struct RaylibAudioStream {
+    RaylibrAudioBuffer *buffer;       // Pointer to internal data used by the audio system
+    RaylibrAudioProcessor *processor; // Pointer to internal data processor, useful for audio effects
 
     unsigned int sampleRate;    // Frequency (samples per second)
     unsigned int sampleSize;    // Bit depth (bits per sample): 8, 16, 32 (24 not supported)
     unsigned int channels;      // Number of channels (1-mono, 2-stereo, ...)
-} AudioStream;
+} RaylibAudioStream;
 
-// Sound
-typedef struct Sound {
-    AudioStream stream;         // Audio stream
+// RaylibSound
+typedef struct RaylibSound {
+    RaylibAudioStream stream;         // Audio stream
     unsigned int frameCount;    // Total number of frames (considering channels)
-} Sound;
+} RaylibSound;
 
-// Music, audio stream, anything longer than ~10 seconds should be streamed
-typedef struct Music {
-    AudioStream stream;         // Audio stream
+// RaylibMusic, audio stream, anything longer than ~10 seconds should be streamed
+typedef struct RaylibMusic {
+    RaylibAudioStream stream;         // Audio stream
     unsigned int frameCount;    // Total number of frames (considering channels)
-    bool looping;               // Music looping enable
+    bool looping;               // RaylibMusic looping enable
 
     int ctxType;                // Type of music context (audio filetype)
     void *ctxData;              // Audio context data, depends on type
-} Music;
+} RaylibMusic;
 
-// VrDeviceInfo, Head-Mounted-Display device parameters
-typedef struct VrDeviceInfo {
+// RaylibVrDeviceInfo, Head-Mounted-Display device parameters
+typedef struct RaylibVrDeviceInfo {
     int hResolution;                // Horizontal resolution in pixels
     int vResolution;                // Vertical resolution in pixels
     float hScreenSize;              // Horizontal size in meters
@@ -489,40 +489,40 @@ typedef struct VrDeviceInfo {
     float interpupillaryDistance;   // IPD (distance between pupils) in meters
     float lensDistortionValues[4];  // Lens distortion constant parameters
     float chromaAbCorrection[4];    // Chromatic aberration correction parameters
-} VrDeviceInfo;
+} RaylibVrDeviceInfo;
 
-// VrStereoConfig, VR stereo rendering configuration for simulator
-typedef struct VrStereoConfig {
-    Matrix projection[2];           // VR projection matrices (per eye)
-    Matrix viewOffset[2];           // VR view offset matrices (per eye)
+// RaylibVrStereoConfig, VR stereo rendering configuration for simulator
+typedef struct RaylibVrStereoConfig {
+    RaylibMatrix projection[2];           // VR projection matrices (per eye)
+    RaylibMatrix viewOffset[2];           // VR view offset matrices (per eye)
     float leftLensCenter[2];        // VR left lens center
     float rightLensCenter[2];       // VR right lens center
     float leftScreenCenter[2];      // VR left screen center
     float rightScreenCenter[2];     // VR right screen center
     float scale[2];                 // VR distortion scale
     float scaleIn[2];               // VR distortion scale in
-} VrStereoConfig;
+} RaylibVrStereoConfig;
 
 // File path list
-typedef struct FilePathList {
+typedef struct RaylibFilePathList {
     unsigned int capacity;          // Filepaths max entries
     unsigned int count;             // Filepaths entries count
     char **paths;                   // Filepaths entries
-} FilePathList;
+} RaylibFilePathList;
 
 // Automation event
-typedef struct AutomationEvent {
+typedef struct RaylibAutomationEvent {
     unsigned int frame;             // Event frame
     unsigned int type;              // Event type (AutomationEventType)
     int params[4];                  // Event parameters (if required)
-} AutomationEvent;
+} RaylibAutomationEvent;
 
 // Automation event list
-typedef struct AutomationEventList {
-    unsigned int capacity;          // Events max entries (MAX_AUTOMATION_EVENTS)
+typedef struct RaylibAutomationEventList {
+    unsigned int capacity;          // Events max entries (RAYLIB_MAX_AUTOMATION_EVENTS)
     unsigned int count;             // Events entries count
-    AutomationEvent *events;        // Events entries
-} AutomationEventList;
+    RaylibAutomationEvent *events;        // Events entries
+} RaylibAutomationEventList;
 
 //----------------------------------------------------------------------------------
 // Enumerators Definition
@@ -531,415 +531,415 @@ typedef struct AutomationEventList {
 // NOTE: Every bit registers one state (use it with bit masks)
 // By default all flags are set to 0
 typedef enum {
-    FLAG_VSYNC_HINT         = 0x00000040,   // Set to try enabling V-Sync on GPU
-    FLAG_FULLSCREEN_MODE    = 0x00000002,   // Set to run program in fullscreen
-    FLAG_WINDOW_RESIZABLE   = 0x00000004,   // Set to allow resizable window
-    FLAG_WINDOW_UNDECORATED = 0x00000008,   // Set to disable window decoration (frame and buttons)
-    FLAG_WINDOW_HIDDEN      = 0x00000080,   // Set to hide window
-    FLAG_WINDOW_MINIMIZED   = 0x00000200,   // Set to minimize window (iconify)
-    FLAG_WINDOW_MAXIMIZED   = 0x00000400,   // Set to maximize window (expanded to monitor)
-    FLAG_WINDOW_UNFOCUSED   = 0x00000800,   // Set to window non focused
-    FLAG_WINDOW_TOPMOST     = 0x00001000,   // Set to window always on top
-    FLAG_WINDOW_ALWAYS_RUN  = 0x00000100,   // Set to allow windows running while minimized
-    FLAG_WINDOW_TRANSPARENT = 0x00000010,   // Set to allow transparent framebuffer
-    FLAG_WINDOW_HIGHDPI     = 0x00002000,   // Set to support HighDPI
-    FLAG_WINDOW_MOUSE_PASSTHROUGH = 0x00004000, // Set to support mouse passthrough, only supported when FLAG_WINDOW_UNDECORATED
-    FLAG_BORDERLESS_WINDOWED_MODE = 0x00008000, // Set to run program in borderless windowed mode
-    FLAG_MSAA_4X_HINT       = 0x00000020,   // Set to try enabling MSAA 4X
-    FLAG_INTERLACED_HINT    = 0x00010000    // Set to try enabling interlaced video format (for V3D)
-} ConfigFlags;
+    RAYLIB_FLAG_VSYNC_HINT         = 0x00000040,   // Set to try enabling V-Sync on GPU
+    RAYLIB_FLAG_FULLSCREEN_MODE    = 0x00000002,   // Set to run program in fullscreen
+    RAYLIB_FLAG_WINDOW_RESIZABLE   = 0x00000004,   // Set to allow resizable window
+    RAYLIB_FLAG_WINDOW_UNDECORATED = 0x00000008,   // Set to disable window decoration (frame and buttons)
+    RAYLIB_FLAG_WINDOW_HIDDEN      = 0x00000080,   // Set to hide window
+    RAYLIB_FLAG_WINDOW_MINIMIZED   = 0x00000200,   // Set to minimize window (iconify)
+    RAYLIB_FLAG_WINDOW_MAXIMIZED   = 0x00000400,   // Set to maximize window (expanded to monitor)
+    RAYLIB_FLAG_WINDOW_UNFOCUSED   = 0x00000800,   // Set to window non focused
+    RAYLIB_FLAG_WINDOW_TOPMOST     = 0x00001000,   // Set to window always on top
+    RAYLIB_FLAG_WINDOW_ALWAYS_RUN  = 0x00000100,   // Set to allow windows running while minimized
+    RAYLIB_FLAG_WINDOW_TRANSPARENT = 0x00000010,   // Set to allow transparent framebuffer
+    RAYLIB_FLAG_WINDOW_HIGHDPI     = 0x00002000,   // Set to support HighDPI
+    RAYLIB_FLAG_WINDOW_MOUSE_PASSTHROUGH = 0x00004000, // Set to support mouse passthrough, only supported when RAYLIB_FLAG_WINDOW_UNDECORATED
+    RAYLIB_FLAG_BORDERLESS_WINDOWED_MODE = 0x00008000, // Set to run program in borderless windowed mode
+    RAYLIB_FLAG_MSAA_4X_HINT       = 0x00000020,   // Set to try enabling MSAA 4X
+    RAYLIB_FLAG_INTERLACED_HINT    = 0x00010000    // Set to try enabling interlaced video format (for V3D)
+} RaylibConfigFlags;
 
 // Trace log level
 // NOTE: Organized by priority level
 typedef enum {
-    LOG_ALL = 0,        // Display all logs
-    LOG_TRACE,          // Trace logging, intended for internal use only
-    LOG_DEBUG,          // Debug logging, used for internal debugging, it should be disabled on release builds
-    LOG_INFO,           // Info logging, used for program execution info
-    LOG_WARNING,        // Warning logging, used on recoverable failures
-    LOG_ERROR,          // Error logging, used on unrecoverable failures
-    LOG_FATAL,          // Fatal logging, used to abort program: exit(EXIT_FAILURE)
-    LOG_NONE            // Disable logging
-} TraceLogLevel;
+    RAYLIB_LOG_ALL = 0,        // Display all logs
+    RAYLIB_LOG_TRACE,          // Trace logging, intended for internal use only
+    RAYLIB_LOG_DEBUG,          // Debug logging, used for internal debugging, it should be disabled on release builds
+    RAYLIB_LOG_INFO,           // Info logging, used for program execution info
+    RAYLIB_LOG_WARNING,        // Warning logging, used on recoverable failures
+    RAYLIB_LOG_ERROR,          // Error logging, used on unrecoverable failures
+    RAYLIB_LOG_FATAL,          // Fatal logging, used to abort program: exit(EXIT_FAILURE)
+    RAYLIB_LOG_NONE            // Disable logging
+} RaylibTraceLogLevel;
 
 // Keyboard keys (US keyboard layout)
-// NOTE: Use GetKeyPressed() to allow redefining
+// NOTE: Use RaylibGetKeyPressed() to allow redefining
 // required keys for alternative layouts
 typedef enum {
-    KEY_NULL            = 0,        // Key: NULL, used for no key pressed
+    RAYLIB_KEY_NULL            = 0,        // Key: NULL, used for no key pressed
     // Alphanumeric keys
-    KEY_APOSTROPHE      = 39,       // Key: '
-    KEY_COMMA           = 44,       // Key: ,
-    KEY_MINUS           = 45,       // Key: -
-    KEY_PERIOD          = 46,       // Key: .
-    KEY_SLASH           = 47,       // Key: /
-    KEY_ZERO            = 48,       // Key: 0
-    KEY_ONE             = 49,       // Key: 1
-    KEY_TWO             = 50,       // Key: 2
-    KEY_THREE           = 51,       // Key: 3
-    KEY_FOUR            = 52,       // Key: 4
-    KEY_FIVE            = 53,       // Key: 5
-    KEY_SIX             = 54,       // Key: 6
-    KEY_SEVEN           = 55,       // Key: 7
-    KEY_EIGHT           = 56,       // Key: 8
-    KEY_NINE            = 57,       // Key: 9
-    KEY_SEMICOLON       = 59,       // Key: ;
-    KEY_EQUAL           = 61,       // Key: =
-    KEY_A               = 65,       // Key: A | a
-    KEY_B               = 66,       // Key: B | b
-    KEY_C               = 67,       // Key: C | c
-    KEY_D               = 68,       // Key: D | d
-    KEY_E               = 69,       // Key: E | e
-    KEY_F               = 70,       // Key: F | f
-    KEY_G               = 71,       // Key: G | g
-    KEY_H               = 72,       // Key: H | h
-    KEY_I               = 73,       // Key: I | i
-    KEY_J               = 74,       // Key: J | j
-    KEY_K               = 75,       // Key: K | k
-    KEY_L               = 76,       // Key: L | l
-    KEY_M               = 77,       // Key: M | m
-    KEY_N               = 78,       // Key: N | n
-    KEY_O               = 79,       // Key: O | o
-    KEY_P               = 80,       // Key: P | p
-    KEY_Q               = 81,       // Key: Q | q
-    KEY_R               = 82,       // Key: R | r
-    KEY_S               = 83,       // Key: S | s
-    KEY_T               = 84,       // Key: T | t
-    KEY_U               = 85,       // Key: U | u
-    KEY_V               = 86,       // Key: V | v
-    KEY_W               = 87,       // Key: W | w
-    KEY_X               = 88,       // Key: X | x
-    KEY_Y               = 89,       // Key: Y | y
-    KEY_Z               = 90,       // Key: Z | z
-    KEY_LEFT_BRACKET    = 91,       // Key: [
-    KEY_BACKSLASH       = 92,       // Key: '\'
-    KEY_RIGHT_BRACKET   = 93,       // Key: ]
-    KEY_GRAVE           = 96,       // Key: `
+    RAYLIB_KEY_APOSTROPHE      = 39,       // Key: '
+    RAYLIB_KEY_COMMA           = 44,       // Key: ,
+    RAYLIB_KEY_MINUS           = 45,       // Key: -
+    RAYLIB_KEY_PERIOD          = 46,       // Key: .
+    RAYLIB_KEY_SLASH           = 47,       // Key: /
+    RAYLIB_KEY_ZERO            = 48,       // Key: 0
+    RAYLIB_KEY_ONE             = 49,       // Key: 1
+    RAYLIB_KEY_TWO             = 50,       // Key: 2
+    RAYLIB_KEY_THREE           = 51,       // Key: 3
+    RAYLIB_KEY_FOUR            = 52,       // Key: 4
+    RAYLIB_KEY_FIVE            = 53,       // Key: 5
+    RAYLIB_KEY_SIX             = 54,       // Key: 6
+    RAYLIB_KEY_SEVEN           = 55,       // Key: 7
+    RAYLIB_KEY_EIGHT           = 56,       // Key: 8
+    RAYLIB_KEY_NINE            = 57,       // Key: 9
+    RAYLIB_KEY_SEMICOLON       = 59,       // Key: ;
+    RAYLIB_KEY_EQUAL           = 61,       // Key: =
+    RAYLIB_KEY_A               = 65,       // Key: A | a
+    RAYLIB_KEY_B               = 66,       // Key: B | b
+    RAYLIB_KEY_C               = 67,       // Key: C | c
+    RAYLIB_KEY_D               = 68,       // Key: D | d
+    RAYLIB_KEY_E               = 69,       // Key: E | e
+    RAYLIB_KEY_F               = 70,       // Key: F | f
+    RAYLIB_KEY_G               = 71,       // Key: G | g
+    RAYLIB_KEY_H               = 72,       // Key: H | h
+    RAYLIB_KEY_I               = 73,       // Key: I | i
+    RAYLIB_KEY_J               = 74,       // Key: J | j
+    RAYLIB_KEY_K               = 75,       // Key: K | k
+    RAYLIB_KEY_L               = 76,       // Key: L | l
+    RAYLIB_KEY_M               = 77,       // Key: M | m
+    RAYLIB_KEY_N               = 78,       // Key: N | n
+    RAYLIB_KEY_O               = 79,       // Key: O | o
+    RAYLIB_KEY_P               = 80,       // Key: P | p
+    RAYLIB_KEY_Q               = 81,       // Key: Q | q
+    RAYLIB_KEY_R               = 82,       // Key: R | r
+    RAYLIB_KEY_S               = 83,       // Key: S | s
+    RAYLIB_KEY_T               = 84,       // Key: T | t
+    RAYLIB_KEY_U               = 85,       // Key: U | u
+    RAYLIB_KEY_V               = 86,       // Key: V | v
+    RAYLIB_KEY_W               = 87,       // Key: W | w
+    RAYLIB_KEY_X               = 88,       // Key: X | x
+    RAYLIB_KEY_Y               = 89,       // Key: Y | y
+    RAYLIB_KEY_Z               = 90,       // Key: Z | z
+    RAYLIB_KEY_LEFT_BRACKET    = 91,       // Key: [
+    RAYLIB_KEY_BACKSLASH       = 92,       // Key: '\'
+    RAYLIB_KEY_RIGHT_BRACKET   = 93,       // Key: ]
+    RAYLIB_KEY_GRAVE           = 96,       // Key: `
     // Function keys
-    KEY_SPACE           = 32,       // Key: Space
-    KEY_ESCAPE          = 256,      // Key: Esc
-    KEY_ENTER           = 257,      // Key: Enter
-    KEY_TAB             = 258,      // Key: Tab
-    KEY_BACKSPACE       = 259,      // Key: Backspace
-    KEY_INSERT          = 260,      // Key: Ins
-    KEY_DELETE          = 261,      // Key: Del
-    KEY_RIGHT           = 262,      // Key: Cursor right
-    KEY_LEFT            = 263,      // Key: Cursor left
-    KEY_DOWN            = 264,      // Key: Cursor down
-    KEY_UP              = 265,      // Key: Cursor up
-    KEY_PAGE_UP         = 266,      // Key: Page up
-    KEY_PAGE_DOWN       = 267,      // Key: Page down
-    KEY_HOME            = 268,      // Key: Home
-    KEY_END             = 269,      // Key: End
-    KEY_CAPS_LOCK       = 280,      // Key: Caps lock
-    KEY_SCROLL_LOCK     = 281,      // Key: Scroll down
-    KEY_NUM_LOCK        = 282,      // Key: Num lock
-    KEY_PRINT_SCREEN    = 283,      // Key: Print screen
-    KEY_PAUSE           = 284,      // Key: Pause
-    KEY_F1              = 290,      // Key: F1
-    KEY_F2              = 291,      // Key: F2
-    KEY_F3              = 292,      // Key: F3
-    KEY_F4              = 293,      // Key: F4
-    KEY_F5              = 294,      // Key: F5
-    KEY_F6              = 295,      // Key: F6
-    KEY_F7              = 296,      // Key: F7
-    KEY_F8              = 297,      // Key: F8
-    KEY_F9              = 298,      // Key: F9
-    KEY_F10             = 299,      // Key: F10
-    KEY_F11             = 300,      // Key: F11
-    KEY_F12             = 301,      // Key: F12
-    KEY_LEFT_SHIFT      = 340,      // Key: Shift left
-    KEY_LEFT_CONTROL    = 341,      // Key: Control left
-    KEY_LEFT_ALT        = 342,      // Key: Alt left
-    KEY_LEFT_SUPER      = 343,      // Key: Super left
-    KEY_RIGHT_SHIFT     = 344,      // Key: Shift right
-    KEY_RIGHT_CONTROL   = 345,      // Key: Control right
-    KEY_RIGHT_ALT       = 346,      // Key: Alt right
-    KEY_RIGHT_SUPER     = 347,      // Key: Super right
-    KEY_KB_MENU         = 348,      // Key: KB menu
+    RAYLIB_KEY_SPACE           = 32,       // Key: Space
+    RAYLIB_KEY_ESCAPE          = 256,      // Key: Esc
+    RAYLIB_KEY_ENTER           = 257,      // Key: Enter
+    RAYLIB_KEY_TAB             = 258,      // Key: Tab
+    RAYLIB_KEY_BACKSPACE       = 259,      // Key: Backspace
+    RAYLIB_KEY_INSERT          = 260,      // Key: Ins
+    RAYLIB_KEY_DELETE          = 261,      // Key: Del
+    RAYLIB_KEY_RIGHT           = 262,      // Key: Cursor right
+    RAYLIB_KEY_LEFT            = 263,      // Key: Cursor left
+    RAYLIB_KEY_DOWN            = 264,      // Key: Cursor down
+    RAYLIB_KEY_UP              = 265,      // Key: Cursor up
+    RAYLIB_KEY_PAGE_UP         = 266,      // Key: Page up
+    RAYLIB_KEY_PAGE_DOWN       = 267,      // Key: Page down
+    RAYLIB_KEY_HOME            = 268,      // Key: Home
+    RAYLIB_KEY_END             = 269,      // Key: End
+    RAYLIB_KEY_CAPS_LOCK       = 280,      // Key: Caps lock
+    RAYLIB_KEY_SCROLL_LOCK     = 281,      // Key: Scroll down
+    RAYLIB_KEY_NUM_LOCK        = 282,      // Key: Num lock
+    RAYLIB_KEY_PRINT_SCREEN    = 283,      // Key: Print screen
+    RAYLIB_KEY_PAUSE           = 284,      // Key: Pause
+    RAYLIB_KEY_F1              = 290,      // Key: F1
+    RAYLIB_KEY_F2              = 291,      // Key: F2
+    RAYLIB_KEY_F3              = 292,      // Key: F3
+    RAYLIB_KEY_F4              = 293,      // Key: F4
+    RAYLIB_KEY_F5              = 294,      // Key: F5
+    RAYLIB_KEY_F6              = 295,      // Key: F6
+    RAYLIB_KEY_F7              = 296,      // Key: F7
+    RAYLIB_KEY_F8              = 297,      // Key: F8
+    RAYLIB_KEY_F9              = 298,      // Key: F9
+    RAYLIB_KEY_F10             = 299,      // Key: F10
+    RAYLIB_KEY_F11             = 300,      // Key: F11
+    RAYLIB_KEY_F12             = 301,      // Key: F12
+    RAYLIB_KEY_LEFT_SHIFT      = 340,      // Key: Shift left
+    RAYLIB_KEY_LEFT_CONTROL    = 341,      // Key: Control left
+    RAYLIB_KEY_LEFT_ALT        = 342,      // Key: Alt left
+    RAYLIB_KEY_LEFT_SUPER      = 343,      // Key: Super left
+    RAYLIB_KEY_RIGHT_SHIFT     = 344,      // Key: Shift right
+    RAYLIB_KEY_RIGHT_CONTROL   = 345,      // Key: Control right
+    RAYLIB_KEY_RIGHT_ALT       = 346,      // Key: Alt right
+    RAYLIB_KEY_RIGHT_SUPER     = 347,      // Key: Super right
+    RAYLIB_KEY_KB_MENU         = 348,      // Key: KB menu
     // Keypad keys
-    KEY_KP_0            = 320,      // Key: Keypad 0
-    KEY_KP_1            = 321,      // Key: Keypad 1
-    KEY_KP_2            = 322,      // Key: Keypad 2
-    KEY_KP_3            = 323,      // Key: Keypad 3
-    KEY_KP_4            = 324,      // Key: Keypad 4
-    KEY_KP_5            = 325,      // Key: Keypad 5
-    KEY_KP_6            = 326,      // Key: Keypad 6
-    KEY_KP_7            = 327,      // Key: Keypad 7
-    KEY_KP_8            = 328,      // Key: Keypad 8
-    KEY_KP_9            = 329,      // Key: Keypad 9
-    KEY_KP_DECIMAL      = 330,      // Key: Keypad .
-    KEY_KP_DIVIDE       = 331,      // Key: Keypad /
-    KEY_KP_MULTIPLY     = 332,      // Key: Keypad *
-    KEY_KP_SUBTRACT     = 333,      // Key: Keypad -
-    KEY_KP_ADD          = 334,      // Key: Keypad +
-    KEY_KP_ENTER        = 335,      // Key: Keypad Enter
-    KEY_KP_EQUAL        = 336,      // Key: Keypad =
+    RAYLIB_KEY_KP_0            = 320,      // Key: Keypad 0
+    RAYLIB_KEY_KP_1            = 321,      // Key: Keypad 1
+    RAYLIB_KEY_KP_2            = 322,      // Key: Keypad 2
+    RAYLIB_KEY_KP_3            = 323,      // Key: Keypad 3
+    RAYLIB_KEY_KP_4            = 324,      // Key: Keypad 4
+    RAYLIB_KEY_KP_5            = 325,      // Key: Keypad 5
+    RAYLIB_KEY_KP_6            = 326,      // Key: Keypad 6
+    RAYLIB_KEY_KP_7            = 327,      // Key: Keypad 7
+    RAYLIB_KEY_KP_8            = 328,      // Key: Keypad 8
+    RAYLIB_KEY_KP_9            = 329,      // Key: Keypad 9
+    RAYLIB_KEY_KP_DECIMAL      = 330,      // Key: Keypad .
+    RAYLIB_KEY_KP_DIVIDE       = 331,      // Key: Keypad /
+    RAYLIB_KEY_KP_MULTIPLY     = 332,      // Key: Keypad *
+    RAYLIB_KEY_KP_SUBTRACT     = 333,      // Key: Keypad -
+    RAYLIB_KEY_KP_ADD          = 334,      // Key: Keypad +
+    RAYLIB_KEY_KP_ENTER        = 335,      // Key: Keypad Enter
+    RAYLIB_KEY_KP_EQUAL        = 336,      // Key: Keypad =
     // Android key buttons
-    KEY_BACK            = 4,        // Key: Android back button
-    KEY_MENU            = 5,        // Key: Android menu button
-    KEY_VOLUME_UP       = 24,       // Key: Android volume up button
-    KEY_VOLUME_DOWN     = 25        // Key: Android volume down button
-} KeyboardKey;
+    RAYLIB_KEY_BACK            = 4,        // Key: Android back button
+    RAYLIB_KEY_MENU            = 5,        // Key: Android menu button
+    RAYLIB_KEY_VOLUME_UP       = 24,       // Key: Android volume up button
+    RAYLIB_KEY_VOLUME_DOWN     = 25        // Key: Android volume down button
+} RaylibKeyboardKey;
 
 // Add backwards compatibility support for deprecated names
-#define MOUSE_LEFT_BUTTON   MOUSE_BUTTON_LEFT
-#define MOUSE_RIGHT_BUTTON  MOUSE_BUTTON_RIGHT
-#define MOUSE_MIDDLE_BUTTON MOUSE_BUTTON_MIDDLE
+#define RAYLIB_MOUSE_LEFT_BUTTON   RAYLIB_MOUSE_BUTTON_LEFT
+#define RAYLIB_MOUSE_RIGHT_BUTTON  RAYLIB_MOUSE_BUTTON_RIGHT
+#define RAYLIB_MOUSE_MIDDLE_BUTTON RAYLIB_MOUSE_BUTTON_MIDDLE
 
 // Mouse buttons
 typedef enum {
-    MOUSE_BUTTON_LEFT    = 0,       // Mouse button left
-    MOUSE_BUTTON_RIGHT   = 1,       // Mouse button right
-    MOUSE_BUTTON_MIDDLE  = 2,       // Mouse button middle (pressed wheel)
-    MOUSE_BUTTON_SIDE    = 3,       // Mouse button side (advanced mouse device)
-    MOUSE_BUTTON_EXTRA   = 4,       // Mouse button extra (advanced mouse device)
-    MOUSE_BUTTON_FORWARD = 5,       // Mouse button forward (advanced mouse device)
-    MOUSE_BUTTON_BACK    = 6,       // Mouse button back (advanced mouse device)
-} MouseButton;
+    RAYLIB_MOUSE_BUTTON_LEFT    = 0,       // Mouse button left
+    RAYLIB_MOUSE_BUTTON_RIGHT   = 1,       // Mouse button right
+    RAYLIB_MOUSE_BUTTON_MIDDLE  = 2,       // Mouse button middle (pressed wheel)
+    RAYLIB_MOUSE_BUTTON_SIDE    = 3,       // Mouse button side (advanced mouse device)
+    RAYLIB_MOUSE_BUTTON_EXTRA   = 4,       // Mouse button extra (advanced mouse device)
+    RAYLIB_MOUSE_BUTTON_FORWARD = 5,       // Mouse button forward (advanced mouse device)
+    RAYLIB_MOUSE_BUTTON_BACK    = 6,       // Mouse button back (advanced mouse device)
+} RaylibMouseButton;
 
 // Mouse cursor
 typedef enum {
-    MOUSE_CURSOR_DEFAULT       = 0,     // Default pointer shape
-    MOUSE_CURSOR_ARROW         = 1,     // Arrow shape
-    MOUSE_CURSOR_IBEAM         = 2,     // Text writing cursor shape
-    MOUSE_CURSOR_CROSSHAIR     = 3,     // Cross shape
-    MOUSE_CURSOR_POINTING_HAND = 4,     // Pointing hand cursor
-    MOUSE_CURSOR_RESIZE_EW     = 5,     // Horizontal resize/move arrow shape
-    MOUSE_CURSOR_RESIZE_NS     = 6,     // Vertical resize/move arrow shape
-    MOUSE_CURSOR_RESIZE_NWSE   = 7,     // Top-left to bottom-right diagonal resize/move arrow shape
-    MOUSE_CURSOR_RESIZE_NESW   = 8,     // The top-right to bottom-left diagonal resize/move arrow shape
-    MOUSE_CURSOR_RESIZE_ALL    = 9,     // The omnidirectional resize/move cursor shape
-    MOUSE_CURSOR_NOT_ALLOWED   = 10     // The operation-not-allowed shape
-} MouseCursor;
+    RAYLIB_MOUSE_CURSOR_DEFAULT       = 0,     // Default pointer shape
+    RAYLIB_MOUSE_CURSOR_ARROW         = 1,     // Arrow shape
+    RAYLIB_MOUSE_CURSOR_IBEAM         = 2,     // Text writing cursor shape
+    RAYLIB_MOUSE_CURSOR_CROSSHAIR     = 3,     // Cross shape
+    RAYLIB_MOUSE_CURSOR_POINTING_HAND = 4,     // Pointing hand cursor
+    RAYLIB_MOUSE_CURSOR_RESIZE_EW     = 5,     // Horizontal resize/move arrow shape
+    RAYLIB_MOUSE_CURSOR_RESIZE_NS     = 6,     // Vertical resize/move arrow shape
+    RAYLIB_MOUSE_CURSOR_RESIZE_NWSE   = 7,     // Top-left to bottom-right diagonal resize/move arrow shape
+    RAYLIB_MOUSE_CURSOR_RESIZE_NESW   = 8,     // The top-right to bottom-left diagonal resize/move arrow shape
+    RAYLIB_MOUSE_CURSOR_RESIZE_ALL    = 9,     // The omnidirectional resize/move cursor shape
+    RAYLIB_MOUSE_CURSOR_NOT_ALLOWED   = 10     // The operation-not-allowed shape
+} RaylibMouseCursor;
 
 // Gamepad buttons
 typedef enum {
-    GAMEPAD_BUTTON_UNKNOWN = 0,         // Unknown button, just for error checking
-    GAMEPAD_BUTTON_LEFT_FACE_UP,        // Gamepad left DPAD up button
-    GAMEPAD_BUTTON_LEFT_FACE_RIGHT,     // Gamepad left DPAD right button
-    GAMEPAD_BUTTON_LEFT_FACE_DOWN,      // Gamepad left DPAD down button
-    GAMEPAD_BUTTON_LEFT_FACE_LEFT,      // Gamepad left DPAD left button
-    GAMEPAD_BUTTON_RIGHT_FACE_UP,       // Gamepad right button up (i.e. PS3: Triangle, Xbox: Y)
-    GAMEPAD_BUTTON_RIGHT_FACE_RIGHT,    // Gamepad right button right (i.e. PS3: Circle, Xbox: B)
-    GAMEPAD_BUTTON_RIGHT_FACE_DOWN,     // Gamepad right button down (i.e. PS3: Cross, Xbox: A)
-    GAMEPAD_BUTTON_RIGHT_FACE_LEFT,     // Gamepad right button left (i.e. PS3: Square, Xbox: X)
-    GAMEPAD_BUTTON_LEFT_TRIGGER_1,      // Gamepad top/back trigger left (first), it could be a trailing button
-    GAMEPAD_BUTTON_LEFT_TRIGGER_2,      // Gamepad top/back trigger left (second), it could be a trailing button
-    GAMEPAD_BUTTON_RIGHT_TRIGGER_1,     // Gamepad top/back trigger right (first), it could be a trailing button
-    GAMEPAD_BUTTON_RIGHT_TRIGGER_2,     // Gamepad top/back trigger right (second), it could be a trailing button
-    GAMEPAD_BUTTON_MIDDLE_LEFT,         // Gamepad center buttons, left one (i.e. PS3: Select)
-    GAMEPAD_BUTTON_MIDDLE,              // Gamepad center buttons, middle one (i.e. PS3: PS, Xbox: XBOX)
-    GAMEPAD_BUTTON_MIDDLE_RIGHT,        // Gamepad center buttons, right one (i.e. PS3: Start)
-    GAMEPAD_BUTTON_LEFT_THUMB,          // Gamepad joystick pressed button left
-    GAMEPAD_BUTTON_RIGHT_THUMB          // Gamepad joystick pressed button right
-} GamepadButton;
+    RAYLIB_GAMEPAD_BUTTON_UNKNOWN = 0,         // Unknown button, just for error checking
+    RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_UP,        // Gamepad left DPAD up button
+    RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_RIGHT,     // Gamepad left DPAD right button
+    RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_DOWN,      // Gamepad left DPAD down button
+    RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_LEFT,      // Gamepad left DPAD left button
+    RAYLIB_GAMEPAD_BUTTON_RIGHT_FACE_UP,       // Gamepad right button up (i.e. PS3: Triangle, Xbox: Y)
+    RAYLIB_GAMEPAD_BUTTON_RIGHT_FACE_RIGHT,    // Gamepad right button right (i.e. PS3: Circle, Xbox: B)
+    RAYLIB_GAMEPAD_BUTTON_RIGHT_FACE_DOWN,     // Gamepad right button down (i.e. PS3: Cross, Xbox: A)
+    RAYLIB_GAMEPAD_BUTTON_RIGHT_FACE_LEFT,     // Gamepad right button left (i.e. PS3: Square, Xbox: X)
+    RAYLIB_GAMEPAD_BUTTON_LEFT_TRIGGER_1,      // Gamepad top/back trigger left (first), it could be a trailing button
+    RAYLIB_GAMEPAD_BUTTON_LEFT_TRIGGER_2,      // Gamepad top/back trigger left (second), it could be a trailing button
+    RAYLIB_GAMEPAD_BUTTON_RIGHT_TRIGGER_1,     // Gamepad top/back trigger right (first), it could be a trailing button
+    RAYLIB_GAMEPAD_BUTTON_RIGHT_TRIGGER_2,     // Gamepad top/back trigger right (second), it could be a trailing button
+    RAYLIB_GAMEPAD_BUTTON_MIDDLE_LEFT,         // Gamepad center buttons, left one (i.e. PS3: Select)
+    RAYLIB_GAMEPAD_BUTTON_MIDDLE,              // Gamepad center buttons, middle one (i.e. PS3: PS, Xbox: XBOX)
+    RAYLIB_GAMEPAD_BUTTON_MIDDLE_RIGHT,        // Gamepad center buttons, right one (i.e. PS3: Start)
+    RAYLIB_GAMEPAD_BUTTON_LEFT_THUMB,          // Gamepad joystick pressed button left
+    RAYLIB_GAMEPAD_BUTTON_RIGHT_THUMB          // Gamepad joystick pressed button right
+} RaylibGamepadButton;
 
 // Gamepad axis
 typedef enum {
-    GAMEPAD_AXIS_LEFT_X        = 0,     // Gamepad left stick X axis
-    GAMEPAD_AXIS_LEFT_Y        = 1,     // Gamepad left stick Y axis
-    GAMEPAD_AXIS_RIGHT_X       = 2,     // Gamepad right stick X axis
-    GAMEPAD_AXIS_RIGHT_Y       = 3,     // Gamepad right stick Y axis
-    GAMEPAD_AXIS_LEFT_TRIGGER  = 4,     // Gamepad back trigger left, pressure level: [1..-1]
-    GAMEPAD_AXIS_RIGHT_TRIGGER = 5      // Gamepad back trigger right, pressure level: [1..-1]
-} GamepadAxis;
+    RAYLIB_GAMEPAD_AXIS_LEFT_X        = 0,     // Gamepad left stick X axis
+    RAYLIB_GAMEPAD_AXIS_LEFT_Y        = 1,     // Gamepad left stick Y axis
+    RAYLIB_GAMEPAD_AXIS_RIGHT_X       = 2,     // Gamepad right stick X axis
+    RAYLIB_GAMEPAD_AXIS_RIGHT_Y       = 3,     // Gamepad right stick Y axis
+    RAYLIB_GAMEPAD_AXIS_LEFT_TRIGGER  = 4,     // Gamepad back trigger left, pressure level: [1..-1]
+    RAYLIB_GAMEPAD_AXIS_RIGHT_TRIGGER = 5      // Gamepad back trigger right, pressure level: [1..-1]
+} RaylibGamepadAxis;
 
-// Material map index
+// RaylibMaterial map index
 typedef enum {
-    MATERIAL_MAP_ALBEDO = 0,        // Albedo material (same as: MATERIAL_MAP_DIFFUSE)
-    MATERIAL_MAP_METALNESS,         // Metalness material (same as: MATERIAL_MAP_SPECULAR)
-    MATERIAL_MAP_NORMAL,            // Normal material
-    MATERIAL_MAP_ROUGHNESS,         // Roughness material
-    MATERIAL_MAP_OCCLUSION,         // Ambient occlusion material
-    MATERIAL_MAP_EMISSION,          // Emission material
-    MATERIAL_MAP_HEIGHT,            // Heightmap material
-    MATERIAL_MAP_CUBEMAP,           // Cubemap material (NOTE: Uses GL_TEXTURE_CUBE_MAP)
-    MATERIAL_MAP_IRRADIANCE,        // Irradiance material (NOTE: Uses GL_TEXTURE_CUBE_MAP)
-    MATERIAL_MAP_PREFILTER,         // Prefilter material (NOTE: Uses GL_TEXTURE_CUBE_MAP)
-    MATERIAL_MAP_BRDF               // Brdf material
-} MaterialMapIndex;
+    RAYLIB_MATERIAL_MAP_ALBEDO = 0,        // Albedo material (same as: RAYLIB_MATERIAL_MAP_DIFFUSE)
+    RAYLIB_MATERIAL_MAP_METALNESS,         // Metalness material (same as: RAYLIB_MATERIAL_MAP_SPECULAR)
+    RAYLIB_MATERIAL_MAP_NORMAL,            // Normal material
+    RAYLIB_MATERIAL_MAP_ROUGHNESS,         // Roughness material
+    RAYLIB_MATERIAL_MAP_OCCLUSION,         // Ambient occlusion material
+    RAYLIB_MATERIAL_MAP_EMISSION,          // Emission material
+    RAYLIB_MATERIAL_MAP_HEIGHT,            // Heightmap material
+    RAYLIB_MATERIAL_MAP_CUBEMAP,           // Cubemap material (NOTE: Uses GL_TEXTURE_CUBE_MAP)
+    RAYLIB_MATERIAL_MAP_IRRADIANCE,        // Irradiance material (NOTE: Uses GL_TEXTURE_CUBE_MAP)
+    RAYLIB_MATERIAL_MAP_PREFILTER,         // Prefilter material (NOTE: Uses GL_TEXTURE_CUBE_MAP)
+    RAYLIB_MATERIAL_MAP_BRDF               // Brdf material
+} RaylibMaterialMapIndex;
 
-#define MATERIAL_MAP_DIFFUSE      MATERIAL_MAP_ALBEDO
-#define MATERIAL_MAP_SPECULAR     MATERIAL_MAP_METALNESS
+#define RAYLIB_MATERIAL_MAP_DIFFUSE      RAYLIB_MATERIAL_MAP_ALBEDO
+#define RAYLIB_MATERIAL_MAP_SPECULAR     RAYLIB_MATERIAL_MAP_METALNESS
 
-// Shader location index
+// RaylibShader location index
 typedef enum {
-    SHADER_LOC_VERTEX_POSITION = 0, // Shader location: vertex attribute: position
-    SHADER_LOC_VERTEX_TEXCOORD01,   // Shader location: vertex attribute: texcoord01
-    SHADER_LOC_VERTEX_TEXCOORD02,   // Shader location: vertex attribute: texcoord02
-    SHADER_LOC_VERTEX_NORMAL,       // Shader location: vertex attribute: normal
-    SHADER_LOC_VERTEX_TANGENT,      // Shader location: vertex attribute: tangent
-    SHADER_LOC_VERTEX_COLOR,        // Shader location: vertex attribute: color
-    SHADER_LOC_MATRIX_MVP,          // Shader location: matrix uniform: model-view-projection
-    SHADER_LOC_MATRIX_VIEW,         // Shader location: matrix uniform: view (camera transform)
-    SHADER_LOC_MATRIX_PROJECTION,   // Shader location: matrix uniform: projection
-    SHADER_LOC_MATRIX_MODEL,        // Shader location: matrix uniform: model (transform)
-    SHADER_LOC_MATRIX_NORMAL,       // Shader location: matrix uniform: normal
-    SHADER_LOC_VECTOR_VIEW,         // Shader location: vector uniform: view
-    SHADER_LOC_COLOR_DIFFUSE,       // Shader location: vector uniform: diffuse color
-    SHADER_LOC_COLOR_SPECULAR,      // Shader location: vector uniform: specular color
-    SHADER_LOC_COLOR_AMBIENT,       // Shader location: vector uniform: ambient color
-    SHADER_LOC_MAP_ALBEDO,          // Shader location: sampler2d texture: albedo (same as: SHADER_LOC_MAP_DIFFUSE)
-    SHADER_LOC_MAP_METALNESS,       // Shader location: sampler2d texture: metalness (same as: SHADER_LOC_MAP_SPECULAR)
-    SHADER_LOC_MAP_NORMAL,          // Shader location: sampler2d texture: normal
-    SHADER_LOC_MAP_ROUGHNESS,       // Shader location: sampler2d texture: roughness
-    SHADER_LOC_MAP_OCCLUSION,       // Shader location: sampler2d texture: occlusion
-    SHADER_LOC_MAP_EMISSION,        // Shader location: sampler2d texture: emission
-    SHADER_LOC_MAP_HEIGHT,          // Shader location: sampler2d texture: height
-    SHADER_LOC_MAP_CUBEMAP,         // Shader location: samplerCube texture: cubemap
-    SHADER_LOC_MAP_IRRADIANCE,      // Shader location: samplerCube texture: irradiance
-    SHADER_LOC_MAP_PREFILTER,       // Shader location: samplerCube texture: prefilter
-    SHADER_LOC_MAP_BRDF             // Shader location: sampler2d texture: brdf
-} ShaderLocationIndex;
+    RAYLIB_SHADER_LOC_VERTEX_POSITION = 0, // RaylibShader location: vertex attribute: position
+    RAYLIB_SHADER_LOC_VERTEX_TEXCOORD01,   // RaylibShader location: vertex attribute: texcoord01
+    RAYLIB_SHADER_LOC_VERTEX_TEXCOORD02,   // RaylibShader location: vertex attribute: texcoord02
+    RAYLIB_SHADER_LOC_VERTEX_NORMAL,       // RaylibShader location: vertex attribute: normal
+    RAYLIB_SHADER_LOC_VERTEX_TANGENT,      // RaylibShader location: vertex attribute: tangent
+    RAYLIB_SHADER_LOC_VERTEX_COLOR,        // RaylibShader location: vertex attribute: color
+    RAYLIB_SHADER_LOC_MATRIX_MVP,          // RaylibShader location: matrix uniform: model-view-projection
+    RAYLIB_SHADER_LOC_MATRIX_VIEW,         // RaylibShader location: matrix uniform: view (camera transform)
+    RAYLIB_SHADER_LOC_MATRIX_PROJECTION,   // RaylibShader location: matrix uniform: projection
+    RAYLIB_SHADER_LOC_MATRIX_MODEL,        // RaylibShader location: matrix uniform: model (transform)
+    RAYLIB_SHADER_LOC_MATRIX_NORMAL,       // RaylibShader location: matrix uniform: normal
+    RAYLIB_SHADER_LOC_VECTOR_VIEW,         // RaylibShader location: vector uniform: view
+    RAYLIB_SHADER_LOC_COLOR_DIFFUSE,       // RaylibShader location: vector uniform: diffuse color
+    RAYLIB_SHADER_LOC_COLOR_SPECULAR,      // RaylibShader location: vector uniform: specular color
+    RAYLIB_SHADER_LOC_COLOR_AMBIENT,       // RaylibShader location: vector uniform: ambient color
+    RAYLIB_SHADER_LOC_MAP_ALBEDO,          // RaylibShader location: sampler2d texture: albedo (same as: RAYLIB_SHADER_LOC_MAP_DIFFUSE)
+    RAYLIB_SHADER_LOC_MAP_METALNESS,       // RaylibShader location: sampler2d texture: metalness (same as: RAYLIB_SHADER_LOC_MAP_SPECULAR)
+    RAYLIB_SHADER_LOC_MAP_NORMAL,          // RaylibShader location: sampler2d texture: normal
+    RAYLIB_SHADER_LOC_MAP_ROUGHNESS,       // RaylibShader location: sampler2d texture: roughness
+    RAYLIB_SHADER_LOC_MAP_OCCLUSION,       // RaylibShader location: sampler2d texture: occlusion
+    RAYLIB_SHADER_LOC_MAP_EMISSION,        // RaylibShader location: sampler2d texture: emission
+    RAYLIB_SHADER_LOC_MAP_HEIGHT,          // RaylibShader location: sampler2d texture: height
+    RAYLIB_SHADER_LOC_MAP_CUBEMAP,         // RaylibShader location: samplerCube texture: cubemap
+    RAYLIB_SHADER_LOC_MAP_IRRADIANCE,      // RaylibShader location: samplerCube texture: irradiance
+    RAYLIB_SHADER_LOC_MAP_PREFILTER,       // RaylibShader location: samplerCube texture: prefilter
+    RAYLIB_SHADER_LOC_MAP_BRDF             // RaylibShader location: sampler2d texture: brdf
+} RaylibShaderLocationIndex;
 
-#define SHADER_LOC_MAP_DIFFUSE      SHADER_LOC_MAP_ALBEDO
-#define SHADER_LOC_MAP_SPECULAR     SHADER_LOC_MAP_METALNESS
+#define RAYLIB_SHADER_LOC_MAP_DIFFUSE      RAYLIB_SHADER_LOC_MAP_ALBEDO
+#define RAYLIB_SHADER_LOC_MAP_SPECULAR     RAYLIB_SHADER_LOC_MAP_METALNESS
 
-// Shader uniform data type
+// RaylibShader uniform data type
 typedef enum {
-    SHADER_UNIFORM_FLOAT = 0,       // Shader uniform type: float
-    SHADER_UNIFORM_VEC2,            // Shader uniform type: vec2 (2 float)
-    SHADER_UNIFORM_VEC3,            // Shader uniform type: vec3 (3 float)
-    SHADER_UNIFORM_VEC4,            // Shader uniform type: vec4 (4 float)
-    SHADER_UNIFORM_INT,             // Shader uniform type: int
-    SHADER_UNIFORM_IVEC2,           // Shader uniform type: ivec2 (2 int)
-    SHADER_UNIFORM_IVEC3,           // Shader uniform type: ivec3 (3 int)
-    SHADER_UNIFORM_IVEC4,           // Shader uniform type: ivec4 (4 int)
-    SHADER_UNIFORM_SAMPLER2D        // Shader uniform type: sampler2d
-} ShaderUniformDataType;
+    RAYLIB_SHADER_UNIFORM_FLOAT = 0,       // RaylibShader uniform type: float
+    RAYLIB_SHADER_UNIFORM_VEC2,            // RaylibShader uniform type: vec2 (2 float)
+    RAYLIB_SHADER_UNIFORM_VEC3,            // RaylibShader uniform type: vec3 (3 float)
+    RAYLIB_SHADER_UNIFORM_VEC4,            // RaylibShader uniform type: vec4 (4 float)
+    RAYLIB_SHADER_UNIFORM_INT,             // RaylibShader uniform type: int
+    RAYLIB_SHADER_UNIFORM_IVEC2,           // RaylibShader uniform type: ivec2 (2 int)
+    RAYLIB_SHADER_UNIFORM_IVEC3,           // RaylibShader uniform type: ivec3 (3 int)
+    RAYLIB_SHADER_UNIFORM_IVEC4,           // RaylibShader uniform type: ivec4 (4 int)
+    RAYLIB_SHADER_UNIFORM_SAMPLER2D        // RaylibShader uniform type: sampler2d
+} RaylibShaderUniformDataType;
 
-// Shader attribute data types
+// RaylibShader attribute data types
 typedef enum {
-    SHADER_ATTRIB_FLOAT = 0,        // Shader attribute type: float
-    SHADER_ATTRIB_VEC2,             // Shader attribute type: vec2 (2 float)
-    SHADER_ATTRIB_VEC3,             // Shader attribute type: vec3 (3 float)
-    SHADER_ATTRIB_VEC4              // Shader attribute type: vec4 (4 float)
-} ShaderAttributeDataType;
+    RAYLIB_SHADER_ATTRIB_FLOAT = 0,        // RaylibShader attribute type: float
+    RAYLIB_SHADER_ATTRIB_VEC2,             // RaylibShader attribute type: vec2 (2 float)
+    RAYLIB_SHADER_ATTRIB_VEC3,             // RaylibShader attribute type: vec3 (3 float)
+    RAYLIB_SHADER_ATTRIB_VEC4              // RaylibShader attribute type: vec4 (4 float)
+} RaylibShaderAttributeDataType;
 
 // Pixel formats
 // NOTE: Support depends on OpenGL version and platform
 typedef enum {
-    PIXELFORMAT_UNCOMPRESSED_GRAYSCALE = 1, // 8 bit per pixel (no alpha)
-    PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA,    // 8*2 bpp (2 channels)
-    PIXELFORMAT_UNCOMPRESSED_R5G6B5,        // 16 bpp
-    PIXELFORMAT_UNCOMPRESSED_R8G8B8,        // 24 bpp
-    PIXELFORMAT_UNCOMPRESSED_R5G5B5A1,      // 16 bpp (1 bit alpha)
-    PIXELFORMAT_UNCOMPRESSED_R4G4B4A4,      // 16 bpp (4 bit alpha)
-    PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,      // 32 bpp
-    PIXELFORMAT_UNCOMPRESSED_R32,           // 32 bpp (1 channel - float)
-    PIXELFORMAT_UNCOMPRESSED_R32G32B32,     // 32*3 bpp (3 channels - float)
-    PIXELFORMAT_UNCOMPRESSED_R32G32B32A32,  // 32*4 bpp (4 channels - float)
-    PIXELFORMAT_UNCOMPRESSED_R16,           // 16 bpp (1 channel - half float)
-    PIXELFORMAT_UNCOMPRESSED_R16G16B16,     // 16*3 bpp (3 channels - half float)
-    PIXELFORMAT_UNCOMPRESSED_R16G16B16A16,  // 16*4 bpp (4 channels - half float)
-    PIXELFORMAT_COMPRESSED_DXT1_RGB,        // 4 bpp (no alpha)
-    PIXELFORMAT_COMPRESSED_DXT1_RGBA,       // 4 bpp (1 bit alpha)
-    PIXELFORMAT_COMPRESSED_DXT3_RGBA,       // 8 bpp
-    PIXELFORMAT_COMPRESSED_DXT5_RGBA,       // 8 bpp
-    PIXELFORMAT_COMPRESSED_ETC1_RGB,        // 4 bpp
-    PIXELFORMAT_COMPRESSED_ETC2_RGB,        // 4 bpp
-    PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA,   // 8 bpp
-    PIXELFORMAT_COMPRESSED_PVRT_RGB,        // 4 bpp
-    PIXELFORMAT_COMPRESSED_PVRT_RGBA,       // 4 bpp
-    PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA,   // 8 bpp
-    PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA    // 2 bpp
-} PixelFormat;
+    RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE = 1, // 8 bit per pixel (no alpha)
+    RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA,    // 8*2 bpp (2 channels)
+    RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G6B5,        // 16 bpp
+    RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8,        // 24 bpp
+    RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1,      // 16 bpp (1 bit alpha)
+    RAYLIB_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4,      // 16 bpp (4 bit alpha)
+    RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,      // 32 bpp
+    RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32,           // 32 bpp (1 channel - float)
+    RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32,     // 32*3 bpp (3 channels - float)
+    RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32,  // 32*4 bpp (4 channels - float)
+    RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16,           // 16 bpp (1 channel - half float)
+    RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16,     // 16*3 bpp (3 channels - half float)
+    RAYLIB_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16,  // 16*4 bpp (4 channels - half float)
+    RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB,        // 4 bpp (no alpha)
+    RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGBA,       // 4 bpp (1 bit alpha)
+    RAYLIB_PIXELFORMAT_COMPRESSED_DXT3_RGBA,       // 8 bpp
+    RAYLIB_PIXELFORMAT_COMPRESSED_DXT5_RGBA,       // 8 bpp
+    RAYLIB_PIXELFORMAT_COMPRESSED_ETC1_RGB,        // 4 bpp
+    RAYLIB_PIXELFORMAT_COMPRESSED_ETC2_RGB,        // 4 bpp
+    RAYLIB_PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA,   // 8 bpp
+    RAYLIB_PIXELFORMAT_COMPRESSED_PVRT_RGB,        // 4 bpp
+    RAYLIB_PIXELFORMAT_COMPRESSED_PVRT_RGBA,       // 4 bpp
+    RAYLIB_PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA,   // 8 bpp
+    RAYLIB_PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA    // 2 bpp
+} RaylibPixelFormat;
 
-// Texture parameters: filter mode
+// RaylibTexture parameters: filter mode
 // NOTE 1: Filtering considers mipmaps if available in the texture
 // NOTE 2: Filter is accordingly set for minification and magnification
 typedef enum {
-    TEXTURE_FILTER_POINT = 0,               // No filter, just pixel approximation
-    TEXTURE_FILTER_BILINEAR,                // Linear filtering
-    TEXTURE_FILTER_TRILINEAR,               // Trilinear filtering (linear with mipmaps)
-    TEXTURE_FILTER_ANISOTROPIC_4X,          // Anisotropic filtering 4x
-    TEXTURE_FILTER_ANISOTROPIC_8X,          // Anisotropic filtering 8x
-    TEXTURE_FILTER_ANISOTROPIC_16X,         // Anisotropic filtering 16x
-} TextureFilter;
+    RAYLIB_TEXTURE_FILTER_POINT = 0,               // No filter, just pixel approximation
+    RAYLIB_TEXTURE_FILTER_BILINEAR,                // Linear filtering
+    RAYLIB_TEXTURE_FILTER_TRILINEAR,               // Trilinear filtering (linear with mipmaps)
+    RAYLIB_TEXTURE_FILTER_ANISOTROPIC_4X,          // Anisotropic filtering 4x
+    RAYLIB_TEXTURE_FILTER_ANISOTROPIC_8X,          // Anisotropic filtering 8x
+    RAYLIB_TEXTURE_FILTER_ANISOTROPIC_16X,         // Anisotropic filtering 16x
+} RaylibTextureFilter;
 
-// Texture parameters: wrap mode
+// RaylibTexture parameters: wrap mode
 typedef enum {
-    TEXTURE_WRAP_REPEAT = 0,                // Repeats texture in tiled mode
-    TEXTURE_WRAP_CLAMP,                     // Clamps texture to edge pixel in tiled mode
-    TEXTURE_WRAP_MIRROR_REPEAT,             // Mirrors and repeats the texture in tiled mode
-    TEXTURE_WRAP_MIRROR_CLAMP               // Mirrors and clamps to border the texture in tiled mode
-} TextureWrap;
+    RAYLIB_TEXTURE_WRAP_REPEAT = 0,                // Repeats texture in tiled mode
+    RAYLIB_TEXTURE_WRAP_CLAMP,                     // Clamps texture to edge pixel in tiled mode
+    RAYLIB_TEXTURE_WRAP_MIRROR_REPEAT,             // Mirrors and repeats the texture in tiled mode
+    RAYLIB_TEXTURE_WRAP_MIRROR_CLAMP               // Mirrors and clamps to border the texture in tiled mode
+} RaylibTextureWrap;
 
 // Cubemap layouts
 typedef enum {
-    CUBEMAP_LAYOUT_AUTO_DETECT = 0,         // Automatically detect layout type
-    CUBEMAP_LAYOUT_LINE_VERTICAL,           // Layout is defined by a vertical line with faces
-    CUBEMAP_LAYOUT_LINE_HORIZONTAL,         // Layout is defined by a horizontal line with faces
-    CUBEMAP_LAYOUT_CROSS_THREE_BY_FOUR,     // Layout is defined by a 3x4 cross with cubemap faces
-    CUBEMAP_LAYOUT_CROSS_FOUR_BY_THREE,     // Layout is defined by a 4x3 cross with cubemap faces
-    CUBEMAP_LAYOUT_PANORAMA                 // Layout is defined by a panorama image (equirrectangular map)
-} CubemapLayout;
+    RAYLIB_CUBEMAP_LAYOUT_AUTO_DETECT = 0,         // Automatically detect layout type
+    RAYLIB_CUBEMAP_LAYOUT_LINE_VERTICAL,           // Layout is defined by a vertical line with faces
+    RAYLIB_CUBEMAP_LAYOUT_LINE_HORIZONTAL,         // Layout is defined by a horizontal line with faces
+    RAYLIB_CUBEMAP_LAYOUT_CROSS_THREE_BY_FOUR,     // Layout is defined by a 3x4 cross with cubemap faces
+    RAYLIB_CUBEMAP_LAYOUT_CROSS_FOUR_BY_THREE,     // Layout is defined by a 4x3 cross with cubemap faces
+    RAYLIB_CUBEMAP_LAYOUT_PANORAMA                 // Layout is defined by a panorama image (equirrectangular map)
+} RaylibCubemapLayout;
 
-// Font type, defines generation method
+// RaylibFont type, defines generation method
 typedef enum {
-    FONT_DEFAULT = 0,               // Default font generation, anti-aliased
-    FONT_BITMAP,                    // Bitmap font generation, no anti-aliasing
-    FONT_SDF                        // SDF font generation, requires external shader
-} FontType;
+    RAYLIB_FONT_DEFAULT = 0,               // Default font generation, anti-aliased
+    RAYLIB_FONT_BITMAP,                    // Bitmap font generation, no anti-aliasing
+    RAYLIB_FONT_SDF                        // SDF font generation, requires external shader
+} RaylibFontType;
 
-// Color blending modes (pre-defined)
+// RaylibColor blending modes (pre-defined)
 typedef enum {
-    BLEND_ALPHA = 0,                // Blend textures considering alpha (default)
-    BLEND_ADDITIVE,                 // Blend textures adding colors
-    BLEND_MULTIPLIED,               // Blend textures multiplying colors
-    BLEND_ADD_COLORS,               // Blend textures adding colors (alternative)
-    BLEND_SUBTRACT_COLORS,          // Blend textures subtracting colors (alternative)
-    BLEND_ALPHA_PREMULTIPLY,        // Blend premultiplied textures considering alpha
-    BLEND_CUSTOM,                   // Blend textures using custom src/dst factors (use rlSetBlendFactors())
-    BLEND_CUSTOM_SEPARATE           // Blend textures using custom rgb/alpha separate src/dst factors (use rlSetBlendFactorsSeparate())
-} BlendMode;
+    RAYLIB_BLEND_ALPHA = 0,                // Blend textures considering alpha (default)
+    RAYLIB_BLEND_ADDITIVE,                 // Blend textures adding colors
+    RAYLIB_BLEND_MULTIPLIED,               // Blend textures multiplying colors
+    RAYLIB_BLEND_ADD_COLORS,               // Blend textures adding colors (alternative)
+    RAYLIB_BLEND_SUBTRACT_COLORS,          // Blend textures subtracting colors (alternative)
+    RAYLIB_BLEND_ALPHA_PREMULTIPLY,        // Blend premultiplied textures considering alpha
+    RAYLIB_BLEND_CUSTOM,                   // Blend textures using custom src/dst factors (use rlSetBlendFactors())
+    RAYLIB_BLEND_CUSTOM_SEPARATE           // Blend textures using custom rgb/alpha separate src/dst factors (use rlSetBlendFactorsSeparate())
+} RaylibBlendMode;
 
-// Gesture
+// RaylibGesture
 // NOTE: Provided as bit-wise flags to enable only desired gestures
 typedef enum {
-    GESTURE_NONE        = 0,        // No gesture
-    GESTURE_TAP         = 1,        // Tap gesture
-    GESTURE_DOUBLETAP   = 2,        // Double tap gesture
-    GESTURE_HOLD        = 4,        // Hold gesture
-    GESTURE_DRAG        = 8,        // Drag gesture
-    GESTURE_SWIPE_RIGHT = 16,       // Swipe right gesture
-    GESTURE_SWIPE_LEFT  = 32,       // Swipe left gesture
-    GESTURE_SWIPE_UP    = 64,       // Swipe up gesture
-    GESTURE_SWIPE_DOWN  = 128,      // Swipe down gesture
-    GESTURE_PINCH_IN    = 256,      // Pinch in gesture
-    GESTURE_PINCH_OUT   = 512       // Pinch out gesture
-} Gesture;
+    RAYLIB_GESTURE_NONE        = 0,        // No gesture
+    RAYLIB_GESTURE_TAP         = 1,        // Tap gesture
+    RAYLIB_GESTURE_DOUBLETAP   = 2,        // Double tap gesture
+    RAYLIB_GESTURE_HOLD        = 4,        // Hold gesture
+    RAYLIB_GESTURE_DRAG        = 8,        // Drag gesture
+    RAYLIB_GESTURE_SWIPE_RIGHT = 16,       // Swipe right gesture
+    RAYLIB_GESTURE_SWIPE_LEFT  = 32,       // Swipe left gesture
+    RAYLIB_GESTURE_SWIPE_UP    = 64,       // Swipe up gesture
+    RAYLIB_GESTURE_SWIPE_DOWN  = 128,      // Swipe down gesture
+    RAYLIB_GESTURE_PINCH_IN    = 256,      // Pinch in gesture
+    RAYLIB_GESTURE_PINCH_OUT   = 512       // Pinch out gesture
+} RaylibGesture;
 
 // Camera system modes
 typedef enum {
-    CAMERA_CUSTOM = 0,              // Camera custom, controlled by user (UpdateCamera() does nothing)
-    CAMERA_FREE,                    // Camera free mode
-    CAMERA_ORBITAL,                 // Camera orbital, around target, zoom supported
-    CAMERA_FIRST_PERSON,            // Camera first person
-    CAMERA_THIRD_PERSON             // Camera third person
-} CameraMode;
+    RAYLIB_CAMERA_CUSTOM = 0,              // Camera custom, controlled by user (RaylibUpdateCamera() does nothing)
+    RAYLIB_CAMERA_FREE,                    // Camera free mode
+    RAYLIB_CAMERA_ORBITAL,                 // Camera orbital, around target, zoom supported
+    RAYLIB_CAMERA_FIRST_PERSON,            // Camera first person
+    RAYLIB_CAMERA_THIRD_PERSON             // Camera third person
+} RaylibCameraMode;
 
 // Camera projection
 typedef enum {
-    CAMERA_PERSPECTIVE = 0,         // Perspective projection
-    CAMERA_ORTHOGRAPHIC             // Orthographic projection
-} CameraProjection;
+    RAYLIB_CAMERA_PERSPECTIVE = 0,         // Perspective projection
+    RAYLIB_CAMERA_ORTHOGRAPHIC             // Orthographic projection
+} RaylibCameraProjection;
 
 // N-patch layout
 typedef enum {
-    NPATCH_NINE_PATCH = 0,          // Npatch layout: 3x3 tiles
-    NPATCH_THREE_PATCH_VERTICAL,    // Npatch layout: 1x3 tiles
-    NPATCH_THREE_PATCH_HORIZONTAL   // Npatch layout: 3x1 tiles
-} NPatchLayout;
+    RAYLIB_NPATCH_NINE_PATCH = 0,          // Npatch layout: 3x3 tiles
+    RAYLIB_NPATCH_THREE_PATCH_VERTICAL,    // Npatch layout: 1x3 tiles
+    RAYLIB_NPATCH_THREE_PATCH_HORIZONTAL   // Npatch layout: 3x1 tiles
+} RaylibNPatchLayout;
 
 // Callbacks to hook some internal functions
 // WARNING: These callbacks are intended for advanced users
-typedef void (*TraceLogCallback)(int logLevel, const char *text, va_list args);  // Logging: Redirect trace log messages
-typedef unsigned char *(*LoadFileDataCallback)(const char *fileName, int *dataSize);    // FileIO: Load binary data
-typedef bool (*SaveFileDataCallback)(const char *fileName, void *data, int dataSize);   // FileIO: Save binary data
-typedef char *(*LoadFileTextCallback)(const char *fileName);            // FileIO: Load text data
-typedef bool (*SaveFileTextCallback)(const char *fileName, char *text); // FileIO: Save text data
+typedef void (*RaylibTraceLogCallback)(int logLevel, const char *text, va_list args);  // Logging: Redirect trace log messages
+typedef unsigned char *(*RaylibLoadFileDataCallback)(const char *fileName, int *dataSize);    // FileIO: Load binary data
+typedef bool (*RaylibSaveFileDataCallback)(const char *fileName, void *data, int dataSize);   // FileIO: Save binary data
+typedef char *(*RaylibLoadFileTextCallback)(const char *fileName);            // FileIO: Load text data
+typedef bool (*RaylibSaveFileTextCallback)(const char *fileName, char *text); // FileIO: Save text data
 
 //------------------------------------------------------------------------------------
 // Global Variables Definition
@@ -955,267 +955,267 @@ extern "C" {            // Prevents name mangling of functions
 #endif
 
 // Window-related functions
-RLAPI void InitWindow(int width, int height, const char *title);  // Initialize window and OpenGL context
-RLAPI void CloseWindow(void);                                     // Close window and unload OpenGL context
-RLAPI bool WindowShouldClose(void);                               // Check if application should close (KEY_ESCAPE pressed or windows close icon clicked)
-RLAPI bool IsWindowReady(void);                                   // Check if window has been initialized successfully
-RLAPI bool IsWindowFullscreen(void);                              // Check if window is currently fullscreen
-RLAPI bool IsWindowHidden(void);                                  // Check if window is currently hidden (only PLATFORM_DESKTOP)
-RLAPI bool IsWindowMinimized(void);                               // Check if window is currently minimized (only PLATFORM_DESKTOP)
-RLAPI bool IsWindowMaximized(void);                               // Check if window is currently maximized (only PLATFORM_DESKTOP)
-RLAPI bool IsWindowFocused(void);                                 // Check if window is currently focused (only PLATFORM_DESKTOP)
-RLAPI bool IsWindowResized(void);                                 // Check if window has been resized last frame
-RLAPI bool IsWindowState(unsigned int flag);                      // Check if one specific window flag is enabled
-RLAPI void SetWindowState(unsigned int flags);                    // Set window configuration state using flags (only PLATFORM_DESKTOP)
-RLAPI void ClearWindowState(unsigned int flags);                  // Clear window configuration state flags
-RLAPI void ToggleFullscreen(void);                                // Toggle window state: fullscreen/windowed (only PLATFORM_DESKTOP)
-RLAPI void ToggleBorderlessWindowed(void);                        // Toggle window state: borderless windowed (only PLATFORM_DESKTOP)
-RLAPI void MaximizeWindow(void);                                  // Set window state: maximized, if resizable (only PLATFORM_DESKTOP)
-RLAPI void MinimizeWindow(void);                                  // Set window state: minimized, if resizable (only PLATFORM_DESKTOP)
-RLAPI void RestoreWindow(void);                                   // Set window state: not minimized/maximized (only PLATFORM_DESKTOP)
-RLAPI void SetWindowIcon(Image image);                            // Set icon for window (single image, RGBA 32bit, only PLATFORM_DESKTOP)
-RLAPI void SetWindowIcons(Image *images, int count);              // Set icon for window (multiple images, RGBA 32bit, only PLATFORM_DESKTOP)
-RLAPI void SetWindowTitle(const char *title);                     // Set title for window (only PLATFORM_DESKTOP and PLATFORM_WEB)
-RLAPI void SetWindowPosition(int x, int y);                       // Set window position on screen (only PLATFORM_DESKTOP)
-RLAPI void SetWindowMonitor(int monitor);                         // Set monitor for the current window
-RLAPI void SetWindowMinSize(int width, int height);               // Set window minimum dimensions (for FLAG_WINDOW_RESIZABLE)
-RLAPI void SetWindowMaxSize(int width, int height);               // Set window maximum dimensions (for FLAG_WINDOW_RESIZABLE)
-RLAPI void SetWindowSize(int width, int height);                  // Set window dimensions
-RLAPI void SetWindowOpacity(float opacity);                       // Set window opacity [0.0f..1.0f] (only PLATFORM_DESKTOP)
-RLAPI void SetWindowFocused(void);                                // Set window focused (only PLATFORM_DESKTOP)
-RLAPI void *GetWindowHandle(void);                                // Get native window handle
-RLAPI int GetScreenWidth(void);                                   // Get current screen width
-RLAPI int GetScreenHeight(void);                                  // Get current screen height
-RLAPI int GetRenderWidth(void);                                   // Get current render width (it considers HiDPI)
-RLAPI int GetRenderHeight(void);                                  // Get current render height (it considers HiDPI)
-RLAPI int GetMonitorCount(void);                                  // Get number of connected monitors
-RLAPI int GetCurrentMonitor(void);                                // Get current connected monitor
-RLAPI Vector2 GetMonitorPosition(int monitor);                    // Get specified monitor position
-RLAPI int GetMonitorWidth(int monitor);                           // Get specified monitor width (current video mode used by monitor)
-RLAPI int GetMonitorHeight(int monitor);                          // Get specified monitor height (current video mode used by monitor)
-RLAPI int GetMonitorPhysicalWidth(int monitor);                   // Get specified monitor physical width in millimetres
-RLAPI int GetMonitorPhysicalHeight(int monitor);                  // Get specified monitor physical height in millimetres
-RLAPI int GetMonitorRefreshRate(int monitor);                     // Get specified monitor refresh rate
-RLAPI Vector2 GetWindowPosition(void);                            // Get window position XY on monitor
-RLAPI Vector2 GetWindowScaleDPI(void);                            // Get window scale DPI factor
-RLAPI const char *GetMonitorName(int monitor);                    // Get the human-readable, UTF-8 encoded name of the specified monitor
-RLAPI void SetClipboardText(const char *text);                    // Set clipboard text content
-RLAPI const char *GetClipboardText(void);                         // Get clipboard text content
-RLAPI void EnableEventWaiting(void);                              // Enable waiting for events on EndDrawing(), no automatic event polling
-RLAPI void DisableEventWaiting(void);                             // Disable waiting for events on EndDrawing(), automatic events polling
+RAYLIB_RLAPI void RaylibInitWindow(int width, int height, const char *title);  // Initialize window and OpenGL context
+RAYLIB_RLAPI void RaylibCloseWindow(void);                                     // Close window and unload OpenGL context
+RAYLIB_RLAPI bool RaylibWindowShouldClose(void);                               // Check if application should close (RAYLIB_KEY_ESCAPE pressed or windows close icon clicked)
+RAYLIB_RLAPI bool RaylibIsWindowReady(void);                                   // Check if window has been initialized successfully
+RAYLIB_RLAPI bool RaylibIsWindowFullscreen(void);                              // Check if window is currently fullscreen
+RAYLIB_RLAPI bool RaylibIsWindowHidden(void);                                  // Check if window is currently hidden (only RAYLIB_PLATFORM_DESKTOP)
+RAYLIB_RLAPI bool RaylibIsWindowMinimized(void);                               // Check if window is currently minimized (only RAYLIB_PLATFORM_DESKTOP)
+RAYLIB_RLAPI bool RaylibIsWindowMaximized(void);                               // Check if window is currently maximized (only RAYLIB_PLATFORM_DESKTOP)
+RAYLIB_RLAPI bool RaylibIsWindowFocused(void);                                 // Check if window is currently focused (only RAYLIB_PLATFORM_DESKTOP)
+RAYLIB_RLAPI bool RaylibIsWindowResized(void);                                 // Check if window has been resized last frame
+RAYLIB_RLAPI bool RaylibIsWindowState(unsigned int flag);                      // Check if one specific window flag is enabled
+RAYLIB_RLAPI void RaylibSetWindowState(unsigned int flags);                    // Set window configuration state using flags (only RAYLIB_PLATFORM_DESKTOP)
+RAYLIB_RLAPI void RaylibClearWindowState(unsigned int flags);                  // Clear window configuration state flags
+RAYLIB_RLAPI void RaylibToggleFullscreen(void);                                // Toggle window state: fullscreen/windowed (only RAYLIB_PLATFORM_DESKTOP)
+RAYLIB_RLAPI void RaylibToggleBorderlessWindowed(void);                        // Toggle window state: borderless windowed (only RAYLIB_PLATFORM_DESKTOP)
+RAYLIB_RLAPI void RaylibMaximizeWindow(void);                                  // Set window state: maximized, if resizable (only RAYLIB_PLATFORM_DESKTOP)
+RAYLIB_RLAPI void RaylibMinimizeWindow(void);                                  // Set window state: minimized, if resizable (only RAYLIB_PLATFORM_DESKTOP)
+RAYLIB_RLAPI void RaylibRestoreWindow(void);                                   // Set window state: not minimized/maximized (only RAYLIB_PLATFORM_DESKTOP)
+RAYLIB_RLAPI void RaylibSetWindowIcon(RaylibImage image);                            // Set icon for window (single image, RGBA 32bit, only RAYLIB_PLATFORM_DESKTOP)
+RAYLIB_RLAPI void RaylibSetWindowIcons(RaylibImage *images, int count);              // Set icon for window (multiple images, RGBA 32bit, only RAYLIB_PLATFORM_DESKTOP)
+RAYLIB_RLAPI void RaylibSetWindowTitle(const char *title);                     // Set title for window (only RAYLIB_PLATFORM_DESKTOP and RAYLIB_PLATFORM_WEB)
+RAYLIB_RLAPI void RaylibSetWindowPosition(int x, int y);                       // Set window position on screen (only RAYLIB_PLATFORM_DESKTOP)
+RAYLIB_RLAPI void RaylibSetWindowMonitor(int monitor);                         // Set monitor for the current window
+RAYLIB_RLAPI void RaylibSetWindowMinSize(int width, int height);               // Set window minimum dimensions (for RAYLIB_FLAG_WINDOW_RESIZABLE)
+RAYLIB_RLAPI void RaylibSetWindowMaxSize(int width, int height);               // Set window maximum dimensions (for RAYLIB_FLAG_WINDOW_RESIZABLE)
+RAYLIB_RLAPI void RaylibSetWindowSize(int width, int height);                  // Set window dimensions
+RAYLIB_RLAPI void RaylibSetWindowOpacity(float opacity);                       // Set window opacity [0.0f..1.0f] (only RAYLIB_PLATFORM_DESKTOP)
+RAYLIB_RLAPI void RaylibSetWindowFocused(void);                                // Set window focused (only RAYLIB_PLATFORM_DESKTOP)
+RAYLIB_RLAPI void *RaylibGetWindowHandle(void);                                // Get native window handle
+RAYLIB_RLAPI int RaylibGetScreenWidth(void);                                   // Get current screen width
+RAYLIB_RLAPI int RaylibGetScreenHeight(void);                                  // Get current screen height
+RAYLIB_RLAPI int RaylibGetRenderWidth(void);                                   // Get current render width (it considers HiDPI)
+RAYLIB_RLAPI int RaylibGetRenderHeight(void);                                  // Get current render height (it considers HiDPI)
+RAYLIB_RLAPI int RaylibGetMonitorCount(void);                                  // Get number of connected monitors
+RAYLIB_RLAPI int RaylibGetCurrentMonitor(void);                                // Get current connected monitor
+RAYLIB_RLAPI RaylibVector2 RaylibGetMonitorPosition(int monitor);                    // Get specified monitor position
+RAYLIB_RLAPI int RaylibGetMonitorWidth(int monitor);                           // Get specified monitor width (current video mode used by monitor)
+RAYLIB_RLAPI int RaylibGetMonitorHeight(int monitor);                          // Get specified monitor height (current video mode used by monitor)
+RAYLIB_RLAPI int RaylibGetMonitorPhysicalWidth(int monitor);                   // Get specified monitor physical width in millimetres
+RAYLIB_RLAPI int RaylibGetMonitorPhysicalHeight(int monitor);                  // Get specified monitor physical height in millimetres
+RAYLIB_RLAPI int RaylibGetMonitorRefreshRate(int monitor);                     // Get specified monitor refresh rate
+RAYLIB_RLAPI RaylibVector2 RaylibGetWindowPosition(void);                            // Get window position XY on monitor
+RAYLIB_RLAPI RaylibVector2 RaylibGetWindowScaleDPI(void);                            // Get window scale DPI factor
+RAYLIB_RLAPI const char *RaylibGetMonitorName(int monitor);                    // Get the human-readable, UTF-8 encoded name of the specified monitor
+RAYLIB_RLAPI void RaylibSetClipboardText(const char *text);                    // Set clipboard text content
+RAYLIB_RLAPI const char *RaylibGetClipboardText(void);                         // Get clipboard text content
+RAYLIB_RLAPI void RaylibEnableEventWaiting(void);                              // Enable waiting for events on RaylibEndDrawing(), no automatic event polling
+RAYLIB_RLAPI void RaylibDisableEventWaiting(void);                             // Disable waiting for events on RaylibEndDrawing(), automatic events polling
 
 // Cursor-related functions
-RLAPI void ShowCursor(void);                                      // Shows cursor
-RLAPI void HideCursor(void);                                      // Hides cursor
-RLAPI bool IsCursorHidden(void);                                  // Check if cursor is not visible
-RLAPI void EnableCursor(void);                                    // Enables cursor (unlock cursor)
-RLAPI void DisableCursor(void);                                   // Disables cursor (lock cursor)
-RLAPI bool IsCursorOnScreen(void);                                // Check if cursor is on the screen
+RAYLIB_RLAPI void RaylibShowCursor(void);                                      // Shows cursor
+RAYLIB_RLAPI void RaylibHideCursor(void);                                      // Hides cursor
+RAYLIB_RLAPI bool RaylibIsCursorHidden(void);                                  // Check if cursor is not visible
+RAYLIB_RLAPI void RaylibEnableCursor(void);                                    // Enables cursor (unlock cursor)
+RAYLIB_RLAPI void RaylibDisableCursor(void);                                   // Disables cursor (lock cursor)
+RAYLIB_RLAPI bool RaylibIsCursorOnScreen(void);                                // Check if cursor is on the screen
 
 // Drawing-related functions
-RLAPI void ClearBackground(Color color);                          // Set background color (framebuffer clear color)
-RLAPI void BeginDrawing(void);                                    // Setup canvas (framebuffer) to start drawing
-RLAPI void EndDrawing(void);                                      // End canvas drawing and swap buffers (double buffering)
-RLAPI void BeginMode2D(Camera2D camera);                          // Begin 2D mode with custom camera (2D)
-RLAPI void EndMode2D(void);                                       // Ends 2D mode with custom camera
-RLAPI void BeginMode3D(Camera3D camera);                          // Begin 3D mode with custom camera (3D)
-RLAPI void EndMode3D(void);                                       // Ends 3D mode and returns to default 2D orthographic mode
-RLAPI void BeginTextureMode(RenderTexture2D target);              // Begin drawing to render texture
-RLAPI void EndTextureMode(void);                                  // Ends drawing to render texture
-RLAPI void BeginShaderMode(Shader shader);                        // Begin custom shader drawing
-RLAPI void EndShaderMode(void);                                   // End custom shader drawing (use default shader)
-RLAPI void BeginBlendMode(int mode);                              // Begin blending mode (alpha, additive, multiplied, subtract, custom)
-RLAPI void EndBlendMode(void);                                    // End blending mode (reset to default: alpha blending)
-RLAPI void BeginScissorMode(int x, int y, int width, int height); // Begin scissor mode (define screen area for following drawing)
-RLAPI void EndScissorMode(void);                                  // End scissor mode
-RLAPI void BeginVrStereoMode(VrStereoConfig config);              // Begin stereo rendering (requires VR simulator)
-RLAPI void EndVrStereoMode(void);                                 // End stereo rendering (requires VR simulator)
+RAYLIB_RLAPI void RaylibClearBackground(RaylibColor color);                          // Set background color (framebuffer clear color)
+RAYLIB_RLAPI void RaylibBeginDrawing(void);                                    // Setup canvas (framebuffer) to start drawing
+RAYLIB_RLAPI void RaylibEndDrawing(void);                                      // End canvas drawing and swap buffers (double buffering)
+RAYLIB_RLAPI void RaylibBeginMode2D(RaylibCamera2D camera);                          // Begin 2D mode with custom camera (2D)
+RAYLIB_RLAPI void RaylibEndMode2D(void);                                       // Ends 2D mode with custom camera
+RAYLIB_RLAPI void RaylibBeginMode3D(RaylibCamera3D camera);                          // Begin 3D mode with custom camera (3D)
+RAYLIB_RLAPI void RaylibEndMode3D(void);                                       // Ends 3D mode and returns to default 2D orthographic mode
+RAYLIB_RLAPI void RaylibBeginTextureMode(RenderTexture2D target);              // Begin drawing to render texture
+RAYLIB_RLAPI void RaylibEndTextureMode(void);                                  // Ends drawing to render texture
+RAYLIB_RLAPI void RaylibBeginShaderMode(RaylibShader shader);                        // Begin custom shader drawing
+RAYLIB_RLAPI void RaylibEndShaderMode(void);                                   // End custom shader drawing (use default shader)
+RAYLIB_RLAPI void RaylibBeginBlendMode(int mode);                              // Begin blending mode (alpha, additive, multiplied, subtract, custom)
+RAYLIB_RLAPI void RaylibEndBlendMode(void);                                    // End blending mode (reset to default: alpha blending)
+RAYLIB_RLAPI void RaylibBeginScissorMode(int x, int y, int width, int height); // Begin scissor mode (define screen area for following drawing)
+RAYLIB_RLAPI void RaylibEndScissorMode(void);                                  // End scissor mode
+RAYLIB_RLAPI void RaylibBeginVrStereoMode(RaylibVrStereoConfig config);              // Begin stereo rendering (requires VR simulator)
+RAYLIB_RLAPI void RaylibEndVrStereoMode(void);                                 // End stereo rendering (requires VR simulator)
 
 // VR stereo config functions for VR simulator
-RLAPI VrStereoConfig LoadVrStereoConfig(VrDeviceInfo device);     // Load VR stereo config for VR simulator device parameters
-RLAPI void UnloadVrStereoConfig(VrStereoConfig config);           // Unload VR stereo config
+RAYLIB_RLAPI RaylibVrStereoConfig RaylibLoadVrStereoConfig(RaylibVrDeviceInfo device);     // Load VR stereo config for VR simulator device parameters
+RAYLIB_RLAPI void RaylibUnloadVrStereoConfig(RaylibVrStereoConfig config);           // Unload VR stereo config
 
-// Shader management functions
-// NOTE: Shader functionality is not available on OpenGL 1.1
-RLAPI Shader LoadShader(const char *vsFileName, const char *fsFileName);   // Load shader from files and bind default locations
-RLAPI Shader LoadShaderFromMemory(const char *vsCode, const char *fsCode); // Load shader from code strings and bind default locations
-RLAPI bool IsShaderReady(Shader shader);                                   // Check if a shader is ready
-RLAPI int GetShaderLocation(Shader shader, const char *uniformName);       // Get shader uniform location
-RLAPI int GetShaderLocationAttrib(Shader shader, const char *attribName);  // Get shader attribute location
-RLAPI void SetShaderValue(Shader shader, int locIndex, const void *value, int uniformType);               // Set shader uniform value
-RLAPI void SetShaderValueV(Shader shader, int locIndex, const void *value, int uniformType, int count);   // Set shader uniform value vector
-RLAPI void SetShaderValueMatrix(Shader shader, int locIndex, Matrix mat);         // Set shader uniform value (matrix 4x4)
-RLAPI void SetShaderValueTexture(Shader shader, int locIndex, Texture2D texture); // Set shader uniform value for texture (sampler2d)
-RLAPI void UnloadShader(Shader shader);                                    // Unload shader from GPU memory (VRAM)
+// RaylibShader management functions
+// NOTE: RaylibShader functionality is not available on OpenGL 1.1
+RAYLIB_RLAPI RaylibShader RaylibLoadShader(const char *vsFileName, const char *fsFileName);   // Load shader from files and bind default locations
+RAYLIB_RLAPI RaylibShader RaylibLoadShaderFromMemory(const char *vsCode, const char *fsCode); // Load shader from code strings and bind default locations
+RAYLIB_RLAPI bool RaylibIsShaderReady(RaylibShader shader);                                   // Check if a shader is ready
+RAYLIB_RLAPI int RaylibGetShaderLocation(RaylibShader shader, const char *uniformName);       // Get shader uniform location
+RAYLIB_RLAPI int RaylibGetShaderLocationAttrib(RaylibShader shader, const char *attribName);  // Get shader attribute location
+RAYLIB_RLAPI void RaylibSetShaderValue(RaylibShader shader, int locIndex, const void *value, int uniformType);               // Set shader uniform value
+RAYLIB_RLAPI void RaylibSetShaderValueV(RaylibShader shader, int locIndex, const void *value, int uniformType, int count);   // Set shader uniform value vector
+RAYLIB_RLAPI void RaylibSetShaderValueMatrix(RaylibShader shader, int locIndex, RaylibMatrix mat);         // Set shader uniform value (matrix 4x4)
+RAYLIB_RLAPI void RaylibSetShaderValueTexture(RaylibShader shader, int locIndex, Texture2D texture); // Set shader uniform value for texture (sampler2d)
+RAYLIB_RLAPI void RaylibUnloadShader(RaylibShader shader);                                    // Unload shader from GPU memory (VRAM)
 
 // Screen-space-related functions
-#define GetMouseRay GetScreenToWorldRay     // Compatibility hack for previous raylib versions
-RLAPI Ray GetScreenToWorldRay(Vector2 position, Camera camera);         // Get a ray trace from screen position (i.e mouse)
-RLAPI Ray GetScreenToWorldRayEx(Vector2 position, Camera camera, int width, int height); // Get a ray trace from screen position (i.e mouse) in a viewport
-RLAPI Vector2 GetWorldToScreen(Vector3 position, Camera camera);        // Get the screen space position for a 3d world space position
-RLAPI Vector2 GetWorldToScreenEx(Vector3 position, Camera camera, int width, int height); // Get size position for a 3d world space position
-RLAPI Vector2 GetWorldToScreen2D(Vector2 position, Camera2D camera);    // Get the screen space position for a 2d camera world space position
-RLAPI Vector2 GetScreenToWorld2D(Vector2 position, Camera2D camera);    // Get the world space position for a 2d camera screen space position
-RLAPI Matrix GetCameraMatrix(Camera camera);                            // Get camera transform matrix (view matrix)
-RLAPI Matrix GetCameraMatrix2D(Camera2D camera);                        // Get camera 2d transform matrix
+#define RAYLIB_GetMouseRay RaylibGetScreenToWorldRay     // Compatibility hack for previous raylib versions
+RAYLIB_RLAPI RaylibRay RaylibGetScreenToWorldRay(RaylibVector2 position, Camera camera);         // Get a ray trace from screen position (i.e mouse)
+RAYLIB_RLAPI RaylibRay RaylibGetScreenToWorldRayEx(RaylibVector2 position, Camera camera, int width, int height); // Get a ray trace from screen position (i.e mouse) in a viewport
+RAYLIB_RLAPI RaylibVector2 RaylibGetWorldToScreen(RaylibVector3 position, Camera camera);        // Get the screen space position for a 3d world space position
+RAYLIB_RLAPI RaylibVector2 RaylibGetWorldToScreenEx(RaylibVector3 position, Camera camera, int width, int height); // Get size position for a 3d world space position
+RAYLIB_RLAPI RaylibVector2 RaylibGetWorldToScreen2D(RaylibVector2 position, RaylibCamera2D camera);    // Get the screen space position for a 2d camera world space position
+RAYLIB_RLAPI RaylibVector2 RaylibGetScreenToWorld2D(RaylibVector2 position, RaylibCamera2D camera);    // Get the world space position for a 2d camera screen space position
+RAYLIB_RLAPI RaylibMatrix RaylibGetCameraMatrix(Camera camera);                            // Get camera transform matrix (view matrix)
+RAYLIB_RLAPI RaylibMatrix RaylibGetCameraMatrix2D(RaylibCamera2D camera);                        // Get camera 2d transform matrix
 
 // Timing-related functions
-RLAPI void SetTargetFPS(int fps);                                 // Set target FPS (maximum)
-RLAPI float GetFrameTime(void);                                   // Get time in seconds for last frame drawn (delta time)
-RLAPI double GetTime(void);                                       // Get elapsed time in seconds since InitWindow()
-RLAPI int GetFPS(void);                                           // Get current FPS
+RAYLIB_RLAPI void RaylibSetTargetFPS(int fps);                                 // Set target FPS (maximum)
+RAYLIB_RLAPI float RaylibGetFrameTime(void);                                   // Get time in seconds for last frame drawn (delta time)
+RAYLIB_RLAPI double RaylibGetTime(void);                                       // Get elapsed time in seconds since RaylibInitWindow()
+RAYLIB_RLAPI int RaylibGetFPS(void);                                           // Get current FPS
 
 // Custom frame control functions
 // NOTE: Those functions are intended for advanced users that want full control over the frame processing
-// By default EndDrawing() does this job: draws everything + SwapScreenBuffer() + manage frame timing + PollInputEvents()
+// By default RaylibEndDrawing() does this job: draws everything + RaylibSwapScreenBuffer() + manage frame timing + RaylibPollInputEvents()
 // To avoid that behaviour and control frame processes manually, enable in config.h: SUPPORT_CUSTOM_FRAME_CONTROL
-RLAPI void SwapScreenBuffer(void);                                // Swap back buffer with front buffer (screen drawing)
-RLAPI void PollInputEvents(void);                                 // Register all input events
-RLAPI void WaitTime(double seconds);                              // Wait for some time (halt program execution)
+RAYLIB_RLAPI void RaylibSwapScreenBuffer(void);                                // Swap back buffer with front buffer (screen drawing)
+RAYLIB_RLAPI void RaylibPollInputEvents(void);                                 // Register all input events
+RAYLIB_RLAPI void RaylibWaitTime(double seconds);                              // Wait for some time (halt program execution)
 
 // Random values generation functions
-RLAPI void SetRandomSeed(unsigned int seed);                      // Set the seed for the random number generator
-RLAPI int GetRandomValue(int min, int max);                       // Get a random value between min and max (both included)
-RLAPI int *LoadRandomSequence(unsigned int count, int min, int max); // Load random values sequence, no values repeated
-RLAPI void UnloadRandomSequence(int *sequence);                   // Unload random values sequence
+RAYLIB_RLAPI void RaylibSetRandomSeed(unsigned int seed);                      // Set the seed for the random number generator
+RAYLIB_RLAPI int RaylibGetRandomValue(int min, int max);                       // Get a random value between min and max (both included)
+RAYLIB_RLAPI int *RaylibLoadRandomSequence(unsigned int count, int min, int max); // Load random values sequence, no values repeated
+RAYLIB_RLAPI void RaylibUnloadRandomSequence(int *sequence);                   // Unload random values sequence
 
 // Misc. functions
-RLAPI void TakeScreenshot(const char *fileName);                  // Takes a screenshot of current screen (filename extension defines format)
-RLAPI void SetConfigFlags(unsigned int flags);                    // Setup init configuration flags (view FLAGS)
-RLAPI void OpenURL(const char *url);                              // Open URL with default system browser (if available)
+RAYLIB_RLAPI void RaylibTakeScreenshot(const char *fileName);                  // Takes a screenshot of current screen (filename extension defines format)
+RAYLIB_RLAPI void RaylibSetConfigFlags(unsigned int flags);                    // Setup init configuration flags (view FLAGS)
+RAYLIB_RLAPI void RaylibOpenURL(const char *url);                              // Open URL with default system browser (if available)
 
 // NOTE: Following functions implemented in module [utils]
 //------------------------------------------------------------------
-RLAPI void TraceLog(int logLevel, const char *text, ...);         // Show trace log messages (LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_ERROR...)
-RLAPI void SetTraceLogLevel(int logLevel);                        // Set the current threshold (minimum) log level
-RLAPI void *MemAlloc(unsigned int size);                          // Internal memory allocator
-RLAPI void *MemRealloc(void *ptr, unsigned int size);             // Internal memory reallocator
-RLAPI void MemFree(void *ptr);                                    // Internal memory free
+RAYLIB_RLAPI void RaylibTraceLog(int logLevel, const char *text, ...);         // Show trace log messages (RAYLIB_LOG_DEBUG, RAYLIB_LOG_INFO, RAYLIB_LOG_WARNING, RAYLIB_LOG_ERROR...)
+RAYLIB_RLAPI void RaylibSetTraceLogLevel(int logLevel);                        // Set the current threshold (minimum) log level
+RAYLIB_RLAPI void *RaylibMemAlloc(unsigned int size);                          // Internal memory allocator
+RAYLIB_RLAPI void *RaylibMemRealloc(void *ptr, unsigned int size);             // Internal memory reallocator
+RAYLIB_RLAPI void RaylibMemFree(void *ptr);                                    // Internal memory free
 
 // Set custom callbacks
 // WARNING: Callbacks setup is intended for advanced users
-RLAPI void SetTraceLogCallback(TraceLogCallback callback);         // Set custom trace log
-RLAPI void SetLoadFileDataCallback(LoadFileDataCallback callback); // Set custom file binary data loader
-RLAPI void SetSaveFileDataCallback(SaveFileDataCallback callback); // Set custom file binary data saver
-RLAPI void SetLoadFileTextCallback(LoadFileTextCallback callback); // Set custom file text data loader
-RLAPI void SetSaveFileTextCallback(SaveFileTextCallback callback); // Set custom file text data saver
+RAYLIB_RLAPI void RaylibSetTraceLogCallback(RaylibTraceLogCallback callback);         // Set custom trace log
+RAYLIB_RLAPI void RaylibSetLoadFileDataCallback(RaylibLoadFileDataCallback callback); // Set custom file binary data loader
+RAYLIB_RLAPI void RaylibSetSaveFileDataCallback(RaylibSaveFileDataCallback callback); // Set custom file binary data saver
+RAYLIB_RLAPI void RaylibSetLoadFileTextCallback(RaylibLoadFileTextCallback callback); // Set custom file text data loader
+RAYLIB_RLAPI void RaylibSetSaveFileTextCallback(RaylibSaveFileTextCallback callback); // Set custom file text data saver
 
 // Files management functions
-RLAPI unsigned char *LoadFileData(const char *fileName, int *dataSize); // Load file data as byte array (read)
-RLAPI void UnloadFileData(unsigned char *data);                   // Unload file data allocated by LoadFileData()
-RLAPI bool SaveFileData(const char *fileName, void *data, int dataSize); // Save data to file from byte array (write), returns true on success
-RLAPI bool ExportDataAsCode(const unsigned char *data, int dataSize, const char *fileName); // Export data to code (.h), returns true on success
-RLAPI char *LoadFileText(const char *fileName);                   // Load text data from file (read), returns a '\0' terminated string
-RLAPI void UnloadFileText(char *text);                            // Unload file text data allocated by LoadFileText()
-RLAPI bool SaveFileText(const char *fileName, char *text);        // Save text data to file (write), string must be '\0' terminated, returns true on success
+RAYLIB_RLAPI unsigned char *RaylibLoadFileData(const char *fileName, int *dataSize); // Load file data as byte array (read)
+RAYLIB_RLAPI void RaylibUnloadFileData(unsigned char *data);                   // Unload file data allocated by RaylibLoadFileData()
+RAYLIB_RLAPI bool RaylibSaveFileData(const char *fileName, void *data, int dataSize); // Save data to file from byte array (write), returns true on success
+RAYLIB_RLAPI bool RaylibExportDataAsCode(const unsigned char *data, int dataSize, const char *fileName); // Export data to code (.h), returns true on success
+RAYLIB_RLAPI char *RaylibLoadFileText(const char *fileName);                   // Load text data from file (read), returns a '\0' terminated string
+RAYLIB_RLAPI void RaylibUnloadFileText(char *text);                            // Unload file text data allocated by RaylibLoadFileText()
+RAYLIB_RLAPI bool RaylibSaveFileText(const char *fileName, char *text);        // Save text data to file (write), string must be '\0' terminated, returns true on success
 //------------------------------------------------------------------
 
 // File system functions
-RLAPI bool FileExists(const char *fileName);                      // Check if file exists
-RLAPI bool DirectoryExists(const char *dirPath);                  // Check if a directory path exists
-RLAPI bool IsFileExtension(const char *fileName, const char *ext); // Check file extension (including point: .png, .wav)
-RLAPI int GetFileLength(const char *fileName);                    // Get file length in bytes (NOTE: GetFileSize() conflicts with windows.h)
-RLAPI const char *GetFileExtension(const char *fileName);         // Get pointer to extension for a filename string (includes dot: '.png')
-RLAPI const char *GetFileName(const char *filePath);              // Get pointer to filename for a path string
-RLAPI const char *GetFileNameWithoutExt(const char *filePath);    // Get filename string without extension (uses static string)
-RLAPI const char *GetDirectoryPath(const char *filePath);         // Get full path for a given fileName with path (uses static string)
-RLAPI const char *GetPrevDirectoryPath(const char *dirPath);      // Get previous directory path for a given path (uses static string)
-RLAPI const char *GetWorkingDirectory(void);                      // Get current working directory (uses static string)
-RLAPI const char *GetApplicationDirectory(void);                  // Get the directory of the running application (uses static string)
-RLAPI bool ChangeDirectory(const char *dir);                      // Change working directory, return true on success
-RLAPI bool IsPathFile(const char *path);                          // Check if a given path is a file or a directory
-RLAPI bool IsFileNameValid(const char *fileName);                 // Check if fileName is valid for the platform/OS
-RLAPI FilePathList LoadDirectoryFiles(const char *dirPath);       // Load directory filepaths
-RLAPI FilePathList LoadDirectoryFilesEx(const char *basePath, const char *filter, bool scanSubdirs); // Load directory filepaths with extension filtering and recursive directory scan
-RLAPI void UnloadDirectoryFiles(FilePathList files);              // Unload filepaths
-RLAPI bool IsFileDropped(void);                                   // Check if a file has been dropped into window
-RLAPI FilePathList LoadDroppedFiles(void);                        // Load dropped filepaths
-RLAPI void UnloadDroppedFiles(FilePathList files);                // Unload dropped filepaths
-RLAPI long GetFileModTime(const char *fileName);                  // Get file modification time (last write time)
+RAYLIB_RLAPI bool RaylibFileExists(const char *fileName);                      // Check if file exists
+RAYLIB_RLAPI bool RaylibDirectoryExists(const char *dirPath);                  // Check if a directory path exists
+RAYLIB_RLAPI bool RaylibIsFileExtension(const char *fileName, const char *ext); // Check file extension (including point: .png, .wav)
+RAYLIB_RLAPI int RaylibGetFileLength(const char *fileName);                    // Get file length in bytes (NOTE: GetFileSize() conflicts with windows.h)
+RAYLIB_RLAPI const char *RaylibGetFileExtension(const char *fileName);         // Get pointer to extension for a filename string (includes dot: '.png')
+RAYLIB_RLAPI const char *RaylibGetFileName(const char *filePath);              // Get pointer to filename for a path string
+RAYLIB_RLAPI const char *RaylibGetFileNameWithoutExt(const char *filePath);    // Get filename string without extension (uses static string)
+RAYLIB_RLAPI const char *RaylibGetDirectoryPath(const char *filePath);         // Get full path for a given fileName with path (uses static string)
+RAYLIB_RLAPI const char *RaylibGetPrevDirectoryPath(const char *dirPath);      // Get previous directory path for a given path (uses static string)
+RAYLIB_RLAPI const char *RaylibGetWorkingDirectory(void);                      // Get current working directory (uses static string)
+RAYLIB_RLAPI const char *RaylibGetApplicationDirectory(void);                  // Get the directory of the running application (uses static string)
+RAYLIB_RLAPI bool RaylibChangeDirectory(const char *dir);                      // Change working directory, return true on success
+RAYLIB_RLAPI bool RaylibIsPathFile(const char *path);                          // Check if a given path is a file or a directory
+RAYLIB_RLAPI bool RaylibIsFileNameValid(const char *fileName);                 // Check if fileName is valid for the platform/OS
+RAYLIB_RLAPI RaylibFilePathList RaylibLoadDirectoryFiles(const char *dirPath);       // Load directory filepaths
+RAYLIB_RLAPI RaylibFilePathList RaylibLoadDirectoryFilesEx(const char *basePath, const char *filter, bool scanSubdirs); // Load directory filepaths with extension filtering and recursive directory scan
+RAYLIB_RLAPI void RaylibUnloadDirectoryFiles(RaylibFilePathList files);              // Unload filepaths
+RAYLIB_RLAPI bool RaylibIsFileDropped(void);                                   // Check if a file has been dropped into window
+RAYLIB_RLAPI RaylibFilePathList RaylibLoadDroppedFiles(void);                        // Load dropped filepaths
+RAYLIB_RLAPI void RaylibUnloadDroppedFiles(RaylibFilePathList files);                // Unload dropped filepaths
+RAYLIB_RLAPI long RaylibGetFileModTime(const char *fileName);                  // Get file modification time (last write time)
 
 // Compression/Encoding functionality
-RLAPI unsigned char *CompressData(const unsigned char *data, int dataSize, int *compDataSize);        // Compress data (DEFLATE algorithm), memory must be MemFree()
-RLAPI unsigned char *DecompressData(const unsigned char *compData, int compDataSize, int *dataSize);  // Decompress data (DEFLATE algorithm), memory must be MemFree()
-RLAPI char *EncodeDataBase64(const unsigned char *data, int dataSize, int *outputSize);               // Encode data to Base64 string, memory must be MemFree()
-RLAPI unsigned char *DecodeDataBase64(const unsigned char *data, int *outputSize);                    // Decode Base64 string data, memory must be MemFree()
+RAYLIB_RLAPI unsigned char *RaylibCompressData(const unsigned char *data, int dataSize, int *compDataSize);        // Compress data (DEFLATE algorithm), memory must be RaylibMemFree()
+RAYLIB_RLAPI unsigned char *RaylibDecompressData(const unsigned char *compData, int compDataSize, int *dataSize);  // Decompress data (DEFLATE algorithm), memory must be RaylibMemFree()
+RAYLIB_RLAPI char *RaylibEncodeDataBase64(const unsigned char *data, int dataSize, int *outputSize);               // Encode data to Base64 string, memory must be RaylibMemFree()
+RAYLIB_RLAPI unsigned char *RaylibDecodeDataBase64(const unsigned char *data, int *outputSize);                    // Decode Base64 string data, memory must be RaylibMemFree()
 
 // Automation events functionality
-RLAPI AutomationEventList LoadAutomationEventList(const char *fileName);                // Load automation events list from file, NULL for empty list, capacity = MAX_AUTOMATION_EVENTS
-RLAPI void UnloadAutomationEventList(AutomationEventList list);                        // Unload automation events list from file
-RLAPI bool ExportAutomationEventList(AutomationEventList list, const char *fileName);   // Export automation events list as text file
-RLAPI void SetAutomationEventList(AutomationEventList *list);                           // Set automation event list to record to
-RLAPI void SetAutomationEventBaseFrame(int frame);                                      // Set automation event internal base frame to start recording
-RLAPI void StartAutomationEventRecording(void);                                         // Start recording automation events (AutomationEventList must be set)
-RLAPI void StopAutomationEventRecording(void);                                          // Stop recording automation events
-RLAPI void PlayAutomationEvent(AutomationEvent event);                                  // Play a recorded automation event
+RAYLIB_RLAPI RaylibAutomationEventList RaylibLoadAutomationEventList(const char *fileName);                // Load automation events list from file, NULL for empty list, capacity = RAYLIB_MAX_AUTOMATION_EVENTS
+RAYLIB_RLAPI void RaylibUnloadAutomationEventList(RaylibAutomationEventList list);                        // Unload automation events list from file
+RAYLIB_RLAPI bool RaylibExportAutomationEventList(RaylibAutomationEventList list, const char *fileName);   // Export automation events list as text file
+RAYLIB_RLAPI void RaylibSetAutomationEventList(RaylibAutomationEventList *list);                           // Set automation event list to record to
+RAYLIB_RLAPI void RaylibSetAutomationEventBaseFrame(int frame);                                      // Set automation event internal base frame to start recording
+RAYLIB_RLAPI void RaylibStartAutomationEventRecording(void);                                         // Start recording automation events (RaylibAutomationEventList must be set)
+RAYLIB_RLAPI void RaylibStopAutomationEventRecording(void);                                          // Stop recording automation events
+RAYLIB_RLAPI void RaylibPlayAutomationEvent(RaylibAutomationEvent event);                                  // Play a recorded automation event
 
 //------------------------------------------------------------------------------------
 // Input Handling Functions (Module: core)
 //------------------------------------------------------------------------------------
 
 // Input-related functions: keyboard
-RLAPI bool IsKeyPressed(int key);                             // Check if a key has been pressed once
-RLAPI bool IsKeyPressedRepeat(int key);                       // Check if a key has been pressed again (Only PLATFORM_DESKTOP)
-RLAPI bool IsKeyDown(int key);                                // Check if a key is being pressed
-RLAPI bool IsKeyReleased(int key);                            // Check if a key has been released once
-RLAPI bool IsKeyUp(int key);                                  // Check if a key is NOT being pressed
-RLAPI int GetKeyPressed(void);                                // Get key pressed (keycode), call it multiple times for keys queued, returns 0 when the queue is empty
-RLAPI int GetCharPressed(void);                               // Get char pressed (unicode), call it multiple times for chars queued, returns 0 when the queue is empty
-RLAPI void SetExitKey(int key);                               // Set a custom key to exit program (default is ESC)
+RAYLIB_RLAPI bool RaylibIsKeyPressed(int key);                             // Check if a key has been pressed once
+RAYLIB_RLAPI bool RaylibIsKeyPressedRepeat(int key);                       // Check if a key has been pressed again (Only RAYLIB_PLATFORM_DESKTOP)
+RAYLIB_RLAPI bool RaylibIsKeyDown(int key);                                // Check if a key is being pressed
+RAYLIB_RLAPI bool RaylibIsKeyReleased(int key);                            // Check if a key has been released once
+RAYLIB_RLAPI bool RaylibIsKeyUp(int key);                                  // Check if a key is NOT being pressed
+RAYLIB_RLAPI int RaylibGetKeyPressed(void);                                // Get key pressed (keycode), call it multiple times for keys queued, returns 0 when the queue is empty
+RAYLIB_RLAPI int RaylibGetCharPressed(void);                               // Get char pressed (unicode), call it multiple times for chars queued, returns 0 when the queue is empty
+RAYLIB_RLAPI void RaylibSetExitKey(int key);                               // Set a custom key to exit program (default is ESC)
 
 // Input-related functions: gamepads
-RLAPI bool IsGamepadAvailable(int gamepad);                                        // Check if a gamepad is available
-RLAPI const char *GetGamepadName(int gamepad);                                     // Get gamepad internal name id
-RLAPI bool IsGamepadButtonPressed(int gamepad, int button);                        // Check if a gamepad button has been pressed once
-RLAPI bool IsGamepadButtonDown(int gamepad, int button);                           // Check if a gamepad button is being pressed
-RLAPI bool IsGamepadButtonReleased(int gamepad, int button);                       // Check if a gamepad button has been released once
-RLAPI bool IsGamepadButtonUp(int gamepad, int button);                             // Check if a gamepad button is NOT being pressed
-RLAPI int GetGamepadButtonPressed(void);                                           // Get the last gamepad button pressed
-RLAPI int GetGamepadAxisCount(int gamepad);                                        // Get gamepad axis count for a gamepad
-RLAPI float GetGamepadAxisMovement(int gamepad, int axis);                         // Get axis movement value for a gamepad axis
-RLAPI int SetGamepadMappings(const char *mappings);                                // Set internal gamepad mappings (SDL_GameControllerDB)
-RLAPI void SetGamepadVibration(int gamepad, float leftMotor, float rightMotor);    // Set gamepad vibration for both motors
+RAYLIB_RLAPI bool RaylibIsGamepadAvailable(int gamepad);                                        // Check if a gamepad is available
+RAYLIB_RLAPI const char *RaylibGetGamepadName(int gamepad);                                     // Get gamepad internal name id
+RAYLIB_RLAPI bool RaylibIsGamepadButtonPressed(int gamepad, int button);                        // Check if a gamepad button has been pressed once
+RAYLIB_RLAPI bool RaylibIsGamepadButtonDown(int gamepad, int button);                           // Check if a gamepad button is being pressed
+RAYLIB_RLAPI bool RaylibIsGamepadButtonReleased(int gamepad, int button);                       // Check if a gamepad button has been released once
+RAYLIB_RLAPI bool RaylibIsGamepadButtonUp(int gamepad, int button);                             // Check if a gamepad button is NOT being pressed
+RAYLIB_RLAPI int RaylibGetGamepadButtonPressed(void);                                           // Get the last gamepad button pressed
+RAYLIB_RLAPI int RaylibGetGamepadAxisCount(int gamepad);                                        // Get gamepad axis count for a gamepad
+RAYLIB_RLAPI float RaylibGetGamepadAxisMovement(int gamepad, int axis);                         // Get axis movement value for a gamepad axis
+RAYLIB_RLAPI int RaylibSetGamepadMappings(const char *mappings);                                // Set internal gamepad mappings (SDL_GameControllerDB)
+RAYLIB_RLAPI void RaylibSetGamepadVibration(int gamepad, float leftMotor, float rightMotor);    // Set gamepad vibration for both motors
 
 // Input-related functions: mouse
-RLAPI bool IsMouseButtonPressed(int button);                  // Check if a mouse button has been pressed once
-RLAPI bool IsMouseButtonDown(int button);                     // Check if a mouse button is being pressed
-RLAPI bool IsMouseButtonReleased(int button);                 // Check if a mouse button has been released once
-RLAPI bool IsMouseButtonUp(int button);                       // Check if a mouse button is NOT being pressed
-RLAPI int GetMouseX(void);                                    // Get mouse position X
-RLAPI int GetMouseY(void);                                    // Get mouse position Y
-RLAPI Vector2 GetMousePosition(void);                         // Get mouse position XY
-RLAPI Vector2 GetMouseDelta(void);                            // Get mouse delta between frames
-RLAPI void SetMousePosition(int x, int y);                    // Set mouse position XY
-RLAPI void SetMouseOffset(int offsetX, int offsetY);          // Set mouse offset
-RLAPI void SetMouseScale(float scaleX, float scaleY);         // Set mouse scaling
-RLAPI float GetMouseWheelMove(void);                          // Get mouse wheel movement for X or Y, whichever is larger
-RLAPI Vector2 GetMouseWheelMoveV(void);                       // Get mouse wheel movement for both X and Y
-RLAPI void SetMouseCursor(int cursor);                        // Set mouse cursor
+RAYLIB_RLAPI bool RaylibIsMouseButtonPressed(int button);                  // Check if a mouse button has been pressed once
+RAYLIB_RLAPI bool RaylibIsMouseButtonDown(int button);                     // Check if a mouse button is being pressed
+RAYLIB_RLAPI bool RaylibIsMouseButtonReleased(int button);                 // Check if a mouse button has been released once
+RAYLIB_RLAPI bool RaylibIsMouseButtonUp(int button);                       // Check if a mouse button is NOT being pressed
+RAYLIB_RLAPI int RaylibGetMouseX(void);                                    // Get mouse position X
+RAYLIB_RLAPI int RaylibGetMouseY(void);                                    // Get mouse position Y
+RAYLIB_RLAPI RaylibVector2 RaylibGetMousePosition(void);                         // Get mouse position XY
+RAYLIB_RLAPI RaylibVector2 RaylibGetMouseDelta(void);                            // Get mouse delta between frames
+RAYLIB_RLAPI void RaylibSetMousePosition(int x, int y);                    // Set mouse position XY
+RAYLIB_RLAPI void RaylibSetMouseOffset(int offsetX, int offsetY);          // Set mouse offset
+RAYLIB_RLAPI void RaylibSetMouseScale(float scaleX, float scaleY);         // Set mouse scaling
+RAYLIB_RLAPI float RaylibGetMouseWheelMove(void);                          // Get mouse wheel movement for X or Y, whichever is larger
+RAYLIB_RLAPI RaylibVector2 RaylibGetMouseWheelMoveV(void);                       // Get mouse wheel movement for both X and Y
+RAYLIB_RLAPI void RaylibSetMouseCursor(int cursor);                        // Set mouse cursor
 
 // Input-related functions: touch
-RLAPI int GetTouchX(void);                                    // Get touch position X for touch point 0 (relative to screen size)
-RLAPI int GetTouchY(void);                                    // Get touch position Y for touch point 0 (relative to screen size)
-RLAPI Vector2 GetTouchPosition(int index);                    // Get touch position XY for a touch point index (relative to screen size)
-RLAPI int GetTouchPointId(int index);                         // Get touch point identifier for given index
-RLAPI int GetTouchPointCount(void);                           // Get number of touch points
+RAYLIB_RLAPI int RaylibGetTouchX(void);                                    // Get touch position X for touch point 0 (relative to screen size)
+RAYLIB_RLAPI int RaylibGetTouchY(void);                                    // Get touch position Y for touch point 0 (relative to screen size)
+RAYLIB_RLAPI RaylibVector2 RaylibGetTouchPosition(int index);                    // Get touch position XY for a touch point index (relative to screen size)
+RAYLIB_RLAPI int RaylibGetTouchPointId(int index);                         // Get touch point identifier for given index
+RAYLIB_RLAPI int RaylibGetTouchPointCount(void);                           // Get number of touch points
 
 //------------------------------------------------------------------------------------
 // Gestures and Touch Handling Functions (Module: rgestures)
 //------------------------------------------------------------------------------------
-RLAPI void SetGesturesEnabled(unsigned int flags);      // Enable a set of gestures using flags
-RLAPI bool IsGestureDetected(unsigned int gesture);     // Check if a gesture have been detected
-RLAPI int GetGestureDetected(void);                     // Get latest detected gesture
-RLAPI float GetGestureHoldDuration(void);               // Get gesture hold time in milliseconds
-RLAPI Vector2 GetGestureDragVector(void);               // Get gesture drag vector
-RLAPI float GetGestureDragAngle(void);                  // Get gesture drag angle
-RLAPI Vector2 GetGesturePinchVector(void);              // Get gesture pinch delta
-RLAPI float GetGesturePinchAngle(void);                 // Get gesture pinch angle
+RAYLIB_RLAPI void RaylibSetGesturesEnabled(unsigned int flags);      // Enable a set of gestures using flags
+RAYLIB_RLAPI bool RaylibIsGestureDetected(unsigned int gesture);     // Check if a gesture have been detected
+RAYLIB_RLAPI int RaylibGetGestureDetected(void);                     // Get latest detected gesture
+RAYLIB_RLAPI float RaylibGetGestureHoldDuration(void);               // Get gesture hold time in milliseconds
+RAYLIB_RLAPI RaylibVector2 RaylibGetGestureDragVector(void);               // Get gesture drag vector
+RAYLIB_RLAPI float RaylibGetGestureDragAngle(void);                  // Get gesture drag angle
+RAYLIB_RLAPI RaylibVector2 RaylibGetGesturePinchVector(void);              // Get gesture pinch delta
+RAYLIB_RLAPI float RaylibGetGesturePinchAngle(void);                 // Get gesture pinch angle
 
 //------------------------------------------------------------------------------------
 // Camera System Functions (Module: rcamera)
 //------------------------------------------------------------------------------------
-RLAPI void UpdateCamera(Camera *camera, int mode);      // Update camera position for selected mode
-RLAPI void UpdateCameraPro(Camera *camera, Vector3 movement, Vector3 rotation, float zoom); // Update camera movement/rotation
+RAYLIB_RLAPI void RaylibUpdateCamera(Camera *camera, int mode);      // Update camera position for selected mode
+RAYLIB_RLAPI void RaylibUpdateCameraPro(Camera *camera, RaylibVector3 movement, RaylibVector3 rotation, float zoom); // Update camera movement/rotation
 
 //------------------------------------------------------------------------------------
 // Basic Shapes Drawing Functions (Module: shapes)
@@ -1223,457 +1223,457 @@ RLAPI void UpdateCameraPro(Camera *camera, Vector3 movement, Vector3 rotation, f
 // Set texture and rectangle to be used on shapes drawing
 // NOTE: It can be useful when using basic shapes and one single font,
 // defining a font char white rectangle would allow drawing everything in a single draw call
-RLAPI void SetShapesTexture(Texture2D texture, Rectangle source);       // Set texture and rectangle to be used on shapes drawing
-RLAPI Texture2D GetShapesTexture(void);                                 // Get texture that is used for shapes drawing
-RLAPI Rectangle GetShapesTextureRectangle(void);                        // Get texture source rectangle that is used for shapes drawing
+RAYLIB_RLAPI void RaylibSetShapesTexture(Texture2D texture, RaylibRectangle source);       // Set texture and rectangle to be used on shapes drawing
+RAYLIB_RLAPI Texture2D RaylibGetShapesTexture(void);                                 // Get texture that is used for shapes drawing
+RAYLIB_RLAPI RaylibRectangle RaylibGetShapesTextureRectangle(void);                        // Get texture source rectangle that is used for shapes drawing
 
 // Basic shapes drawing functions
-RLAPI void DrawPixel(int posX, int posY, Color color);                                                   // Draw a pixel
-RLAPI void DrawPixelV(Vector2 position, Color color);                                                    // Draw a pixel (Vector version)
-RLAPI void DrawLine(int startPosX, int startPosY, int endPosX, int endPosY, Color color);                // Draw a line
-RLAPI void DrawLineV(Vector2 startPos, Vector2 endPos, Color color);                                     // Draw a line (using gl lines)
-RLAPI void DrawLineEx(Vector2 startPos, Vector2 endPos, float thick, Color color);                       // Draw a line (using triangles/quads)
-RLAPI void DrawLineStrip(Vector2 *points, int pointCount, Color color);                                  // Draw lines sequence (using gl lines)
-RLAPI void DrawLineBezier(Vector2 startPos, Vector2 endPos, float thick, Color color);                   // Draw line segment cubic-bezier in-out interpolation
-RLAPI void DrawCircle(int centerX, int centerY, float radius, Color color);                              // Draw a color-filled circle
-RLAPI void DrawCircleSector(Vector2 center, float radius, float startAngle, float endAngle, int segments, Color color);      // Draw a piece of a circle
-RLAPI void DrawCircleSectorLines(Vector2 center, float radius, float startAngle, float endAngle, int segments, Color color); // Draw circle sector outline
-RLAPI void DrawCircleGradient(int centerX, int centerY, float radius, Color color1, Color color2);       // Draw a gradient-filled circle
-RLAPI void DrawCircleV(Vector2 center, float radius, Color color);                                       // Draw a color-filled circle (Vector version)
-RLAPI void DrawCircleLines(int centerX, int centerY, float radius, Color color);                         // Draw circle outline
-RLAPI void DrawCircleLinesV(Vector2 center, float radius, Color color);                                  // Draw circle outline (Vector version)
-RLAPI void DrawEllipse(int centerX, int centerY, float radiusH, float radiusV, Color color);             // Draw ellipse
-RLAPI void DrawEllipseLines(int centerX, int centerY, float radiusH, float radiusV, Color color);        // Draw ellipse outline
-RLAPI void DrawRing(Vector2 center, float innerRadius, float outerRadius, float startAngle, float endAngle, int segments, Color color); // Draw ring
-RLAPI void DrawRingLines(Vector2 center, float innerRadius, float outerRadius, float startAngle, float endAngle, int segments, Color color);    // Draw ring outline
-RLAPI void DrawRectangle(int posX, int posY, int width, int height, Color color);                        // Draw a color-filled rectangle
-RLAPI void DrawRectangleV(Vector2 position, Vector2 size, Color color);                                  // Draw a color-filled rectangle (Vector version)
-RLAPI void DrawRectangleRec(Rectangle rec, Color color);                                                 // Draw a color-filled rectangle
-RLAPI void DrawRectanglePro(Rectangle rec, Vector2 origin, float rotation, Color color);                 // Draw a color-filled rectangle with pro parameters
-RLAPI void DrawRectangleGradientV(int posX, int posY, int width, int height, Color color1, Color color2);// Draw a vertical-gradient-filled rectangle
-RLAPI void DrawRectangleGradientH(int posX, int posY, int width, int height, Color color1, Color color2);// Draw a horizontal-gradient-filled rectangle
-RLAPI void DrawRectangleGradientEx(Rectangle rec, Color col1, Color col2, Color col3, Color col4);       // Draw a gradient-filled rectangle with custom vertex colors
-RLAPI void DrawRectangleLines(int posX, int posY, int width, int height, Color color);                   // Draw rectangle outline
-RLAPI void DrawRectangleLinesEx(Rectangle rec, float lineThick, Color color);                            // Draw rectangle outline with extended parameters
-RLAPI void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color color);              // Draw rectangle with rounded edges
-RLAPI void DrawRectangleRoundedLines(Rectangle rec, float roundness, int segments, Color color);         // Draw rectangle lines with rounded edges
-RLAPI void DrawRectangleRoundedLinesEx(Rectangle rec, float roundness, int segments, float lineThick, Color color); // Draw rectangle with rounded edges outline
-RLAPI void DrawTriangle(Vector2 v1, Vector2 v2, Vector2 v3, Color color);                                // Draw a color-filled triangle (vertex in counter-clockwise order!)
-RLAPI void DrawTriangleLines(Vector2 v1, Vector2 v2, Vector2 v3, Color color);                           // Draw triangle outline (vertex in counter-clockwise order!)
-RLAPI void DrawTriangleFan(Vector2 *points, int pointCount, Color color);                                // Draw a triangle fan defined by points (first vertex is the center)
-RLAPI void DrawTriangleStrip(Vector2 *points, int pointCount, Color color);                              // Draw a triangle strip defined by points
-RLAPI void DrawPoly(Vector2 center, int sides, float radius, float rotation, Color color);               // Draw a regular polygon (Vector version)
-RLAPI void DrawPolyLines(Vector2 center, int sides, float radius, float rotation, Color color);          // Draw a polygon outline of n sides
-RLAPI void DrawPolyLinesEx(Vector2 center, int sides, float radius, float rotation, float lineThick, Color color); // Draw a polygon outline of n sides with extended parameters
+RAYLIB_RLAPI void RaylibDrawPixel(int posX, int posY, RaylibColor color);                                                   // Draw a pixel
+RAYLIB_RLAPI void RaylibDrawPixelV(RaylibVector2 position, RaylibColor color);                                                    // Draw a pixel (Vector version)
+RAYLIB_RLAPI void RaylibDrawLine(int startPosX, int startPosY, int endPosX, int endPosY, RaylibColor color);                // Draw a line
+RAYLIB_RLAPI void RaylibDrawLineV(RaylibVector2 startPos, RaylibVector2 endPos, RaylibColor color);                                     // Draw a line (using gl lines)
+RAYLIB_RLAPI void RaylibDrawLineEx(RaylibVector2 startPos, RaylibVector2 endPos, float thick, RaylibColor color);                       // Draw a line (using triangles/quads)
+RAYLIB_RLAPI void RaylibDrawLineStrip(RaylibVector2 *points, int pointCount, RaylibColor color);                                  // Draw lines sequence (using gl lines)
+RAYLIB_RLAPI void RaylibDrawLineBezier(RaylibVector2 startPos, RaylibVector2 endPos, float thick, RaylibColor color);                   // Draw line segment cubic-bezier in-out interpolation
+RAYLIB_RLAPI void RaylibDrawCircle(int centerX, int centerY, float radius, RaylibColor color);                              // Draw a color-filled circle
+RAYLIB_RLAPI void RaylibDrawCircleSector(RaylibVector2 center, float radius, float startAngle, float endAngle, int segments, RaylibColor color);      // Draw a piece of a circle
+RAYLIB_RLAPI void RaylibDrawCircleSectorLines(RaylibVector2 center, float radius, float startAngle, float endAngle, int segments, RaylibColor color); // Draw circle sector outline
+RAYLIB_RLAPI void RaylibDrawCircleGradient(int centerX, int centerY, float radius, RaylibColor color1, RaylibColor color2);       // Draw a gradient-filled circle
+RAYLIB_RLAPI void RaylibDrawCircleV(RaylibVector2 center, float radius, RaylibColor color);                                       // Draw a color-filled circle (Vector version)
+RAYLIB_RLAPI void RaylibDrawCircleLines(int centerX, int centerY, float radius, RaylibColor color);                         // Draw circle outline
+RAYLIB_RLAPI void RaylibDrawCircleLinesV(RaylibVector2 center, float radius, RaylibColor color);                                  // Draw circle outline (Vector version)
+RAYLIB_RLAPI void RaylibDrawEllipse(int centerX, int centerY, float radiusH, float radiusV, RaylibColor color);             // Draw ellipse
+RAYLIB_RLAPI void RaylibDrawEllipseLines(int centerX, int centerY, float radiusH, float radiusV, RaylibColor color);        // Draw ellipse outline
+RAYLIB_RLAPI void RaylibDrawRing(RaylibVector2 center, float innerRadius, float outerRadius, float startAngle, float endAngle, int segments, RaylibColor color); // Draw ring
+RAYLIB_RLAPI void RaylibDrawRingLines(RaylibVector2 center, float innerRadius, float outerRadius, float startAngle, float endAngle, int segments, RaylibColor color);    // Draw ring outline
+RAYLIB_RLAPI void RaylibDrawRectangle(int posX, int posY, int width, int height, RaylibColor color);                        // Draw a color-filled rectangle
+RAYLIB_RLAPI void RaylibDrawRectangleV(RaylibVector2 position, RaylibVector2 size, RaylibColor color);                                  // Draw a color-filled rectangle (Vector version)
+RAYLIB_RLAPI void RaylibDrawRectangleRec(RaylibRectangle rec, RaylibColor color);                                                 // Draw a color-filled rectangle
+RAYLIB_RLAPI void RaylibDrawRectanglePro(RaylibRectangle rec, RaylibVector2 origin, float rotation, RaylibColor color);                 // Draw a color-filled rectangle with pro parameters
+RAYLIB_RLAPI void RaylibDrawRectangleGradientV(int posX, int posY, int width, int height, RaylibColor color1, RaylibColor color2);// Draw a vertical-gradient-filled rectangle
+RAYLIB_RLAPI void RaylibDrawRectangleGradientH(int posX, int posY, int width, int height, RaylibColor color1, RaylibColor color2);// Draw a horizontal-gradient-filled rectangle
+RAYLIB_RLAPI void RaylibDrawRectangleGradientEx(RaylibRectangle rec, RaylibColor col1, RaylibColor col2, RaylibColor col3, RaylibColor col4);       // Draw a gradient-filled rectangle with custom vertex colors
+RAYLIB_RLAPI void RaylibDrawRectangleLines(int posX, int posY, int width, int height, RaylibColor color);                   // Draw rectangle outline
+RAYLIB_RLAPI void RaylibDrawRectangleLinesEx(RaylibRectangle rec, float lineThick, RaylibColor color);                            // Draw rectangle outline with extended parameters
+RAYLIB_RLAPI void RaylibDrawRectangleRounded(RaylibRectangle rec, float roundness, int segments, RaylibColor color);              // Draw rectangle with rounded edges
+RAYLIB_RLAPI void RaylibDrawRectangleRoundedLines(RaylibRectangle rec, float roundness, int segments, RaylibColor color);         // Draw rectangle lines with rounded edges
+RAYLIB_RLAPI void RaylibDrawRectangleRoundedLinesEx(RaylibRectangle rec, float roundness, int segments, float lineThick, RaylibColor color); // Draw rectangle with rounded edges outline
+RAYLIB_RLAPI void RaylibDrawTriangle(RaylibVector2 v1, RaylibVector2 v2, RaylibVector2 v3, RaylibColor color);                                // Draw a color-filled triangle (vertex in counter-clockwise order!)
+RAYLIB_RLAPI void RaylibDrawTriangleLines(RaylibVector2 v1, RaylibVector2 v2, RaylibVector2 v3, RaylibColor color);                           // Draw triangle outline (vertex in counter-clockwise order!)
+RAYLIB_RLAPI void RaylibDrawTriangleFan(RaylibVector2 *points, int pointCount, RaylibColor color);                                // Draw a triangle fan defined by points (first vertex is the center)
+RAYLIB_RLAPI void RaylibDrawTriangleStrip(RaylibVector2 *points, int pointCount, RaylibColor color);                              // Draw a triangle strip defined by points
+RAYLIB_RLAPI void RaylibDrawPoly(RaylibVector2 center, int sides, float radius, float rotation, RaylibColor color);               // Draw a regular polygon (Vector version)
+RAYLIB_RLAPI void RaylibDrawPolyLines(RaylibVector2 center, int sides, float radius, float rotation, RaylibColor color);          // Draw a polygon outline of n sides
+RAYLIB_RLAPI void RaylibDrawPolyLinesEx(RaylibVector2 center, int sides, float radius, float rotation, float lineThick, RaylibColor color); // Draw a polygon outline of n sides with extended parameters
 
 // Splines drawing functions
-RLAPI void DrawSplineLinear(Vector2 *points, int pointCount, float thick, Color color);                  // Draw spline: Linear, minimum 2 points
-RLAPI void DrawSplineBasis(Vector2 *points, int pointCount, float thick, Color color);                   // Draw spline: B-Spline, minimum 4 points
-RLAPI void DrawSplineCatmullRom(Vector2 *points, int pointCount, float thick, Color color);              // Draw spline: Catmull-Rom, minimum 4 points
-RLAPI void DrawSplineBezierQuadratic(Vector2 *points, int pointCount, float thick, Color color);         // Draw spline: Quadratic Bezier, minimum 3 points (1 control point): [p1, c2, p3, c4...]
-RLAPI void DrawSplineBezierCubic(Vector2 *points, int pointCount, float thick, Color color);             // Draw spline: Cubic Bezier, minimum 4 points (2 control points): [p1, c2, c3, p4, c5, c6...]
-RLAPI void DrawSplineSegmentLinear(Vector2 p1, Vector2 p2, float thick, Color color);                    // Draw spline segment: Linear, 2 points
-RLAPI void DrawSplineSegmentBasis(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float thick, Color color); // Draw spline segment: B-Spline, 4 points
-RLAPI void DrawSplineSegmentCatmullRom(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float thick, Color color); // Draw spline segment: Catmull-Rom, 4 points
-RLAPI void DrawSplineSegmentBezierQuadratic(Vector2 p1, Vector2 c2, Vector2 p3, float thick, Color color); // Draw spline segment: Quadratic Bezier, 2 points, 1 control point
-RLAPI void DrawSplineSegmentBezierCubic(Vector2 p1, Vector2 c2, Vector2 c3, Vector2 p4, float thick, Color color); // Draw spline segment: Cubic Bezier, 2 points, 2 control points
+RAYLIB_RLAPI void RaylibDrawSplineLinear(RaylibVector2 *points, int pointCount, float thick, RaylibColor color);                  // Draw spline: Linear, minimum 2 points
+RAYLIB_RLAPI void RaylibDrawSplineBasis(RaylibVector2 *points, int pointCount, float thick, RaylibColor color);                   // Draw spline: B-Spline, minimum 4 points
+RAYLIB_RLAPI void RaylibDrawSplineCatmullRom(RaylibVector2 *points, int pointCount, float thick, RaylibColor color);              // Draw spline: Catmull-Rom, minimum 4 points
+RAYLIB_RLAPI void RaylibDrawSplineBezierQuadratic(RaylibVector2 *points, int pointCount, float thick, RaylibColor color);         // Draw spline: Quadratic Bezier, minimum 3 points (1 control point): [p1, c2, p3, c4...]
+RAYLIB_RLAPI void RaylibDrawSplineBezierCubic(RaylibVector2 *points, int pointCount, float thick, RaylibColor color);             // Draw spline: Cubic Bezier, minimum 4 points (2 control points): [p1, c2, c3, p4, c5, c6...]
+RAYLIB_RLAPI void RaylibDrawSplineSegmentLinear(RaylibVector2 p1, RaylibVector2 p2, float thick, RaylibColor color);                    // Draw spline segment: Linear, 2 points
+RAYLIB_RLAPI void RaylibDrawSplineSegmentBasis(RaylibVector2 p1, RaylibVector2 p2, RaylibVector2 p3, RaylibVector2 p4, float thick, RaylibColor color); // Draw spline segment: B-Spline, 4 points
+RAYLIB_RLAPI void RaylibDrawSplineSegmentCatmullRom(RaylibVector2 p1, RaylibVector2 p2, RaylibVector2 p3, RaylibVector2 p4, float thick, RaylibColor color); // Draw spline segment: Catmull-Rom, 4 points
+RAYLIB_RLAPI void RaylibDrawSplineSegmentBezierQuadratic(RaylibVector2 p1, RaylibVector2 c2, RaylibVector2 p3, float thick, RaylibColor color); // Draw spline segment: Quadratic Bezier, 2 points, 1 control point
+RAYLIB_RLAPI void RaylibDrawSplineSegmentBezierCubic(RaylibVector2 p1, RaylibVector2 c2, RaylibVector2 c3, RaylibVector2 p4, float thick, RaylibColor color); // Draw spline segment: Cubic Bezier, 2 points, 2 control points
 
 // Spline segment point evaluation functions, for a given t [0.0f .. 1.0f]
-RLAPI Vector2 GetSplinePointLinear(Vector2 startPos, Vector2 endPos, float t);                           // Get (evaluate) spline point: Linear
-RLAPI Vector2 GetSplinePointBasis(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float t);              // Get (evaluate) spline point: B-Spline
-RLAPI Vector2 GetSplinePointCatmullRom(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float t);         // Get (evaluate) spline point: Catmull-Rom
-RLAPI Vector2 GetSplinePointBezierQuad(Vector2 p1, Vector2 c2, Vector2 p3, float t);                     // Get (evaluate) spline point: Quadratic Bezier
-RLAPI Vector2 GetSplinePointBezierCubic(Vector2 p1, Vector2 c2, Vector2 c3, Vector2 p4, float t);        // Get (evaluate) spline point: Cubic Bezier
+RAYLIB_RLAPI RaylibVector2 RaylibGetSplinePointLinear(RaylibVector2 startPos, RaylibVector2 endPos, float t);                           // Get (evaluate) spline point: Linear
+RAYLIB_RLAPI RaylibVector2 RaylibGetSplinePointBasis(RaylibVector2 p1, RaylibVector2 p2, RaylibVector2 p3, RaylibVector2 p4, float t);              // Get (evaluate) spline point: B-Spline
+RAYLIB_RLAPI RaylibVector2 RaylibGetSplinePointCatmullRom(RaylibVector2 p1, RaylibVector2 p2, RaylibVector2 p3, RaylibVector2 p4, float t);         // Get (evaluate) spline point: Catmull-Rom
+RAYLIB_RLAPI RaylibVector2 RaylibGetSplinePointBezierQuad(RaylibVector2 p1, RaylibVector2 c2, RaylibVector2 p3, float t);                     // Get (evaluate) spline point: Quadratic Bezier
+RAYLIB_RLAPI RaylibVector2 RaylibGetSplinePointBezierCubic(RaylibVector2 p1, RaylibVector2 c2, RaylibVector2 c3, RaylibVector2 p4, float t);        // Get (evaluate) spline point: Cubic Bezier
 
 // Basic shapes collision detection functions
-RLAPI bool CheckCollisionRecs(Rectangle rec1, Rectangle rec2);                                           // Check collision between two rectangles
-RLAPI bool CheckCollisionCircles(Vector2 center1, float radius1, Vector2 center2, float radius2);        // Check collision between two circles
-RLAPI bool CheckCollisionCircleRec(Vector2 center, float radius, Rectangle rec);                         // Check collision between circle and rectangle
-RLAPI bool CheckCollisionPointRec(Vector2 point, Rectangle rec);                                         // Check if point is inside rectangle
-RLAPI bool CheckCollisionPointCircle(Vector2 point, Vector2 center, float radius);                       // Check if point is inside circle
-RLAPI bool CheckCollisionPointTriangle(Vector2 point, Vector2 p1, Vector2 p2, Vector2 p3);               // Check if point is inside a triangle
-RLAPI bool CheckCollisionPointPoly(Vector2 point, Vector2 *points, int pointCount);                      // Check if point is within a polygon described by array of vertices
-RLAPI bool CheckCollisionLines(Vector2 startPos1, Vector2 endPos1, Vector2 startPos2, Vector2 endPos2, Vector2 *collisionPoint); // Check the collision between two lines defined by two points each, returns collision point by reference
-RLAPI bool CheckCollisionPointLine(Vector2 point, Vector2 p1, Vector2 p2, int threshold);                // Check if point belongs to line created between two points [p1] and [p2] with defined margin in pixels [threshold]
-RLAPI bool CheckCollisionCircleLine(Vector2 center, float radius, Vector2 p1, Vector2 p2);               // Check if circle collides with a line created betweeen two points [p1] and [p2]
-RLAPI Rectangle GetCollisionRec(Rectangle rec1, Rectangle rec2);                                         // Get collision rectangle for two rectangles collision
+RAYLIB_RLAPI bool RaylibCheckCollisionRecs(RaylibRectangle rec1, RaylibRectangle rec2);                                           // Check collision between two rectangles
+RAYLIB_RLAPI bool RaylibCheckCollisionCircles(RaylibVector2 center1, float radius1, RaylibVector2 center2, float radius2);        // Check collision between two circles
+RAYLIB_RLAPI bool RaylibCheckCollisionCircleRec(RaylibVector2 center, float radius, RaylibRectangle rec);                         // Check collision between circle and rectangle
+RAYLIB_RLAPI bool RaylibCheckCollisionPointRec(RaylibVector2 point, RaylibRectangle rec);                                         // Check if point is inside rectangle
+RAYLIB_RLAPI bool RaylibCheckCollisionPointCircle(RaylibVector2 point, RaylibVector2 center, float radius);                       // Check if point is inside circle
+RAYLIB_RLAPI bool RaylibCheckCollisionPointTriangle(RaylibVector2 point, RaylibVector2 p1, RaylibVector2 p2, RaylibVector2 p3);               // Check if point is inside a triangle
+RAYLIB_RLAPI bool RaylibCheckCollisionPointPoly(RaylibVector2 point, RaylibVector2 *points, int pointCount);                      // Check if point is within a polygon described by array of vertices
+RAYLIB_RLAPI bool RaylibCheckCollisionLines(RaylibVector2 startPos1, RaylibVector2 endPos1, RaylibVector2 startPos2, RaylibVector2 endPos2, RaylibVector2 *collisionPoint); // Check the collision between two lines defined by two points each, returns collision point by reference
+RAYLIB_RLAPI bool RaylibCheckCollisionPointLine(RaylibVector2 point, RaylibVector2 p1, RaylibVector2 p2, int threshold);                // Check if point belongs to line created between two points [p1] and [p2] with defined margin in pixels [threshold]
+RAYLIB_RLAPI bool RaylibCheckCollisionCircleLine(RaylibVector2 center, float radius, RaylibVector2 p1, RaylibVector2 p2);               // Check if circle collides with a line created betweeen two points [p1] and [p2]
+RAYLIB_RLAPI RaylibRectangle RaylibGetCollisionRec(RaylibRectangle rec1, RaylibRectangle rec2);                                         // Get collision rectangle for two rectangles collision
 
 //------------------------------------------------------------------------------------
-// Texture Loading and Drawing Functions (Module: textures)
+// RaylibTexture Loading and Drawing Functions (Module: textures)
 //------------------------------------------------------------------------------------
 
-// Image loading functions
+// RaylibImage loading functions
 // NOTE: These functions do not require GPU access
-RLAPI Image LoadImage(const char *fileName);                                                             // Load image from file into CPU memory (RAM)
-RLAPI Image LoadImageRaw(const char *fileName, int width, int height, int format, int headerSize);       // Load image from RAW file data
-RLAPI Image LoadImageSvg(const char *fileNameOrString, int width, int height);                           // Load image from SVG file data or string with specified size
-RLAPI Image LoadImageAnim(const char *fileName, int *frames);                                            // Load image sequence from file (frames appended to image.data)
-RLAPI Image LoadImageAnimFromMemory(const char *fileType, const unsigned char *fileData, int dataSize, int *frames); // Load image sequence from memory buffer
-RLAPI Image LoadImageFromMemory(const char *fileType, const unsigned char *fileData, int dataSize);      // Load image from memory buffer, fileType refers to extension: i.e. '.png'
-RLAPI Image LoadImageFromTexture(Texture2D texture);                                                     // Load image from GPU texture data
-RLAPI Image LoadImageFromScreen(void);                                                                   // Load image from screen buffer and (screenshot)
-RLAPI bool IsImageReady(Image image);                                                                    // Check if an image is ready
-RLAPI void UnloadImage(Image image);                                                                     // Unload image from CPU memory (RAM)
-RLAPI bool ExportImage(Image image, const char *fileName);                                               // Export image data to file, returns true on success
-RLAPI unsigned char *ExportImageToMemory(Image image, const char *fileType, int *fileSize);              // Export image to memory buffer
-RLAPI bool ExportImageAsCode(Image image, const char *fileName);                                         // Export image as code file defining an array of bytes, returns true on success
+RAYLIB_RLAPI RaylibImage RaylibLoadImage(const char *fileName);                                                             // Load image from file into CPU memory (RAM)
+RAYLIB_RLAPI RaylibImage RaylibLoadImageRaw(const char *fileName, int width, int height, int format, int headerSize);       // Load image from RAW file data
+RAYLIB_RLAPI RaylibImage RaylibLoadImageSvg(const char *fileNameOrString, int width, int height);                           // Load image from SVG file data or string with specified size
+RAYLIB_RLAPI RaylibImage RaylibLoadImageAnim(const char *fileName, int *frames);                                            // Load image sequence from file (frames appended to image.data)
+RAYLIB_RLAPI RaylibImage RaylibLoadImageAnimFromMemory(const char *fileType, const unsigned char *fileData, int dataSize, int *frames); // Load image sequence from memory buffer
+RAYLIB_RLAPI RaylibImage RaylibLoadImageFromMemory(const char *fileType, const unsigned char *fileData, int dataSize);      // Load image from memory buffer, fileType refers to extension: i.e. '.png'
+RAYLIB_RLAPI RaylibImage RaylibLoadImageFromTexture(Texture2D texture);                                                     // Load image from GPU texture data
+RAYLIB_RLAPI RaylibImage RaylibLoadImageFromScreen(void);                                                                   // Load image from screen buffer and (screenshot)
+RAYLIB_RLAPI bool RaylibIsImageReady(RaylibImage image);                                                                    // Check if an image is ready
+RAYLIB_RLAPI void RaylibUnloadImage(RaylibImage image);                                                                     // Unload image from CPU memory (RAM)
+RAYLIB_RLAPI bool RaylibExportImage(RaylibImage image, const char *fileName);                                               // Export image data to file, returns true on success
+RAYLIB_RLAPI unsigned char *RaylibExportImageToMemory(RaylibImage image, const char *fileType, int *fileSize);              // Export image to memory buffer
+RAYLIB_RLAPI bool RaylibExportImageAsCode(RaylibImage image, const char *fileName);                                         // Export image as code file defining an array of bytes, returns true on success
 
-// Image generation functions
-RLAPI Image GenImageColor(int width, int height, Color color);                                           // Generate image: plain color
-RLAPI Image GenImageGradientLinear(int width, int height, int direction, Color start, Color end);        // Generate image: linear gradient, direction in degrees [0..360], 0=Vertical gradient
-RLAPI Image GenImageGradientRadial(int width, int height, float density, Color inner, Color outer);      // Generate image: radial gradient
-RLAPI Image GenImageGradientSquare(int width, int height, float density, Color inner, Color outer);      // Generate image: square gradient
-RLAPI Image GenImageChecked(int width, int height, int checksX, int checksY, Color col1, Color col2);    // Generate image: checked
-RLAPI Image GenImageWhiteNoise(int width, int height, float factor);                                     // Generate image: white noise
-RLAPI Image GenImagePerlinNoise(int width, int height, int offsetX, int offsetY, float scale);           // Generate image: perlin noise
-RLAPI Image GenImageCellular(int width, int height, int tileSize);                                       // Generate image: cellular algorithm, bigger tileSize means bigger cells
-RLAPI Image GenImageText(int width, int height, const char *text);                                       // Generate image: grayscale image from text data
+// RaylibImage generation functions
+RAYLIB_RLAPI RaylibImage RaylibGenImageColor(int width, int height, RaylibColor color);                                           // Generate image: plain color
+RAYLIB_RLAPI RaylibImage RaylibGenImageGradientLinear(int width, int height, int direction, RaylibColor start, RaylibColor end);        // Generate image: linear gradient, direction in degrees [0..360], 0=Vertical gradient
+RAYLIB_RLAPI RaylibImage RaylibGenImageGradientRadial(int width, int height, float density, RaylibColor inner, RaylibColor outer);      // Generate image: radial gradient
+RAYLIB_RLAPI RaylibImage RaylibGenImageGradientSquare(int width, int height, float density, RaylibColor inner, RaylibColor outer);      // Generate image: square gradient
+RAYLIB_RLAPI RaylibImage RaylibGenImageChecked(int width, int height, int checksX, int checksY, RaylibColor col1, RaylibColor col2);    // Generate image: checked
+RAYLIB_RLAPI RaylibImage RaylibGenImageWhiteNoise(int width, int height, float factor);                                     // Generate image: white noise
+RAYLIB_RLAPI RaylibImage RaylibGenImagePerlinNoise(int width, int height, int offsetX, int offsetY, float scale);           // Generate image: perlin noise
+RAYLIB_RLAPI RaylibImage RaylibGenImageCellular(int width, int height, int tileSize);                                       // Generate image: cellular algorithm, bigger tileSize means bigger cells
+RAYLIB_RLAPI RaylibImage RaylibGenImageText(int width, int height, const char *text);                                       // Generate image: grayscale image from text data
 
-// Image manipulation functions
-RLAPI Image ImageCopy(Image image);                                                                      // Create an image duplicate (useful for transformations)
-RLAPI Image ImageFromImage(Image image, Rectangle rec);                                                  // Create an image from another image piece
-RLAPI Image ImageText(const char *text, int fontSize, Color color);                                      // Create an image from text (default font)
-RLAPI Image ImageTextEx(Font font, const char *text, float fontSize, float spacing, Color tint);         // Create an image from text (custom sprite font)
-RLAPI void ImageFormat(Image *image, int newFormat);                                                     // Convert image data to desired format
-RLAPI void ImageToPOT(Image *image, Color fill);                                                         // Convert image to POT (power-of-two)
-RLAPI void ImageCrop(Image *image, Rectangle crop);                                                      // Crop an image to a defined rectangle
-RLAPI void ImageAlphaCrop(Image *image, float threshold);                                                // Crop image depending on alpha value
-RLAPI void ImageAlphaClear(Image *image, Color color, float threshold);                                  // Clear alpha channel to desired color
-RLAPI void ImageAlphaMask(Image *image, Image alphaMask);                                                // Apply alpha mask to image
-RLAPI void ImageAlphaPremultiply(Image *image);                                                          // Premultiply alpha channel
-RLAPI void ImageBlurGaussian(Image *image, int blurSize);                                                // Apply Gaussian blur using a box blur approximation
-RLAPI void ImageKernelConvolution(Image *image, float* kernel, int kernelSize);                         // Apply Custom Square image convolution kernel
-RLAPI void ImageResize(Image *image, int newWidth, int newHeight);                                       // Resize image (Bicubic scaling algorithm)
-RLAPI void ImageResizeNN(Image *image, int newWidth,int newHeight);                                      // Resize image (Nearest-Neighbor scaling algorithm)
-RLAPI void ImageResizeCanvas(Image *image, int newWidth, int newHeight, int offsetX, int offsetY, Color fill);  // Resize canvas and fill with color
-RLAPI void ImageMipmaps(Image *image);                                                                   // Compute all mipmap levels for a provided image
-RLAPI void ImageDither(Image *image, int rBpp, int gBpp, int bBpp, int aBpp);                            // Dither image data to 16bpp or lower (Floyd-Steinberg dithering)
-RLAPI void ImageFlipVertical(Image *image);                                                              // Flip image vertically
-RLAPI void ImageFlipHorizontal(Image *image);                                                            // Flip image horizontally
-RLAPI void ImageRotate(Image *image, int degrees);                                                       // Rotate image by input angle in degrees (-359 to 359)
-RLAPI void ImageRotateCW(Image *image);                                                                  // Rotate image clockwise 90deg
-RLAPI void ImageRotateCCW(Image *image);                                                                 // Rotate image counter-clockwise 90deg
-RLAPI void ImageColorTint(Image *image, Color color);                                                    // Modify image color: tint
-RLAPI void ImageColorInvert(Image *image);                                                               // Modify image color: invert
-RLAPI void ImageColorGrayscale(Image *image);                                                            // Modify image color: grayscale
-RLAPI void ImageColorContrast(Image *image, float contrast);                                             // Modify image color: contrast (-100 to 100)
-RLAPI void ImageColorBrightness(Image *image, int brightness);                                           // Modify image color: brightness (-255 to 255)
-RLAPI void ImageColorReplace(Image *image, Color color, Color replace);                                  // Modify image color: replace color
-RLAPI Color *LoadImageColors(Image image);                                                               // Load color data from image as a Color array (RGBA - 32bit)
-RLAPI Color *LoadImagePalette(Image image, int maxPaletteSize, int *colorCount);                         // Load colors palette from image as a Color array (RGBA - 32bit)
-RLAPI void UnloadImageColors(Color *colors);                                                             // Unload color data loaded with LoadImageColors()
-RLAPI void UnloadImagePalette(Color *colors);                                                            // Unload colors palette loaded with LoadImagePalette()
-RLAPI Rectangle GetImageAlphaBorder(Image image, float threshold);                                       // Get image alpha border rectangle
-RLAPI Color GetImageColor(Image image, int x, int y);                                                    // Get image pixel color at (x, y) position
+// RaylibImage manipulation functions
+RAYLIB_RLAPI RaylibImage RaylibImageCopy(RaylibImage image);                                                                      // Create an image duplicate (useful for transformations)
+RAYLIB_RLAPI RaylibImage RaylibImageFromImage(RaylibImage image, RaylibRectangle rec);                                                  // Create an image from another image piece
+RAYLIB_RLAPI RaylibImage RaylibImageText(const char *text, int fontSize, RaylibColor color);                                      // Create an image from text (default font)
+RAYLIB_RLAPI RaylibImage RaylibImageTextEx(RaylibFont font, const char *text, float fontSize, float spacing, RaylibColor tint);         // Create an image from text (custom sprite font)
+RAYLIB_RLAPI void RaylibImageFormat(RaylibImage *image, int newFormat);                                                     // Convert image data to desired format
+RAYLIB_RLAPI void RaylibImageToPOT(RaylibImage *image, RaylibColor fill);                                                         // Convert image to POT (power-of-two)
+RAYLIB_RLAPI void RaylibImageCrop(RaylibImage *image, RaylibRectangle crop);                                                      // Crop an image to a defined rectangle
+RAYLIB_RLAPI void RaylibImageAlphaCrop(RaylibImage *image, float threshold);                                                // Crop image depending on alpha value
+RAYLIB_RLAPI void RaylibImageAlphaClear(RaylibImage *image, RaylibColor color, float threshold);                                  // Clear alpha channel to desired color
+RAYLIB_RLAPI void RaylibImageAlphaMask(RaylibImage *image, RaylibImage alphaMask);                                                // Apply alpha mask to image
+RAYLIB_RLAPI void RaylibImageAlphaPremultiply(RaylibImage *image);                                                          // Premultiply alpha channel
+RAYLIB_RLAPI void RaylibImageBlurGaussian(RaylibImage *image, int blurSize);                                                // Apply Gaussian blur using a box blur approximation
+RAYLIB_RLAPI void RaylibImageKernelConvolution(RaylibImage *image, float* kernel, int kernelSize);                         // Apply Custom Square image convolution kernel
+RAYLIB_RLAPI void RaylibImageResize(RaylibImage *image, int newWidth, int newHeight);                                       // Resize image (Bicubic scaling algorithm)
+RAYLIB_RLAPI void RaylibImageResizeNN(RaylibImage *image, int newWidth,int newHeight);                                      // Resize image (Nearest-Neighbor scaling algorithm)
+RAYLIB_RLAPI void RaylibImageResizeCanvas(RaylibImage *image, int newWidth, int newHeight, int offsetX, int offsetY, RaylibColor fill);  // Resize canvas and fill with color
+RAYLIB_RLAPI void RaylibImageMipmaps(RaylibImage *image);                                                                   // Compute all mipmap levels for a provided image
+RAYLIB_RLAPI void RaylibImageDither(RaylibImage *image, int rBpp, int gBpp, int bBpp, int aBpp);                            // Dither image data to 16bpp or lower (Floyd-Steinberg dithering)
+RAYLIB_RLAPI void RaylibImageFlipVertical(RaylibImage *image);                                                              // Flip image vertically
+RAYLIB_RLAPI void RaylibImageFlipHorizontal(RaylibImage *image);                                                            // Flip image horizontally
+RAYLIB_RLAPI void RaylibImageRotate(RaylibImage *image, int degrees);                                                       // Rotate image by input angle in degrees (-359 to 359)
+RAYLIB_RLAPI void RaylibImageRotateCW(RaylibImage *image);                                                                  // Rotate image clockwise 90deg
+RAYLIB_RLAPI void RaylibImageRotateCCW(RaylibImage *image);                                                                 // Rotate image counter-clockwise 90deg
+RAYLIB_RLAPI void RaylibImageColorTint(RaylibImage *image, RaylibColor color);                                                    // Modify image color: tint
+RAYLIB_RLAPI void RaylibImageColorInvert(RaylibImage *image);                                                               // Modify image color: invert
+RAYLIB_RLAPI void RaylibImageColorGrayscale(RaylibImage *image);                                                            // Modify image color: grayscale
+RAYLIB_RLAPI void RaylibImageColorContrast(RaylibImage *image, float contrast);                                             // Modify image color: contrast (-100 to 100)
+RAYLIB_RLAPI void RaylibImageColorBrightness(RaylibImage *image, int brightness);                                           // Modify image color: brightness (-255 to 255)
+RAYLIB_RLAPI void RaylibImageColorReplace(RaylibImage *image, RaylibColor color, RaylibColor replace);                                  // Modify image color: replace color
+RAYLIB_RLAPI RaylibColor *RaylibLoadImageColors(RaylibImage image);                                                               // Load color data from image as a RaylibColor array (RGBA - 32bit)
+RAYLIB_RLAPI RaylibColor *RaylibLoadImagePalette(RaylibImage image, int maxPaletteSize, int *colorCount);                         // Load colors palette from image as a RaylibColor array (RGBA - 32bit)
+RAYLIB_RLAPI void RaylibUnloadImageColors(RaylibColor *colors);                                                             // Unload color data loaded with RaylibLoadImageColors()
+RAYLIB_RLAPI void RaylibUnloadImagePalette(RaylibColor *colors);                                                            // Unload colors palette loaded with RaylibLoadImagePalette()
+RAYLIB_RLAPI RaylibRectangle RaylibGetImageAlphaBorder(RaylibImage image, float threshold);                                       // Get image alpha border rectangle
+RAYLIB_RLAPI RaylibColor RaylibGetImageColor(RaylibImage image, int x, int y);                                                    // Get image pixel color at (x, y) position
 
-// Image drawing functions
-// NOTE: Image software-rendering functions (CPU)
-RLAPI void ImageClearBackground(Image *dst, Color color);                                                // Clear image background with given color
-RLAPI void ImageDrawPixel(Image *dst, int posX, int posY, Color color);                                  // Draw pixel within an image
-RLAPI void ImageDrawPixelV(Image *dst, Vector2 position, Color color);                                   // Draw pixel within an image (Vector version)
-RLAPI void ImageDrawLine(Image *dst, int startPosX, int startPosY, int endPosX, int endPosY, Color color); // Draw line within an image
-RLAPI void ImageDrawLineV(Image *dst, Vector2 start, Vector2 end, Color color);                          // Draw line within an image (Vector version)
-RLAPI void ImageDrawCircle(Image *dst, int centerX, int centerY, int radius, Color color);               // Draw a filled circle within an image
-RLAPI void ImageDrawCircleV(Image *dst, Vector2 center, int radius, Color color);                        // Draw a filled circle within an image (Vector version)
-RLAPI void ImageDrawCircleLines(Image *dst, int centerX, int centerY, int radius, Color color);          // Draw circle outline within an image
-RLAPI void ImageDrawCircleLinesV(Image *dst, Vector2 center, int radius, Color color);                   // Draw circle outline within an image (Vector version)
-RLAPI void ImageDrawRectangle(Image *dst, int posX, int posY, int width, int height, Color color);       // Draw rectangle within an image
-RLAPI void ImageDrawRectangleV(Image *dst, Vector2 position, Vector2 size, Color color);                 // Draw rectangle within an image (Vector version)
-RLAPI void ImageDrawRectangleRec(Image *dst, Rectangle rec, Color color);                                // Draw rectangle within an image
-RLAPI void ImageDrawRectangleLines(Image *dst, Rectangle rec, int thick, Color color);                   // Draw rectangle lines within an image
-RLAPI void ImageDraw(Image *dst, Image src, Rectangle srcRec, Rectangle dstRec, Color tint);             // Draw a source image within a destination image (tint applied to source)
-RLAPI void ImageDrawText(Image *dst, const char *text, int posX, int posY, int fontSize, Color color);   // Draw text (using default font) within an image (destination)
-RLAPI void ImageDrawTextEx(Image *dst, Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint); // Draw text (custom sprite font) within an image (destination)
+// RaylibImage drawing functions
+// NOTE: RaylibImage software-rendering functions (CPU)
+RAYLIB_RLAPI void RaylibImageClearBackground(RaylibImage *dst, RaylibColor color);                                                // Clear image background with given color
+RAYLIB_RLAPI void RaylibImageDrawPixel(RaylibImage *dst, int posX, int posY, RaylibColor color);                                  // Draw pixel within an image
+RAYLIB_RLAPI void RaylibImageDrawPixelV(RaylibImage *dst, RaylibVector2 position, RaylibColor color);                                   // Draw pixel within an image (Vector version)
+RAYLIB_RLAPI void RaylibImageDrawLine(RaylibImage *dst, int startPosX, int startPosY, int endPosX, int endPosY, RaylibColor color); // Draw line within an image
+RAYLIB_RLAPI void RaylibImageDrawLineV(RaylibImage *dst, RaylibVector2 start, RaylibVector2 end, RaylibColor color);                          // Draw line within an image (Vector version)
+RAYLIB_RLAPI void RaylibImageDrawCircle(RaylibImage *dst, int centerX, int centerY, int radius, RaylibColor color);               // Draw a filled circle within an image
+RAYLIB_RLAPI void RaylibImageDrawCircleV(RaylibImage *dst, RaylibVector2 center, int radius, RaylibColor color);                        // Draw a filled circle within an image (Vector version)
+RAYLIB_RLAPI void RaylibImageDrawCircleLines(RaylibImage *dst, int centerX, int centerY, int radius, RaylibColor color);          // Draw circle outline within an image
+RAYLIB_RLAPI void RaylibImageDrawCircleLinesV(RaylibImage *dst, RaylibVector2 center, int radius, RaylibColor color);                   // Draw circle outline within an image (Vector version)
+RAYLIB_RLAPI void RaylibImageDrawRectangle(RaylibImage *dst, int posX, int posY, int width, int height, RaylibColor color);       // Draw rectangle within an image
+RAYLIB_RLAPI void RaylibImageDrawRectangleV(RaylibImage *dst, RaylibVector2 position, RaylibVector2 size, RaylibColor color);                 // Draw rectangle within an image (Vector version)
+RAYLIB_RLAPI void RaylibImageDrawRectangleRec(RaylibImage *dst, RaylibRectangle rec, RaylibColor color);                                // Draw rectangle within an image
+RAYLIB_RLAPI void RaylibImageDrawRectangleLines(RaylibImage *dst, RaylibRectangle rec, int thick, RaylibColor color);                   // Draw rectangle lines within an image
+RAYLIB_RLAPI void RaylibImageDraw(RaylibImage *dst, RaylibImage src, RaylibRectangle srcRec, RaylibRectangle dstRec, RaylibColor tint);             // Draw a source image within a destination image (tint applied to source)
+RAYLIB_RLAPI void RaylibImageDrawText(RaylibImage *dst, const char *text, int posX, int posY, int fontSize, RaylibColor color);   // Draw text (using default font) within an image (destination)
+RAYLIB_RLAPI void RaylibImageDrawTextEx(RaylibImage *dst, RaylibFont font, const char *text, RaylibVector2 position, float fontSize, float spacing, RaylibColor tint); // Draw text (custom sprite font) within an image (destination)
 
-// Texture loading functions
+// RaylibTexture loading functions
 // NOTE: These functions require GPU access
-RLAPI Texture2D LoadTexture(const char *fileName);                                                       // Load texture from file into GPU memory (VRAM)
-RLAPI Texture2D LoadTextureFromImage(Image image);                                                       // Load texture from image data
-RLAPI TextureCubemap LoadTextureCubemap(Image image, int layout);                                        // Load cubemap from image, multiple image cubemap layouts supported
-RLAPI RenderTexture2D LoadRenderTexture(int width, int height);                                          // Load texture for rendering (framebuffer)
-RLAPI bool IsTextureReady(Texture2D texture);                                                            // Check if a texture is ready
-RLAPI void UnloadTexture(Texture2D texture);                                                             // Unload texture from GPU memory (VRAM)
-RLAPI bool IsRenderTextureReady(RenderTexture2D target);                                                 // Check if a render texture is ready
-RLAPI void UnloadRenderTexture(RenderTexture2D target);                                                  // Unload render texture from GPU memory (VRAM)
-RLAPI void UpdateTexture(Texture2D texture, const void *pixels);                                         // Update GPU texture with new data
-RLAPI void UpdateTextureRec(Texture2D texture, Rectangle rec, const void *pixels);                       // Update GPU texture rectangle with new data
+RAYLIB_RLAPI Texture2D RaylibLoadTexture(const char *fileName);                                                       // Load texture from file into GPU memory (VRAM)
+RAYLIB_RLAPI Texture2D RaylibLoadTextureFromImage(RaylibImage image);                                                       // Load texture from image data
+RAYLIB_RLAPI TextureCubemap RaylibLoadTextureCubemap(RaylibImage image, int layout);                                        // Load cubemap from image, multiple image cubemap layouts supported
+RAYLIB_RLAPI RenderTexture2D RaylibLoadRenderTexture(int width, int height);                                          // Load texture for rendering (framebuffer)
+RAYLIB_RLAPI bool RaylibIsTextureReady(Texture2D texture);                                                            // Check if a texture is ready
+RAYLIB_RLAPI void RaylibUnloadTexture(Texture2D texture);                                                             // Unload texture from GPU memory (VRAM)
+RAYLIB_RLAPI bool RaylibIsRenderTextureReady(RenderTexture2D target);                                                 // Check if a render texture is ready
+RAYLIB_RLAPI void RaylibUnloadRenderTexture(RenderTexture2D target);                                                  // Unload render texture from GPU memory (VRAM)
+RAYLIB_RLAPI void RaylibUpdateTexture(Texture2D texture, const void *pixels);                                         // Update GPU texture with new data
+RAYLIB_RLAPI void RaylibUpdateTextureRec(Texture2D texture, RaylibRectangle rec, const void *pixels);                       // Update GPU texture rectangle with new data
 
-// Texture configuration functions
-RLAPI void GenTextureMipmaps(Texture2D *texture);                                                        // Generate GPU mipmaps for a texture
-RLAPI void SetTextureFilter(Texture2D texture, int filter);                                              // Set texture scaling filter mode
-RLAPI void SetTextureWrap(Texture2D texture, int wrap);                                                  // Set texture wrapping mode
+// RaylibTexture configuration functions
+RAYLIB_RLAPI void RaylibGenTextureMipmaps(Texture2D *texture);                                                        // Generate GPU mipmaps for a texture
+RAYLIB_RLAPI void RaylibSetTextureFilter(Texture2D texture, int filter);                                              // Set texture scaling filter mode
+RAYLIB_RLAPI void RaylibSetTextureWrap(Texture2D texture, int wrap);                                                  // Set texture wrapping mode
 
-// Texture drawing functions
-RLAPI void DrawTexture(Texture2D texture, int posX, int posY, Color tint);                               // Draw a Texture2D
-RLAPI void DrawTextureV(Texture2D texture, Vector2 position, Color tint);                                // Draw a Texture2D with position defined as Vector2
-RLAPI void DrawTextureEx(Texture2D texture, Vector2 position, float rotation, float scale, Color tint);  // Draw a Texture2D with extended parameters
-RLAPI void DrawTextureRec(Texture2D texture, Rectangle source, Vector2 position, Color tint);            // Draw a part of a texture defined by a rectangle
-RLAPI void DrawTexturePro(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Color tint); // Draw a part of a texture defined by a rectangle with 'pro' parameters
-RLAPI void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest, Vector2 origin, float rotation, Color tint); // Draws a texture (or part of it) that stretches or shrinks nicely
+// RaylibTexture drawing functions
+RAYLIB_RLAPI void RaylibDrawTexture(Texture2D texture, int posX, int posY, RaylibColor tint);                               // Draw a Texture2D
+RAYLIB_RLAPI void RaylibDrawTextureV(Texture2D texture, RaylibVector2 position, RaylibColor tint);                                // Draw a Texture2D with position defined as RaylibVector2
+RAYLIB_RLAPI void RaylibDrawTextureEx(Texture2D texture, RaylibVector2 position, float rotation, float scale, RaylibColor tint);  // Draw a Texture2D with extended parameters
+RAYLIB_RLAPI void RaylibDrawTextureRec(Texture2D texture, RaylibRectangle source, RaylibVector2 position, RaylibColor tint);            // Draw a part of a texture defined by a rectangle
+RAYLIB_RLAPI void RaylibDrawTexturePro(Texture2D texture, RaylibRectangle source, RaylibRectangle dest, RaylibVector2 origin, float rotation, RaylibColor tint); // Draw a part of a texture defined by a rectangle with 'pro' parameters
+RAYLIB_RLAPI void RaylibDrawTextureNPatch(Texture2D texture, RaylibNPatchInfo nPatchInfo, RaylibRectangle dest, RaylibVector2 origin, float rotation, RaylibColor tint); // Draws a texture (or part of it) that stretches or shrinks nicely
 
-// Color/pixel related functions
-RLAPI bool ColorIsEqual(Color col1, Color col2);                            // Check if two colors are equal
-RLAPI Color Fade(Color color, float alpha);                                 // Get color with alpha applied, alpha goes from 0.0f to 1.0f
-RLAPI int ColorToInt(Color color);                                          // Get hexadecimal value for a Color (0xRRGGBBAA)
-RLAPI Vector4 ColorNormalize(Color color);                                  // Get Color normalized as float [0..1]
-RLAPI Color ColorFromNormalized(Vector4 normalized);                        // Get Color from normalized values [0..1]
-RLAPI Vector3 ColorToHSV(Color color);                                      // Get HSV values for a Color, hue [0..360], saturation/value [0..1]
-RLAPI Color ColorFromHSV(float hue, float saturation, float value);         // Get a Color from HSV values, hue [0..360], saturation/value [0..1]
-RLAPI Color ColorTint(Color color, Color tint);                             // Get color multiplied with another color
-RLAPI Color ColorBrightness(Color color, float factor);                     // Get color with brightness correction, brightness factor goes from -1.0f to 1.0f
-RLAPI Color ColorContrast(Color color, float contrast);                     // Get color with contrast correction, contrast values between -1.0f and 1.0f
-RLAPI Color ColorAlpha(Color color, float alpha);                           // Get color with alpha applied, alpha goes from 0.0f to 1.0f
-RLAPI Color ColorAlphaBlend(Color dst, Color src, Color tint);              // Get src alpha-blended into dst color with tint
-RLAPI Color GetColor(unsigned int hexValue);                                // Get Color structure from hexadecimal value
-RLAPI Color GetPixelColor(void *srcPtr, int format);                        // Get Color from a source pixel pointer of certain format
-RLAPI void SetPixelColor(void *dstPtr, Color color, int format);            // Set color formatted into destination pixel pointer
-RLAPI int GetPixelDataSize(int width, int height, int format);              // Get pixel data size in bytes for certain format
+// RaylibColor/pixel related functions
+RAYLIB_RLAPI bool RaylibColorIsEqual(RaylibColor col1, RaylibColor col2);                            // Check if two colors are equal
+RAYLIB_RLAPI RaylibColor RaylibFade(RaylibColor color, float alpha);                                 // Get color with alpha applied, alpha goes from 0.0f to 1.0f
+RAYLIB_RLAPI int RaylibColorToInt(RaylibColor color);                                          // Get hexadecimal value for a RaylibColor (0xRRGGBBAA)
+RAYLIB_RLAPI RaylibVector4 RaylibColorNormalize(RaylibColor color);                                  // Get RaylibColor normalized as float [0..1]
+RAYLIB_RLAPI RaylibColor RaylibColorFromNormalized(RaylibVector4 normalized);                        // Get RaylibColor from normalized values [0..1]
+RAYLIB_RLAPI RaylibVector3 RaylibColorToHSV(RaylibColor color);                                      // Get HSV values for a RaylibColor, hue [0..360], saturation/value [0..1]
+RAYLIB_RLAPI RaylibColor RaylibColorFromHSV(float hue, float saturation, float value);         // Get a RaylibColor from HSV values, hue [0..360], saturation/value [0..1]
+RAYLIB_RLAPI RaylibColor RaylibColorTint(RaylibColor color, RaylibColor tint);                             // Get color multiplied with another color
+RAYLIB_RLAPI RaylibColor RaylibColorBrightness(RaylibColor color, float factor);                     // Get color with brightness correction, brightness factor goes from -1.0f to 1.0f
+RAYLIB_RLAPI RaylibColor RaylibColorContrast(RaylibColor color, float contrast);                     // Get color with contrast correction, contrast values between -1.0f and 1.0f
+RAYLIB_RLAPI RaylibColor RaylibColorAlpha(RaylibColor color, float alpha);                           // Get color with alpha applied, alpha goes from 0.0f to 1.0f
+RAYLIB_RLAPI RaylibColor RaylibColorAlphaBlend(RaylibColor dst, RaylibColor src, RaylibColor tint);              // Get src alpha-blended into dst color with tint
+RAYLIB_RLAPI RaylibColor RaylibGetColor(unsigned int hexValue);                                // Get RaylibColor structure from hexadecimal value
+RAYLIB_RLAPI RaylibColor RaylibGetPixelColor(void *srcPtr, int format);                        // Get RaylibColor from a source pixel pointer of certain format
+RAYLIB_RLAPI void RaylibSetPixelColor(void *dstPtr, RaylibColor color, int format);            // Set color formatted into destination pixel pointer
+RAYLIB_RLAPI int RaylibGetPixelDataSize(int width, int height, int format);              // Get pixel data size in bytes for certain format
 
 //------------------------------------------------------------------------------------
-// Font Loading and Text Drawing Functions (Module: text)
+// RaylibFont Loading and Text Drawing Functions (Module: text)
 //------------------------------------------------------------------------------------
 
-// Font loading/unloading functions
-RLAPI Font GetFontDefault(void);                                                            // Get the default Font
-RLAPI Font LoadFont(const char *fileName);                                                  // Load font from file into GPU memory (VRAM)
-RLAPI Font LoadFontEx(const char *fileName, int fontSize, int *codepoints, int codepointCount);  // Load font from file with extended parameters, use NULL for codepoints and 0 for codepointCount to load the default character set
-RLAPI Font LoadFontFromImage(Image image, Color key, int firstChar);                        // Load font from Image (XNA style)
-RLAPI Font LoadFontFromMemory(const char *fileType, const unsigned char *fileData, int dataSize, int fontSize, int *codepoints, int codepointCount); // Load font from memory buffer, fileType refers to extension: i.e. '.ttf'
-RLAPI bool IsFontReady(Font font);                                                          // Check if a font is ready
-RLAPI GlyphInfo *LoadFontData(const unsigned char *fileData, int dataSize, int fontSize, int *codepoints, int codepointCount, int type); // Load font data for further use
-RLAPI Image GenImageFontAtlas(const GlyphInfo *glyphs, Rectangle **glyphRecs, int glyphCount, int fontSize, int padding, int packMethod); // Generate image font atlas using chars info
-RLAPI void UnloadFontData(GlyphInfo *glyphs, int glyphCount);                               // Unload font chars info data (RAM)
-RLAPI void UnloadFont(Font font);                                                           // Unload font from GPU memory (VRAM)
-RLAPI bool ExportFontAsCode(Font font, const char *fileName);                               // Export font as code file, returns true on success
+// RaylibFont loading/unloading functions
+RAYLIB_RLAPI RaylibFont RaylibGetFontDefault(void);                                                            // Get the default RaylibFont
+RAYLIB_RLAPI RaylibFont RaylibLoadFont(const char *fileName);                                                  // Load font from file into GPU memory (VRAM)
+RAYLIB_RLAPI RaylibFont RaylibLoadFontEx(const char *fileName, int fontSize, int *codepoints, int codepointCount);  // Load font from file with extended parameters, use NULL for codepoints and 0 for codepointCount to load the default character set
+RAYLIB_RLAPI RaylibFont RaylibLoadFontFromImage(RaylibImage image, RaylibColor key, int firstChar);                        // Load font from RaylibImage (XNA style)
+RAYLIB_RLAPI RaylibFont RaylibLoadFontFromMemory(const char *fileType, const unsigned char *fileData, int dataSize, int fontSize, int *codepoints, int codepointCount); // Load font from memory buffer, fileType refers to extension: i.e. '.ttf'
+RAYLIB_RLAPI bool RaylibIsFontReady(RaylibFont font);                                                          // Check if a font is ready
+RAYLIB_RLAPI RaylibGlyphInfo *RaylibLoadFontData(const unsigned char *fileData, int dataSize, int fontSize, int *codepoints, int codepointCount, int type); // Load font data for further use
+RAYLIB_RLAPI RaylibImage RaylibGenImageFontAtlas(const RaylibGlyphInfo *glyphs, RaylibRectangle **glyphRecs, int glyphCount, int fontSize, int padding, int packMethod); // Generate image font atlas using chars info
+RAYLIB_RLAPI void RaylibUnloadFontData(RaylibGlyphInfo *glyphs, int glyphCount);                               // Unload font chars info data (RAM)
+RAYLIB_RLAPI void RaylibUnloadFont(RaylibFont font);                                                           // Unload font from GPU memory (VRAM)
+RAYLIB_RLAPI bool RaylibExportFontAsCode(RaylibFont font, const char *fileName);                               // Export font as code file, returns true on success
 
 // Text drawing functions
-RLAPI void DrawFPS(int posX, int posY);                                                     // Draw current FPS
-RLAPI void DrawText(const char *text, int posX, int posY, int fontSize, Color color);       // Draw text (using default font)
-RLAPI void DrawTextEx(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint); // Draw text using font and additional parameters
-RLAPI void DrawTextPro(Font font, const char *text, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, Color tint); // Draw text using Font and pro parameters (rotation)
-RLAPI void DrawTextCodepoint(Font font, int codepoint, Vector2 position, float fontSize, Color tint); // Draw one character (codepoint)
-RLAPI void DrawTextCodepoints(Font font, const int *codepoints, int codepointCount, Vector2 position, float fontSize, float spacing, Color tint); // Draw multiple character (codepoint)
+RAYLIB_RLAPI void RaylibDrawFPS(int posX, int posY);                                                     // Draw current FPS
+RAYLIB_RLAPI void RaylibDrawText(const char *text, int posX, int posY, int fontSize, RaylibColor color);       // Draw text (using default font)
+RAYLIB_RLAPI void RaylibDrawTextEx(RaylibFont font, const char *text, RaylibVector2 position, float fontSize, float spacing, RaylibColor tint); // Draw text using font and additional parameters
+RAYLIB_RLAPI void RaylibDrawTextPro(RaylibFont font, const char *text, RaylibVector2 position, RaylibVector2 origin, float rotation, float fontSize, float spacing, RaylibColor tint); // Draw text using RaylibFont and pro parameters (rotation)
+RAYLIB_RLAPI void RaylibDrawTextCodepoint(RaylibFont font, int codepoint, RaylibVector2 position, float fontSize, RaylibColor tint); // Draw one character (codepoint)
+RAYLIB_RLAPI void RaylibDrawTextCodepoints(RaylibFont font, const int *codepoints, int codepointCount, RaylibVector2 position, float fontSize, float spacing, RaylibColor tint); // Draw multiple character (codepoint)
 
 // Text font info functions
-RLAPI void SetTextLineSpacing(int spacing);                                                 // Set vertical line spacing when drawing with line-breaks
-RLAPI int MeasureText(const char *text, int fontSize);                                      // Measure string width for default font
-RLAPI Vector2 MeasureTextEx(Font font, const char *text, float fontSize, float spacing);    // Measure string size for Font
-RLAPI int GetGlyphIndex(Font font, int codepoint);                                          // Get glyph index position in font for a codepoint (unicode character), fallback to '?' if not found
-RLAPI GlyphInfo GetGlyphInfo(Font font, int codepoint);                                     // Get glyph font info data for a codepoint (unicode character), fallback to '?' if not found
-RLAPI Rectangle GetGlyphAtlasRec(Font font, int codepoint);                                 // Get glyph rectangle in font atlas for a codepoint (unicode character), fallback to '?' if not found
+RAYLIB_RLAPI void RaylibSetTextLineSpacing(int spacing);                                                 // Set vertical line spacing when drawing with line-breaks
+RAYLIB_RLAPI int RaylibMeasureText(const char *text, int fontSize);                                      // Measure string width for default font
+RAYLIB_RLAPI RaylibVector2 RaylibMeasureTextEx(RaylibFont font, const char *text, float fontSize, float spacing);    // Measure string size for RaylibFont
+RAYLIB_RLAPI int RaylibGetGlyphIndex(RaylibFont font, int codepoint);                                          // Get glyph index position in font for a codepoint (unicode character), fallback to '?' if not found
+RAYLIB_RLAPI RaylibGlyphInfo RaylibGetGlyphInfo(RaylibFont font, int codepoint);                                     // Get glyph font info data for a codepoint (unicode character), fallback to '?' if not found
+RAYLIB_RLAPI RaylibRectangle RaylibGetGlyphAtlasRec(RaylibFont font, int codepoint);                                 // Get glyph rectangle in font atlas for a codepoint (unicode character), fallback to '?' if not found
 
 // Text codepoints management functions (unicode characters)
-RLAPI char *LoadUTF8(const int *codepoints, int length);                // Load UTF-8 text encoded from codepoints array
-RLAPI void UnloadUTF8(char *text);                                      // Unload UTF-8 text encoded from codepoints array
-RLAPI int *LoadCodepoints(const char *text, int *count);                // Load all codepoints from a UTF-8 text string, codepoints count returned by parameter
-RLAPI void UnloadCodepoints(int *codepoints);                           // Unload codepoints data from memory
-RLAPI int GetCodepointCount(const char *text);                          // Get total number of codepoints in a UTF-8 encoded string
-RLAPI int GetCodepoint(const char *text, int *codepointSize);           // Get next codepoint in a UTF-8 encoded string, 0x3f('?') is returned on failure
-RLAPI int GetCodepointNext(const char *text, int *codepointSize);       // Get next codepoint in a UTF-8 encoded string, 0x3f('?') is returned on failure
-RLAPI int GetCodepointPrevious(const char *text, int *codepointSize);   // Get previous codepoint in a UTF-8 encoded string, 0x3f('?') is returned on failure
-RLAPI const char *CodepointToUTF8(int codepoint, int *utf8Size);        // Encode one codepoint into UTF-8 byte array (array length returned as parameter)
+RAYLIB_RLAPI char *RaylibLoadUTF8(const int *codepoints, int length);                // Load UTF-8 text encoded from codepoints array
+RAYLIB_RLAPI void RaylibUnloadUTF8(char *text);                                      // Unload UTF-8 text encoded from codepoints array
+RAYLIB_RLAPI int *RaylibLoadCodepoints(const char *text, int *count);                // Load all codepoints from a UTF-8 text string, codepoints count returned by parameter
+RAYLIB_RLAPI void RaylibUnloadCodepoints(int *codepoints);                           // Unload codepoints data from memory
+RAYLIB_RLAPI int RaylibGetCodepointCount(const char *text);                          // Get total number of codepoints in a UTF-8 encoded string
+RAYLIB_RLAPI int RaylibGetCodepoint(const char *text, int *codepointSize);           // Get next codepoint in a UTF-8 encoded string, 0x3f('?') is returned on failure
+RAYLIB_RLAPI int RaylibGetCodepointNext(const char *text, int *codepointSize);       // Get next codepoint in a UTF-8 encoded string, 0x3f('?') is returned on failure
+RAYLIB_RLAPI int RaylibGetCodepointPrevious(const char *text, int *codepointSize);   // Get previous codepoint in a UTF-8 encoded string, 0x3f('?') is returned on failure
+RAYLIB_RLAPI const char *RaylibCodepointToUTF8(int codepoint, int *utf8Size);        // Encode one codepoint into UTF-8 byte array (array length returned as parameter)
 
 // Text strings management functions (no UTF-8 strings, only byte chars)
 // NOTE: Some strings allocate memory internally for returned strings, just be careful!
-RLAPI int TextCopy(char *dst, const char *src);                                             // Copy one string to another, returns bytes copied
-RLAPI bool TextIsEqual(const char *text1, const char *text2);                               // Check if two text string are equal
-RLAPI unsigned int TextLength(const char *text);                                            // Get text length, checks for '\0' ending
-RLAPI const char *TextFormat(const char *text, ...);                                        // Text formatting with variables (sprintf() style)
-RLAPI const char *TextSubtext(const char *text, int position, int length);                  // Get a piece of a text string
-RLAPI char *TextReplace(const char *text, const char *replace, const char *by);             // Replace text string (WARNING: memory must be freed!)
-RLAPI char *TextInsert(const char *text, const char *insert, int position);                 // Insert text in a position (WARNING: memory must be freed!)
-RLAPI const char *TextJoin(const char **textList, int count, const char *delimiter);        // Join text strings with delimiter
-RLAPI const char **TextSplit(const char *text, char delimiter, int *count);                 // Split text into multiple strings
-RLAPI void TextAppend(char *text, const char *append, int *position);                       // Append text at specific position and move cursor!
-RLAPI int TextFindIndex(const char *text, const char *find);                                // Find first text occurrence within a string
-RLAPI const char *TextToUpper(const char *text);                      // Get upper case version of provided string
-RLAPI const char *TextToLower(const char *text);                      // Get lower case version of provided string
-RLAPI const char *TextToPascal(const char *text);                     // Get Pascal case notation version of provided string
-RLAPI const char *TextToSnake(const char *text);                      // Get Snake case notation version of provided string
-RLAPI const char *TextToCamel(const char *text);                      // Get Camel case notation version of provided string
+RAYLIB_RLAPI int RaylibTextCopy(char *dst, const char *src);                                             // Copy one string to another, returns bytes copied
+RAYLIB_RLAPI bool RaylibTextIsEqual(const char *text1, const char *text2);                               // Check if two text string are equal
+RAYLIB_RLAPI unsigned int RaylibTextLength(const char *text);                                            // Get text length, checks for '\0' ending
+RAYLIB_RLAPI const char *RaylibTextFormat(const char *text, ...);                                        // Text formatting with variables (sprintf() style)
+RAYLIB_RLAPI const char *RaylibTextSubtext(const char *text, int position, int length);                  // Get a piece of a text string
+RAYLIB_RLAPI char *RaylibTextReplace(const char *text, const char *replace, const char *by);             // Replace text string (WARNING: memory must be freed!)
+RAYLIB_RLAPI char *RaylibTextInsert(const char *text, const char *insert, int position);                 // Insert text in a position (WARNING: memory must be freed!)
+RAYLIB_RLAPI const char *RaylibTextJoin(const char **textList, int count, const char *delimiter);        // Join text strings with delimiter
+RAYLIB_RLAPI const char **RaylibTextSplit(const char *text, char delimiter, int *count);                 // Split text into multiple strings
+RAYLIB_RLAPI void RaylibTextAppend(char *text, const char *append, int *position);                       // Append text at specific position and move cursor!
+RAYLIB_RLAPI int RaylibTextFindIndex(const char *text, const char *find);                                // Find first text occurrence within a string
+RAYLIB_RLAPI const char *RaylibTextToUpper(const char *text);                      // Get upper case version of provided string
+RAYLIB_RLAPI const char *RaylibTextToLower(const char *text);                      // Get lower case version of provided string
+RAYLIB_RLAPI const char *RaylibTextToPascal(const char *text);                     // Get Pascal case notation version of provided string
+RAYLIB_RLAPI const char *RaylibTextToSnake(const char *text);                      // Get Snake case notation version of provided string
+RAYLIB_RLAPI const char *RaylibTextToCamel(const char *text);                      // Get Camel case notation version of provided string
 
-RLAPI int TextToInteger(const char *text);                            // Get integer value from text (negative values not supported)
-RLAPI float TextToFloat(const char *text);                            // Get float value from text (negative values not supported)
+RAYLIB_RLAPI int RaylibTextToInteger(const char *text);                            // Get integer value from text (negative values not supported)
+RAYLIB_RLAPI float RaylibTextToFloat(const char *text);                            // Get float value from text (negative values not supported)
 
 //------------------------------------------------------------------------------------
 // Basic 3d Shapes Drawing Functions (Module: models)
 //------------------------------------------------------------------------------------
 
 // Basic geometric 3D shapes drawing functions
-RLAPI void DrawLine3D(Vector3 startPos, Vector3 endPos, Color color);                                    // Draw a line in 3D world space
-RLAPI void DrawPoint3D(Vector3 position, Color color);                                                   // Draw a point in 3D space, actually a small line
-RLAPI void DrawCircle3D(Vector3 center, float radius, Vector3 rotationAxis, float rotationAngle, Color color); // Draw a circle in 3D world space
-RLAPI void DrawTriangle3D(Vector3 v1, Vector3 v2, Vector3 v3, Color color);                              // Draw a color-filled triangle (vertex in counter-clockwise order!)
-RLAPI void DrawTriangleStrip3D(Vector3 *points, int pointCount, Color color);                            // Draw a triangle strip defined by points
-RLAPI void DrawCube(Vector3 position, float width, float height, float length, Color color);             // Draw cube
-RLAPI void DrawCubeV(Vector3 position, Vector3 size, Color color);                                       // Draw cube (Vector version)
-RLAPI void DrawCubeWires(Vector3 position, float width, float height, float length, Color color);        // Draw cube wires
-RLAPI void DrawCubeWiresV(Vector3 position, Vector3 size, Color color);                                  // Draw cube wires (Vector version)
-RLAPI void DrawSphere(Vector3 centerPos, float radius, Color color);                                     // Draw sphere
-RLAPI void DrawSphereEx(Vector3 centerPos, float radius, int rings, int slices, Color color);            // Draw sphere with extended parameters
-RLAPI void DrawSphereWires(Vector3 centerPos, float radius, int rings, int slices, Color color);         // Draw sphere wires
-RLAPI void DrawCylinder(Vector3 position, float radiusTop, float radiusBottom, float height, int slices, Color color); // Draw a cylinder/cone
-RLAPI void DrawCylinderEx(Vector3 startPos, Vector3 endPos, float startRadius, float endRadius, int sides, Color color); // Draw a cylinder with base at startPos and top at endPos
-RLAPI void DrawCylinderWires(Vector3 position, float radiusTop, float radiusBottom, float height, int slices, Color color); // Draw a cylinder/cone wires
-RLAPI void DrawCylinderWiresEx(Vector3 startPos, Vector3 endPos, float startRadius, float endRadius, int sides, Color color); // Draw a cylinder wires with base at startPos and top at endPos
-RLAPI void DrawCapsule(Vector3 startPos, Vector3 endPos, float radius, int slices, int rings, Color color); // Draw a capsule with the center of its sphere caps at startPos and endPos
-RLAPI void DrawCapsuleWires(Vector3 startPos, Vector3 endPos, float radius, int slices, int rings, Color color); // Draw capsule wireframe with the center of its sphere caps at startPos and endPos
-RLAPI void DrawPlane(Vector3 centerPos, Vector2 size, Color color);                                      // Draw a plane XZ
-RLAPI void DrawRay(Ray ray, Color color);                                                                // Draw a ray line
-RLAPI void DrawGrid(int slices, float spacing);                                                          // Draw a grid (centered at (0, 0, 0))
+RAYLIB_RLAPI void RaylibDrawLine3D(RaylibVector3 startPos, RaylibVector3 endPos, RaylibColor color);                                    // Draw a line in 3D world space
+RAYLIB_RLAPI void RaylibDrawPoint3D(RaylibVector3 position, RaylibColor color);                                                   // Draw a point in 3D space, actually a small line
+RAYLIB_RLAPI void RaylibDrawCircle3D(RaylibVector3 center, float radius, RaylibVector3 rotationAxis, float rotationAngle, RaylibColor color); // Draw a circle in 3D world space
+RAYLIB_RLAPI void RaylibDrawTriangle3D(RaylibVector3 v1, RaylibVector3 v2, RaylibVector3 v3, RaylibColor color);                              // Draw a color-filled triangle (vertex in counter-clockwise order!)
+RAYLIB_RLAPI void RaylibDrawTriangleStrip3D(RaylibVector3 *points, int pointCount, RaylibColor color);                            // Draw a triangle strip defined by points
+RAYLIB_RLAPI void RaylibDrawCube(RaylibVector3 position, float width, float height, float length, RaylibColor color);             // Draw cube
+RAYLIB_RLAPI void RaylibDrawCubeV(RaylibVector3 position, RaylibVector3 size, RaylibColor color);                                       // Draw cube (Vector version)
+RAYLIB_RLAPI void RaylibDrawCubeWires(RaylibVector3 position, float width, float height, float length, RaylibColor color);        // Draw cube wires
+RAYLIB_RLAPI void RaylibDrawCubeWiresV(RaylibVector3 position, RaylibVector3 size, RaylibColor color);                                  // Draw cube wires (Vector version)
+RAYLIB_RLAPI void RaylibDrawSphere(RaylibVector3 centerPos, float radius, RaylibColor color);                                     // Draw sphere
+RAYLIB_RLAPI void RaylibDrawSphereEx(RaylibVector3 centerPos, float radius, int rings, int slices, RaylibColor color);            // Draw sphere with extended parameters
+RAYLIB_RLAPI void RaylibDrawSphereWires(RaylibVector3 centerPos, float radius, int rings, int slices, RaylibColor color);         // Draw sphere wires
+RAYLIB_RLAPI void RaylibDrawCylinder(RaylibVector3 position, float radiusTop, float radiusBottom, float height, int slices, RaylibColor color); // Draw a cylinder/cone
+RAYLIB_RLAPI void RaylibDrawCylinderEx(RaylibVector3 startPos, RaylibVector3 endPos, float startRadius, float endRadius, int sides, RaylibColor color); // Draw a cylinder with base at startPos and top at endPos
+RAYLIB_RLAPI void RaylibDrawCylinderWires(RaylibVector3 position, float radiusTop, float radiusBottom, float height, int slices, RaylibColor color); // Draw a cylinder/cone wires
+RAYLIB_RLAPI void RaylibDrawCylinderWiresEx(RaylibVector3 startPos, RaylibVector3 endPos, float startRadius, float endRadius, int sides, RaylibColor color); // Draw a cylinder wires with base at startPos and top at endPos
+RAYLIB_RLAPI void RaylibDrawCapsule(RaylibVector3 startPos, RaylibVector3 endPos, float radius, int slices, int rings, RaylibColor color); // Draw a capsule with the center of its sphere caps at startPos and endPos
+RAYLIB_RLAPI void RaylibDrawCapsuleWires(RaylibVector3 startPos, RaylibVector3 endPos, float radius, int slices, int rings, RaylibColor color); // Draw capsule wireframe with the center of its sphere caps at startPos and endPos
+RAYLIB_RLAPI void RaylibDrawPlane(RaylibVector3 centerPos, RaylibVector2 size, RaylibColor color);                                      // Draw a plane XZ
+RAYLIB_RLAPI void RaylibDrawRay(RaylibRay ray, RaylibColor color);                                                                // Draw a ray line
+RAYLIB_RLAPI void RaylibDrawGrid(int slices, float spacing);                                                          // Draw a grid (centered at (0, 0, 0))
 
 //------------------------------------------------------------------------------------
-// Model 3d Loading and Drawing Functions (Module: models)
+// RaylibModel 3d Loading and Drawing Functions (Module: models)
 //------------------------------------------------------------------------------------
 
-// Model management functions
-RLAPI Model LoadModel(const char *fileName);                                                // Load model from files (meshes and materials)
-RLAPI Model LoadModelFromMesh(Mesh mesh);                                                   // Load model from generated mesh (default material)
-RLAPI bool IsModelReady(Model model);                                                       // Check if a model is ready
-RLAPI void UnloadModel(Model model);                                                        // Unload model (including meshes) from memory (RAM and/or VRAM)
-RLAPI BoundingBox GetModelBoundingBox(Model model);                                         // Compute model bounding box limits (considers all meshes)
+// RaylibModel management functions
+RAYLIB_RLAPI RaylibModel RaylibLoadModel(const char *fileName);                                                // Load model from files (meshes and materials)
+RAYLIB_RLAPI RaylibModel RaylibLoadModelFromMesh(RaylibMesh mesh);                                                   // Load model from generated mesh (default material)
+RAYLIB_RLAPI bool RaylibIsModelReady(RaylibModel model);                                                       // Check if a model is ready
+RAYLIB_RLAPI void RaylibUnloadModel(RaylibModel model);                                                        // Unload model (including meshes) from memory (RAM and/or VRAM)
+RAYLIB_RLAPI RaylibBoundingBox RaylibGetModelBoundingBox(RaylibModel model);                                         // Compute model bounding box limits (considers all meshes)
 
-// Model drawing functions
-RLAPI void DrawModel(Model model, Vector3 position, float scale, Color tint);               // Draw a model (with texture if set)
-RLAPI void DrawModelEx(Model model, Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint); // Draw a model with extended parameters
-RLAPI void DrawModelWires(Model model, Vector3 position, float scale, Color tint);          // Draw a model wires (with texture if set)
-RLAPI void DrawModelWiresEx(Model model, Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint); // Draw a model wires (with texture if set) with extended parameters
-RLAPI void DrawBoundingBox(BoundingBox box, Color color);                                   // Draw bounding box (wires)
-RLAPI void DrawBillboard(Camera camera, Texture2D texture, Vector3 position, float size, Color tint);   // Draw a billboard texture
-RLAPI void DrawBillboardRec(Camera camera, Texture2D texture, Rectangle source, Vector3 position, Vector2 size, Color tint); // Draw a billboard texture defined by source
-RLAPI void DrawBillboardPro(Camera camera, Texture2D texture, Rectangle source, Vector3 position, Vector3 up, Vector2 size, Vector2 origin, float rotation, Color tint); // Draw a billboard texture defined by source and rotation
+// RaylibModel drawing functions
+RAYLIB_RLAPI void RaylibDrawModel(RaylibModel model, RaylibVector3 position, float scale, RaylibColor tint);               // Draw a model (with texture if set)
+RAYLIB_RLAPI void RaylibDrawModelEx(RaylibModel model, RaylibVector3 position, RaylibVector3 rotationAxis, float rotationAngle, RaylibVector3 scale, RaylibColor tint); // Draw a model with extended parameters
+RAYLIB_RLAPI void RaylibDrawModelWires(RaylibModel model, RaylibVector3 position, float scale, RaylibColor tint);          // Draw a model wires (with texture if set)
+RAYLIB_RLAPI void RaylibDrawModelWiresEx(RaylibModel model, RaylibVector3 position, RaylibVector3 rotationAxis, float rotationAngle, RaylibVector3 scale, RaylibColor tint); // Draw a model wires (with texture if set) with extended parameters
+RAYLIB_RLAPI void RaylibDrawBoundingBox(RaylibBoundingBox box, RaylibColor color);                                   // Draw bounding box (wires)
+RAYLIB_RLAPI void RaylibDrawBillboard(Camera camera, Texture2D texture, RaylibVector3 position, float size, RaylibColor tint);   // Draw a billboard texture
+RAYLIB_RLAPI void RaylibDrawBillboardRec(Camera camera, Texture2D texture, RaylibRectangle source, RaylibVector3 position, RaylibVector2 size, RaylibColor tint); // Draw a billboard texture defined by source
+RAYLIB_RLAPI void RaylibDrawBillboardPro(Camera camera, Texture2D texture, RaylibRectangle source, RaylibVector3 position, RaylibVector3 up, RaylibVector2 size, RaylibVector2 origin, float rotation, RaylibColor tint); // Draw a billboard texture defined by source and rotation
 
-// Mesh management functions
-RLAPI void UploadMesh(Mesh *mesh, bool dynamic);                                            // Upload mesh vertex data in GPU and provide VAO/VBO ids
-RLAPI void UpdateMeshBuffer(Mesh mesh, int index, const void *data, int dataSize, int offset); // Update mesh vertex data in GPU for a specific buffer index
-RLAPI void UnloadMesh(Mesh mesh);                                                           // Unload mesh data from CPU and GPU
-RLAPI void DrawMesh(Mesh mesh, Material material, Matrix transform);                        // Draw a 3d mesh with material and transform
-RLAPI void DrawMeshInstanced(Mesh mesh, Material material, const Matrix *transforms, int instances); // Draw multiple mesh instances with material and different transforms
-RLAPI BoundingBox GetMeshBoundingBox(Mesh mesh);                                            // Compute mesh bounding box limits
-RLAPI void GenMeshTangents(Mesh *mesh);                                                     // Compute mesh tangents
-RLAPI bool ExportMesh(Mesh mesh, const char *fileName);                                     // Export mesh data to file, returns true on success
-RLAPI bool ExportMeshAsCode(Mesh mesh, const char *fileName);                               // Export mesh as code file (.h) defining multiple arrays of vertex attributes
+// RaylibMesh management functions
+RAYLIB_RLAPI void RaylibUploadMesh(RaylibMesh *mesh, bool dynamic);                                            // Upload mesh vertex data in GPU and provide VAO/VBO ids
+RAYLIB_RLAPI void RaylibUpdateMeshBuffer(RaylibMesh mesh, int index, const void *data, int dataSize, int offset); // Update mesh vertex data in GPU for a specific buffer index
+RAYLIB_RLAPI void RaylibUnloadMesh(RaylibMesh mesh);                                                           // Unload mesh data from CPU and GPU
+RAYLIB_RLAPI void RaylibDrawMesh(RaylibMesh mesh, RaylibMaterial material, RaylibMatrix transform);                        // Draw a 3d mesh with material and transform
+RAYLIB_RLAPI void RaylibDrawMeshInstanced(RaylibMesh mesh, RaylibMaterial material, const RaylibMatrix *transforms, int instances); // Draw multiple mesh instances with material and different transforms
+RAYLIB_RLAPI RaylibBoundingBox RaylibGetMeshBoundingBox(RaylibMesh mesh);                                            // Compute mesh bounding box limits
+RAYLIB_RLAPI void RaylibGenMeshTangents(RaylibMesh *mesh);                                                     // Compute mesh tangents
+RAYLIB_RLAPI bool RaylibExportMesh(RaylibMesh mesh, const char *fileName);                                     // Export mesh data to file, returns true on success
+RAYLIB_RLAPI bool RaylibExportMeshAsCode(RaylibMesh mesh, const char *fileName);                               // Export mesh as code file (.h) defining multiple arrays of vertex attributes
 
-// Mesh generation functions
-RLAPI Mesh GenMeshPoly(int sides, float radius);                                            // Generate polygonal mesh
-RLAPI Mesh GenMeshPlane(float width, float length, int resX, int resZ);                     // Generate plane mesh (with subdivisions)
-RLAPI Mesh GenMeshCube(float width, float height, float length);                            // Generate cuboid mesh
-RLAPI Mesh GenMeshSphere(float radius, int rings, int slices);                              // Generate sphere mesh (standard sphere)
-RLAPI Mesh GenMeshHemiSphere(float radius, int rings, int slices);                          // Generate half-sphere mesh (no bottom cap)
-RLAPI Mesh GenMeshCylinder(float radius, float height, int slices);                         // Generate cylinder mesh
-RLAPI Mesh GenMeshCone(float radius, float height, int slices);                             // Generate cone/pyramid mesh
-RLAPI Mesh GenMeshTorus(float radius, float size, int radSeg, int sides);                   // Generate torus mesh
-RLAPI Mesh GenMeshKnot(float radius, float size, int radSeg, int sides);                    // Generate trefoil knot mesh
-RLAPI Mesh GenMeshHeightmap(Image heightmap, Vector3 size);                                 // Generate heightmap mesh from image data
-RLAPI Mesh GenMeshCubicmap(Image cubicmap, Vector3 cubeSize);                               // Generate cubes-based map mesh from image data
+// RaylibMesh generation functions
+RAYLIB_RLAPI RaylibMesh RaylibGenMeshPoly(int sides, float radius);                                            // Generate polygonal mesh
+RAYLIB_RLAPI RaylibMesh RaylibGenMeshPlane(float width, float length, int resX, int resZ);                     // Generate plane mesh (with subdivisions)
+RAYLIB_RLAPI RaylibMesh RaylibGenMeshCube(float width, float height, float length);                            // Generate cuboid mesh
+RAYLIB_RLAPI RaylibMesh RaylibGenMeshSphere(float radius, int rings, int slices);                              // Generate sphere mesh (standard sphere)
+RAYLIB_RLAPI RaylibMesh RaylibGenMeshHemiSphere(float radius, int rings, int slices);                          // Generate half-sphere mesh (no bottom cap)
+RAYLIB_RLAPI RaylibMesh RaylibGenMeshCylinder(float radius, float height, int slices);                         // Generate cylinder mesh
+RAYLIB_RLAPI RaylibMesh RaylibGenMeshCone(float radius, float height, int slices);                             // Generate cone/pyramid mesh
+RAYLIB_RLAPI RaylibMesh RaylibGenMeshTorus(float radius, float size, int radSeg, int sides);                   // Generate torus mesh
+RAYLIB_RLAPI RaylibMesh RaylibGenMeshKnot(float radius, float size, int radSeg, int sides);                    // Generate trefoil knot mesh
+RAYLIB_RLAPI RaylibMesh RaylibGenMeshHeightmap(RaylibImage heightmap, RaylibVector3 size);                                 // Generate heightmap mesh from image data
+RAYLIB_RLAPI RaylibMesh RaylibGenMeshCubicmap(RaylibImage cubicmap, RaylibVector3 cubeSize);                               // Generate cubes-based map mesh from image data
 
-// Material loading/unloading functions
-RLAPI Material *LoadMaterials(const char *fileName, int *materialCount);                    // Load materials from model file
-RLAPI Material LoadMaterialDefault(void);                                                   // Load default material (Supports: DIFFUSE, SPECULAR, NORMAL maps)
-RLAPI bool IsMaterialReady(Material material);                                              // Check if a material is ready
-RLAPI void UnloadMaterial(Material material);                                               // Unload material from GPU memory (VRAM)
-RLAPI void SetMaterialTexture(Material *material, int mapType, Texture2D texture);          // Set texture for a material map type (MATERIAL_MAP_DIFFUSE, MATERIAL_MAP_SPECULAR...)
-RLAPI void SetModelMeshMaterial(Model *model, int meshId, int materialId);                  // Set material for a mesh
+// RaylibMaterial loading/unloading functions
+RAYLIB_RLAPI RaylibMaterial *RaylibLoadMaterials(const char *fileName, int *materialCount);                    // Load materials from model file
+RAYLIB_RLAPI RaylibMaterial RaylibLoadMaterialDefault(void);                                                   // Load default material (Supports: DIFFUSE, SPECULAR, NORMAL maps)
+RAYLIB_RLAPI bool RaylibIsMaterialReady(RaylibMaterial material);                                              // Check if a material is ready
+RAYLIB_RLAPI void RaylibUnloadMaterial(RaylibMaterial material);                                               // Unload material from GPU memory (VRAM)
+RAYLIB_RLAPI void RaylibSetMaterialTexture(RaylibMaterial *material, int mapType, Texture2D texture);          // Set texture for a material map type (RAYLIB_MATERIAL_MAP_DIFFUSE, RAYLIB_MATERIAL_MAP_SPECULAR...)
+RAYLIB_RLAPI void RaylibSetModelMeshMaterial(RaylibModel *model, int meshId, int materialId);                  // Set material for a mesh
 
-// Model animations loading/unloading functions
-RLAPI ModelAnimation *LoadModelAnimations(const char *fileName, int *animCount);            // Load model animations from file
-RLAPI void UpdateModelAnimation(Model model, ModelAnimation anim, int frame);               // Update model animation pose
-RLAPI void UnloadModelAnimation(ModelAnimation anim);                                       // Unload animation data
-RLAPI void UnloadModelAnimations(ModelAnimation *animations, int animCount);                // Unload animation array data
-RLAPI bool IsModelAnimationValid(Model model, ModelAnimation anim);                         // Check model animation skeleton match
+// RaylibModel animations loading/unloading functions
+RAYLIB_RLAPI RaylibModelAnimation *RaylibLoadModelAnimations(const char *fileName, int *animCount);            // Load model animations from file
+RAYLIB_RLAPI void RaylibUpdateModelAnimation(RaylibModel model, RaylibModelAnimation anim, int frame);               // Update model animation pose
+RAYLIB_RLAPI void RaylibUnloadModelAnimation(RaylibModelAnimation anim);                                       // Unload animation data
+RAYLIB_RLAPI void RaylibUnloadModelAnimations(RaylibModelAnimation *animations, int animCount);                // Unload animation array data
+RAYLIB_RLAPI bool RaylibIsModelAnimationValid(RaylibModel model, RaylibModelAnimation anim);                         // Check model animation skeleton match
 
 // Collision detection functions
-RLAPI bool CheckCollisionSpheres(Vector3 center1, float radius1, Vector3 center2, float radius2);   // Check collision between two spheres
-RLAPI bool CheckCollisionBoxes(BoundingBox box1, BoundingBox box2);                                 // Check collision between two bounding boxes
-RLAPI bool CheckCollisionBoxSphere(BoundingBox box, Vector3 center, float radius);                  // Check collision between box and sphere
-RLAPI RayCollision GetRayCollisionSphere(Ray ray, Vector3 center, float radius);                    // Get collision info between ray and sphere
-RLAPI RayCollision GetRayCollisionBox(Ray ray, BoundingBox box);                                    // Get collision info between ray and box
-RLAPI RayCollision GetRayCollisionMesh(Ray ray, Mesh mesh, Matrix transform);                       // Get collision info between ray and mesh
-RLAPI RayCollision GetRayCollisionTriangle(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3);            // Get collision info between ray and triangle
-RLAPI RayCollision GetRayCollisionQuad(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4);    // Get collision info between ray and quad
+RAYLIB_RLAPI bool RaylibCheckCollisionSpheres(RaylibVector3 center1, float radius1, RaylibVector3 center2, float radius2);   // Check collision between two spheres
+RAYLIB_RLAPI bool RaylibCheckCollisionBoxes(RaylibBoundingBox box1, RaylibBoundingBox box2);                                 // Check collision between two bounding boxes
+RAYLIB_RLAPI bool RaylibCheckCollisionBoxSphere(RaylibBoundingBox box, RaylibVector3 center, float radius);                  // Check collision between box and sphere
+RAYLIB_RLAPI RaylibRayCollision RaylibGetRayCollisionSphere(RaylibRay ray, RaylibVector3 center, float radius);                    // Get collision info between ray and sphere
+RAYLIB_RLAPI RaylibRayCollision RaylibGetRayCollisionBox(RaylibRay ray, RaylibBoundingBox box);                                    // Get collision info between ray and box
+RAYLIB_RLAPI RaylibRayCollision RaylibGetRayCollisionMesh(RaylibRay ray, RaylibMesh mesh, RaylibMatrix transform);                       // Get collision info between ray and mesh
+RAYLIB_RLAPI RaylibRayCollision RaylibGetRayCollisionTriangle(RaylibRay ray, RaylibVector3 p1, RaylibVector3 p2, RaylibVector3 p3);            // Get collision info between ray and triangle
+RAYLIB_RLAPI RaylibRayCollision RaylibGetRayCollisionQuad(RaylibRay ray, RaylibVector3 p1, RaylibVector3 p2, RaylibVector3 p3, RaylibVector3 p4);    // Get collision info between ray and quad
 
 //------------------------------------------------------------------------------------
 // Audio Loading and Playing Functions (Module: audio)
 //------------------------------------------------------------------------------------
-typedef void (*AudioCallback)(void *bufferData, unsigned int frames);
+typedef void (*RaylibAudioCallback)(void *bufferData, unsigned int frames);
 
 // Audio device management functions
-RLAPI void InitAudioDevice(void);                                     // Initialize audio device and context
-RLAPI void CloseAudioDevice(void);                                    // Close the audio device and context
-RLAPI bool IsAudioDeviceReady(void);                                  // Check if audio device has been initialized successfully
-RLAPI void SetMasterVolume(float volume);                             // Set master volume (listener)
-RLAPI float GetMasterVolume(void);                                    // Get master volume (listener)
+RAYLIB_RLAPI void RaylibInitAudioDevice(void);                                     // Initialize audio device and context
+RAYLIB_RLAPI void RaylibCloseAudioDevice(void);                                    // Close the audio device and context
+RAYLIB_RLAPI bool RaylibIsAudioDeviceReady(void);                                  // Check if audio device has been initialized successfully
+RAYLIB_RLAPI void RaylibSetMasterVolume(float volume);                             // Set master volume (listener)
+RAYLIB_RLAPI float RaylibGetMasterVolume(void);                                    // Get master volume (listener)
 
-// Wave/Sound loading/unloading functions
-RLAPI Wave LoadWave(const char *fileName);                            // Load wave data from file
-RLAPI Wave LoadWaveFromMemory(const char *fileType, const unsigned char *fileData, int dataSize); // Load wave from memory buffer, fileType refers to extension: i.e. '.wav'
-RLAPI bool IsWaveReady(Wave wave);                                    // Checks if wave data is ready
-RLAPI Sound LoadSound(const char *fileName);                          // Load sound from file
-RLAPI Sound LoadSoundFromWave(Wave wave);                             // Load sound from wave data
-RLAPI Sound LoadSoundAlias(Sound source);                             // Create a new sound that shares the same sample data as the source sound, does not own the sound data
-RLAPI bool IsSoundReady(Sound sound);                                 // Checks if a sound is ready
-RLAPI void UpdateSound(Sound sound, const void *data, int sampleCount); // Update sound buffer with new data
-RLAPI void UnloadWave(Wave wave);                                     // Unload wave data
-RLAPI void UnloadSound(Sound sound);                                  // Unload sound
-RLAPI void UnloadSoundAlias(Sound alias);                             // Unload a sound alias (does not deallocate sample data)
-RLAPI bool ExportWave(Wave wave, const char *fileName);               // Export wave data to file, returns true on success
-RLAPI bool ExportWaveAsCode(Wave wave, const char *fileName);         // Export wave sample data to code (.h), returns true on success
+// RaylibWave/RaylibSound loading/unloading functions
+RAYLIB_RLAPI RaylibWave RaylibLoadWave(const char *fileName);                            // Load wave data from file
+RAYLIB_RLAPI RaylibWave RaylibLoadWaveFromMemory(const char *fileType, const unsigned char *fileData, int dataSize); // Load wave from memory buffer, fileType refers to extension: i.e. '.wav'
+RAYLIB_RLAPI bool RaylibIsWaveReady(RaylibWave wave);                                    // Checks if wave data is ready
+RAYLIB_RLAPI RaylibSound RaylibLoadSound(const char *fileName);                          // Load sound from file
+RAYLIB_RLAPI RaylibSound RaylibLoadSoundFromWave(RaylibWave wave);                             // Load sound from wave data
+RAYLIB_RLAPI RaylibSound RaylibLoadSoundAlias(RaylibSound source);                             // Create a new sound that shares the same sample data as the source sound, does not own the sound data
+RAYLIB_RLAPI bool RaylibIsSoundReady(RaylibSound sound);                                 // Checks if a sound is ready
+RAYLIB_RLAPI void RaylibUpdateSound(RaylibSound sound, const void *data, int sampleCount); // Update sound buffer with new data
+RAYLIB_RLAPI void RaylibUnloadWave(RaylibWave wave);                                     // Unload wave data
+RAYLIB_RLAPI void RaylibUnloadSound(RaylibSound sound);                                  // Unload sound
+RAYLIB_RLAPI void RaylibUnloadSoundAlias(RaylibSound alias);                             // Unload a sound alias (does not deallocate sample data)
+RAYLIB_RLAPI bool RaylibExportWave(RaylibWave wave, const char *fileName);               // Export wave data to file, returns true on success
+RAYLIB_RLAPI bool RaylibExportWaveAsCode(RaylibWave wave, const char *fileName);         // Export wave sample data to code (.h), returns true on success
 
-// Wave/Sound management functions
-RLAPI void PlaySound(Sound sound);                                    // Play a sound
-RLAPI void StopSound(Sound sound);                                    // Stop playing a sound
-RLAPI void PauseSound(Sound sound);                                   // Pause a sound
-RLAPI void ResumeSound(Sound sound);                                  // Resume a paused sound
-RLAPI bool IsSoundPlaying(Sound sound);                               // Check if a sound is currently playing
-RLAPI void SetSoundVolume(Sound sound, float volume);                 // Set volume for a sound (1.0 is max level)
-RLAPI void SetSoundPitch(Sound sound, float pitch);                   // Set pitch for a sound (1.0 is base level)
-RLAPI void SetSoundPan(Sound sound, float pan);                       // Set pan for a sound (0.5 is center)
-RLAPI Wave WaveCopy(Wave wave);                                       // Copy a wave to a new wave
-RLAPI void WaveCrop(Wave *wave, int initFrame, int finalFrame);       // Crop a wave to defined frames range
-RLAPI void WaveFormat(Wave *wave, int sampleRate, int sampleSize, int channels); // Convert wave data to desired format
-RLAPI float *LoadWaveSamples(Wave wave);                              // Load samples data from wave as a 32bit float data array
-RLAPI void UnloadWaveSamples(float *samples);                         // Unload samples data loaded with LoadWaveSamples()
+// RaylibWave/RaylibSound management functions
+RAYLIB_RLAPI void RaylibPlaySound(RaylibSound sound);                                    // Play a sound
+RAYLIB_RLAPI void RaylibStopSound(RaylibSound sound);                                    // Stop playing a sound
+RAYLIB_RLAPI void RaylibPauseSound(RaylibSound sound);                                   // Pause a sound
+RAYLIB_RLAPI void RaylibResumeSound(RaylibSound sound);                                  // Resume a paused sound
+RAYLIB_RLAPI bool RaylibIsSoundPlaying(RaylibSound sound);                               // Check if a sound is currently playing
+RAYLIB_RLAPI void RaylibSetSoundVolume(RaylibSound sound, float volume);                 // Set volume for a sound (1.0 is max level)
+RAYLIB_RLAPI void RaylibSetSoundPitch(RaylibSound sound, float pitch);                   // Set pitch for a sound (1.0 is base level)
+RAYLIB_RLAPI void RaylibSetSoundPan(RaylibSound sound, float pan);                       // Set pan for a sound (0.5 is center)
+RAYLIB_RLAPI RaylibWave RaylibWaveCopy(RaylibWave wave);                                       // Copy a wave to a new wave
+RAYLIB_RLAPI void RaylibWaveCrop(RaylibWave *wave, int initFrame, int finalFrame);       // Crop a wave to defined frames range
+RAYLIB_RLAPI void RaylibWaveFormat(RaylibWave *wave, int sampleRate, int sampleSize, int channels); // Convert wave data to desired format
+RAYLIB_RLAPI float *RaylibLoadWaveSamples(RaylibWave wave);                              // Load samples data from wave as a 32bit float data array
+RAYLIB_RLAPI void RaylibUnloadWaveSamples(float *samples);                         // Unload samples data loaded with RaylibLoadWaveSamples()
 
-// Music management functions
-RLAPI Music LoadMusicStream(const char *fileName);                    // Load music stream from file
-RLAPI Music LoadMusicStreamFromMemory(const char *fileType, const unsigned char *data, int dataSize); // Load music stream from data
-RLAPI bool IsMusicReady(Music music);                                 // Checks if a music stream is ready
-RLAPI void UnloadMusicStream(Music music);                            // Unload music stream
-RLAPI void PlayMusicStream(Music music);                              // Start music playing
-RLAPI bool IsMusicStreamPlaying(Music music);                         // Check if music is playing
-RLAPI void UpdateMusicStream(Music music);                            // Updates buffers for music streaming
-RLAPI void StopMusicStream(Music music);                              // Stop music playing
-RLAPI void PauseMusicStream(Music music);                             // Pause music playing
-RLAPI void ResumeMusicStream(Music music);                            // Resume playing paused music
-RLAPI void SeekMusicStream(Music music, float position);              // Seek music to a position (in seconds)
-RLAPI void SetMusicVolume(Music music, float volume);                 // Set volume for music (1.0 is max level)
-RLAPI void SetMusicPitch(Music music, float pitch);                   // Set pitch for a music (1.0 is base level)
-RLAPI void SetMusicPan(Music music, float pan);                       // Set pan for a music (0.5 is center)
-RLAPI float GetMusicTimeLength(Music music);                          // Get music time length (in seconds)
-RLAPI float GetMusicTimePlayed(Music music);                          // Get current music time played (in seconds)
+// RaylibMusic management functions
+RAYLIB_RLAPI RaylibMusic RaylibLoadMusicStream(const char *fileName);                    // Load music stream from file
+RAYLIB_RLAPI RaylibMusic RaylibLoadMusicStreamFromMemory(const char *fileType, const unsigned char *data, int dataSize); // Load music stream from data
+RAYLIB_RLAPI bool RaylibIsMusicReady(RaylibMusic music);                                 // Checks if a music stream is ready
+RAYLIB_RLAPI void RaylibUnloadMusicStream(RaylibMusic music);                            // Unload music stream
+RAYLIB_RLAPI void RaylibPlayMusicStream(RaylibMusic music);                              // Start music playing
+RAYLIB_RLAPI bool RaylibIsMusicStreamPlaying(RaylibMusic music);                         // Check if music is playing
+RAYLIB_RLAPI void RaylibUpdateMusicStream(RaylibMusic music);                            // Updates buffers for music streaming
+RAYLIB_RLAPI void RaylibStopMusicStream(RaylibMusic music);                              // Stop music playing
+RAYLIB_RLAPI void RaylibPauseMusicStream(RaylibMusic music);                             // Pause music playing
+RAYLIB_RLAPI void RaylibResumeMusicStream(RaylibMusic music);                            // Resume playing paused music
+RAYLIB_RLAPI void RaylibSeekMusicStream(RaylibMusic music, float position);              // Seek music to a position (in seconds)
+RAYLIB_RLAPI void RaylibSetMusicVolume(RaylibMusic music, float volume);                 // Set volume for music (1.0 is max level)
+RAYLIB_RLAPI void RaylibSetMusicPitch(RaylibMusic music, float pitch);                   // Set pitch for a music (1.0 is base level)
+RAYLIB_RLAPI void RaylibSetMusicPan(RaylibMusic music, float pan);                       // Set pan for a music (0.5 is center)
+RAYLIB_RLAPI float RaylibGetMusicTimeLength(RaylibMusic music);                          // Get music time length (in seconds)
+RAYLIB_RLAPI float RaylibGetMusicTimePlayed(RaylibMusic music);                          // Get current music time played (in seconds)
 
-// AudioStream management functions
-RLAPI AudioStream LoadAudioStream(unsigned int sampleRate, unsigned int sampleSize, unsigned int channels); // Load audio stream (to stream raw audio pcm data)
-RLAPI bool IsAudioStreamReady(AudioStream stream);                    // Checks if an audio stream is ready
-RLAPI void UnloadAudioStream(AudioStream stream);                     // Unload audio stream and free memory
-RLAPI void UpdateAudioStream(AudioStream stream, const void *data, int frameCount); // Update audio stream buffers with data
-RLAPI bool IsAudioStreamProcessed(AudioStream stream);                // Check if any audio stream buffers requires refill
-RLAPI void PlayAudioStream(AudioStream stream);                       // Play audio stream
-RLAPI void PauseAudioStream(AudioStream stream);                      // Pause audio stream
-RLAPI void ResumeAudioStream(AudioStream stream);                     // Resume audio stream
-RLAPI bool IsAudioStreamPlaying(AudioStream stream);                  // Check if audio stream is playing
-RLAPI void StopAudioStream(AudioStream stream);                       // Stop audio stream
-RLAPI void SetAudioStreamVolume(AudioStream stream, float volume);    // Set volume for audio stream (1.0 is max level)
-RLAPI void SetAudioStreamPitch(AudioStream stream, float pitch);      // Set pitch for audio stream (1.0 is base level)
-RLAPI void SetAudioStreamPan(AudioStream stream, float pan);          // Set pan for audio stream (0.5 is centered)
-RLAPI void SetAudioStreamBufferSizeDefault(int size);                 // Default size for new audio streams
-RLAPI void SetAudioStreamCallback(AudioStream stream, AudioCallback callback); // Audio thread callback to request new data
+// RaylibAudioStream management functions
+RAYLIB_RLAPI RaylibAudioStream RaylibLoadAudioStream(unsigned int sampleRate, unsigned int sampleSize, unsigned int channels); // Load audio stream (to stream raw audio pcm data)
+RAYLIB_RLAPI bool RaylibIsAudioStreamReady(RaylibAudioStream stream);                    // Checks if an audio stream is ready
+RAYLIB_RLAPI void RaylibUnloadAudioStream(RaylibAudioStream stream);                     // Unload audio stream and free memory
+RAYLIB_RLAPI void RaylibUpdateAudioStream(RaylibAudioStream stream, const void *data, int frameCount); // Update audio stream buffers with data
+RAYLIB_RLAPI bool RaylibIsAudioStreamProcessed(RaylibAudioStream stream);                // Check if any audio stream buffers requires refill
+RAYLIB_RLAPI void RaylibPlayAudioStream(RaylibAudioStream stream);                       // Play audio stream
+RAYLIB_RLAPI void RaylibPauseAudioStream(RaylibAudioStream stream);                      // Pause audio stream
+RAYLIB_RLAPI void RaylibResumeAudioStream(RaylibAudioStream stream);                     // Resume audio stream
+RAYLIB_RLAPI bool RaylibIsAudioStreamPlaying(RaylibAudioStream stream);                  // Check if audio stream is playing
+RAYLIB_RLAPI void RaylibStopAudioStream(RaylibAudioStream stream);                       // Stop audio stream
+RAYLIB_RLAPI void RaylibSetAudioStreamVolume(RaylibAudioStream stream, float volume);    // Set volume for audio stream (1.0 is max level)
+RAYLIB_RLAPI void RaylibSetAudioStreamPitch(RaylibAudioStream stream, float pitch);      // Set pitch for audio stream (1.0 is base level)
+RAYLIB_RLAPI void RaylibSetAudioStreamPan(RaylibAudioStream stream, float pan);          // Set pan for audio stream (0.5 is centered)
+RAYLIB_RLAPI void RaylibSetAudioStreamBufferSizeDefault(int size);                 // Default size for new audio streams
+RAYLIB_RLAPI void RaylibSetAudioStreamCallback(RaylibAudioStream stream, RaylibAudioCallback callback); // Audio thread callback to request new data
 
-RLAPI void AttachAudioStreamProcessor(AudioStream stream, AudioCallback processor); // Attach audio stream processor to stream, receives the samples as 'float'
-RLAPI void DetachAudioStreamProcessor(AudioStream stream, AudioCallback processor); // Detach audio stream processor from stream
+RAYLIB_RLAPI void RaylibAttachAudioStreamProcessor(RaylibAudioStream stream, RaylibAudioCallback processor); // Attach audio stream processor to stream, receives the samples as 'float'
+RAYLIB_RLAPI void RaylibDetachAudioStreamProcessor(RaylibAudioStream stream, RaylibAudioCallback processor); // Detach audio stream processor from stream
 
-RLAPI void AttachAudioMixedProcessor(AudioCallback processor); // Attach audio stream processor to the entire audio pipeline, receives the samples as 'float'
-RLAPI void DetachAudioMixedProcessor(AudioCallback processor); // Detach audio stream processor from the entire audio pipeline
+RAYLIB_RLAPI void RaylibAttachAudioMixedProcessor(RaylibAudioCallback processor); // Attach audio stream processor to the entire audio pipeline, receives the samples as 'float'
+RAYLIB_RLAPI void RaylibDetachAudioMixedProcessor(RaylibAudioCallback processor); // Detach audio stream processor from the entire audio pipeline
 
 #if defined(__cplusplus)
 }

@@ -5,21 +5,21 @@
 *   ADDITIONAL NOTES:
 *       Shapes can be draw using 3 types of primitives: LINES, TRIANGLES and QUADS.
 *       Some functions implement two drawing options: TRIANGLES and QUADS, by default TRIANGLES
-*       are used but QUADS implementation can be selected with SUPPORT_QUADS_DRAW_MODE define
+*       are used but QUADS implementation can be selected with RAYLIB_SUPPORT_QUADS_DRAW_MODE define
 *
 *       Some functions define texture coordinates (rlTexCoord2f()) for the shapes and use a
-*       user-provided texture with SetShapesTexture(), the pourpouse of this implementation
+*       user-provided texture with RaylibSetShapesTexture(), the pourpouse of this implementation
 *       is allowing to reduce draw calls when combined with a texture-atlas.
 *
-*       By default, raylib sets the default texture and rectangle at InitWindow()[rcore] to one
+*       By default, raylib sets the default texture and rectangle at RaylibInitWindow()[rcore] to one
 *       white character of default font [rtext], this way, raylib text and shapes can be draw with
 *       a single draw call and it also allows users to configure it the same way with their own fonts.
 *
 *   CONFIGURATION:
-*       #define SUPPORT_MODULE_RSHAPES
+*       #define RAYLIB_SUPPORT_MODULE_RSHAPES
 *           rshapes module is included in the build
 *
-*       #define SUPPORT_QUADS_DRAW_MODE
+*       #define RAYLIB_SUPPORT_QUADS_DRAW_MODE
 *           Use QUADS instead of TRIANGLES for drawing when possible. Lines-based shapes still use LINES
 *
 *
@@ -51,7 +51,7 @@
     #include "config.h"         // Defines module configuration flags
 #endif
 
-#if defined(SUPPORT_MODULE_RSHAPES)
+#if defined(RAYLIB_SUPPORT_MODULE_RSHAPES)
 
 #include "rlgl.h"       // OpenGL abstraction layer to OpenGL 1.1, 2.1, 3.3+ or ES2
 
@@ -67,8 +67,8 @@
 #ifndef SMOOTH_CIRCLE_ERROR_RATE
     #define SMOOTH_CIRCLE_ERROR_RATE    0.5f      // Circle error rate
 #endif
-#ifndef SPLINE_SEGMENT_DIVISIONS
-    #define SPLINE_SEGMENT_DIVISIONS      24      // Spline segment divisions
+#ifndef RAYLIB_SPLINE_SEGMENT_DIVISIONS
+    #define RAYLIB_SPLINE_SEGMENT_DIVISIONS      24      // Spline segment divisions
 #endif
 
 //----------------------------------------------------------------------------------
@@ -79,8 +79,8 @@
 //----------------------------------------------------------------------------------
 // Global Variables Definition
 //----------------------------------------------------------------------------------
-Texture2D texShapes = { 1, 1, 1, 1, 7 };                // Texture used on shapes drawing (white pixel loaded by rlgl)
-Rectangle texShapesRec = { 0.0f, 0.0f, 1.0f, 1.0f };    // Texture source rectangle used on shapes drawing
+Texture2D texShapes = { 1, 1, 1, 1, 7 };                // RaylibTexture used on shapes drawing (white pixel loaded by rlgl)
+RaylibRectangle texShapesRec = { 0.0f, 0.0f, 1.0f, 1.0f };    // RaylibTexture source rectangle used on shapes drawing
 
 //----------------------------------------------------------------------------------
 // Module specific Functions Declaration
@@ -94,7 +94,7 @@ static float EaseCubicInOut(float t, float b, float c, float d);    // Cubic eas
 // Set texture and rectangle to be used on shapes drawing
 // NOTE: It can be useful when using basic shapes and one single font,
 // defining a font char white rectangle would allow drawing everything in a single draw call
-void SetShapesTexture(Texture2D texture, Rectangle source)
+void RaylibSetShapesTexture(Texture2D texture, RaylibRectangle source)
 {
     // Reset texture to default pixel if required
     // WARNING: Shapes texture should be probably better validated,
@@ -102,7 +102,7 @@ void SetShapesTexture(Texture2D texture, Rectangle source)
     if ((texture.id == 0) || (source.width == 0) || (source.height == 0))
     {
         texShapes = (Texture2D){ 1, 1, 1, 1, 7 };
-        texShapesRec = (Rectangle){ 0.0f, 0.0f, 1.0f, 1.0f };
+        texShapesRec = (RaylibRectangle){ 0.0f, 0.0f, 1.0f, 1.0f };
     }
     else
     {
@@ -112,29 +112,29 @@ void SetShapesTexture(Texture2D texture, Rectangle source)
 }
 
 // Get texture that is used for shapes drawing
-Texture2D GetShapesTexture(void)
+Texture2D RaylibGetShapesTexture(void)
 {
     return texShapes;
 }
 
 // Get texture source rectangle that is used for shapes drawing
-Rectangle GetShapesTextureRectangle(void)
+RaylibRectangle RaylibGetShapesTextureRectangle(void)
 {
     return texShapesRec;
 }
 
 // Draw a pixel
-void DrawPixel(int posX, int posY, Color color)
+void RaylibDrawPixel(int posX, int posY, RaylibColor color)
 {
-  DrawPixelV((Vector2){ (float)posX, (float)posY }, color);
+  RaylibDrawPixelV((RaylibVector2){ (float)posX, (float)posY }, color);
 }
 
 // Draw a pixel (Vector version)
-void DrawPixelV(Vector2 position, Color color)
+void RaylibDrawPixelV(RaylibVector2 position, RaylibColor color)
 {
-#if defined(SUPPORT_QUADS_DRAW_MODE)
-    rlSetTexture(GetShapesTexture().id);
-    Rectangle shapeRect = GetShapesTextureRectangle();
+#if defined(RAYLIB_SUPPORT_QUADS_DRAW_MODE)
+    rlSetTexture(RaylibGetShapesTexture().id);
+    RaylibRectangle shapeRect = RaylibGetShapesTextureRectangle();
 
     rlBegin(RL_QUADS);
 
@@ -174,7 +174,7 @@ void DrawPixelV(Vector2 position, Color color)
 }
 
 // Draw a line (using gl lines)
-void DrawLine(int startPosX, int startPosY, int endPosX, int endPosY, Color color)
+void RaylibDrawLine(int startPosX, int startPosY, int endPosX, int endPosY, RaylibColor color)
 {
     rlBegin(RL_LINES);
         rlColor4ub(color.r, color.g, color.b, color.a);
@@ -185,7 +185,7 @@ void DrawLine(int startPosX, int startPosY, int endPosX, int endPosY, Color colo
 }
 
 // Draw a line (using gl lines)
-void DrawLineV(Vector2 startPos, Vector2 endPos, Color color)
+void RaylibDrawLineV(RaylibVector2 startPos, RaylibVector2 endPos, RaylibColor color)
 {
     rlBegin(RL_LINES);
         rlColor4ub(color.r, color.g, color.b, color.a);
@@ -196,7 +196,7 @@ void DrawLineV(Vector2 startPos, Vector2 endPos, Color color)
 }
 
 // Draw lines sequuence (using gl lines)
-void DrawLineStrip(Vector2 *points, int pointCount, Color color)
+void RaylibDrawLineStrip(RaylibVector2 *points, int pointCount, RaylibColor color)
 {
     if (pointCount < 2) return; // Security check
 
@@ -212,19 +212,19 @@ void DrawLineStrip(Vector2 *points, int pointCount, Color color)
 }
 
 // Draw line using cubic-bezier spline, in-out interpolation, no control points
-void DrawLineBezier(Vector2 startPos, Vector2 endPos, float thick, Color color)
+void RaylibDrawLineBezier(RaylibVector2 startPos, RaylibVector2 endPos, float thick, RaylibColor color)
 {
-    Vector2 previous = startPos;
-    Vector2 current = { 0 };
+    RaylibVector2 previous = startPos;
+    RaylibVector2 current = { 0 };
 
-    Vector2 points[2*SPLINE_SEGMENT_DIVISIONS + 2] = { 0 };
+    RaylibVector2 points[2*RAYLIB_SPLINE_SEGMENT_DIVISIONS + 2] = { 0 };
 
-    for (int i = 1; i <= SPLINE_SEGMENT_DIVISIONS; i++)
+    for (int i = 1; i <= RAYLIB_SPLINE_SEGMENT_DIVISIONS; i++)
     {
         // Cubic easing in-out
         // NOTE: Easing is calculated only for y position value
-        current.y = EaseCubicInOut((float)i, startPos.y, endPos.y - startPos.y, (float)SPLINE_SEGMENT_DIVISIONS);
-        current.x = previous.x + (endPos.x - startPos.x)/(float)SPLINE_SEGMENT_DIVISIONS;
+        current.y = EaseCubicInOut((float)i, startPos.y, endPos.y - startPos.y, (float)RAYLIB_SPLINE_SEGMENT_DIVISIONS);
+        current.x = previous.x + (endPos.x - startPos.x)/(float)RAYLIB_SPLINE_SEGMENT_DIVISIONS;
 
         float dy = current.y - previous.y;
         float dx = current.x - previous.x;
@@ -246,46 +246,46 @@ void DrawLineBezier(Vector2 startPos, Vector2 endPos, float thick, Color color)
         previous = current;
     }
 
-    DrawTriangleStrip(points, 2*SPLINE_SEGMENT_DIVISIONS + 2, color);
+    RaylibDrawTriangleStrip(points, 2*RAYLIB_SPLINE_SEGMENT_DIVISIONS + 2, color);
 }
 
 // Draw a line defining thickness
-void DrawLineEx(Vector2 startPos, Vector2 endPos, float thick, Color color)
+void RaylibDrawLineEx(RaylibVector2 startPos, RaylibVector2 endPos, float thick, RaylibColor color)
 {
-    Vector2 delta = { endPos.x - startPos.x, endPos.y - startPos.y };
+    RaylibVector2 delta = { endPos.x - startPos.x, endPos.y - startPos.y };
     float length = sqrtf(delta.x*delta.x + delta.y*delta.y);
 
     if ((length > 0) && (thick > 0))
     {
         float scale = thick/(2*length);
 
-        Vector2 radius = { -scale*delta.y, scale*delta.x };
-        Vector2 strip[4] = {
+        RaylibVector2 radius = { -scale*delta.y, scale*delta.x };
+        RaylibVector2 strip[4] = {
             { startPos.x - radius.x, startPos.y - radius.y },
             { startPos.x + radius.x, startPos.y + radius.y },
             { endPos.x - radius.x, endPos.y - radius.y },
             { endPos.x + radius.x, endPos.y + radius.y }
         };
 
-        DrawTriangleStrip(strip, 4, color);
+        RaylibDrawTriangleStrip(strip, 4, color);
     }
 }
 
 // Draw a color-filled circle
-void DrawCircle(int centerX, int centerY, float radius, Color color)
+void RaylibDrawCircle(int centerX, int centerY, float radius, RaylibColor color)
 {
-    DrawCircleV((Vector2){ (float)centerX, (float)centerY }, radius, color);
+    RaylibDrawCircleV((RaylibVector2){ (float)centerX, (float)centerY }, radius, color);
 }
 
 // Draw a color-filled circle (Vector version)
 // NOTE: On OpenGL 3.3 and ES2 we use QUADS to avoid drawing order issues
-void DrawCircleV(Vector2 center, float radius, Color color)
+void RaylibDrawCircleV(RaylibVector2 center, float radius, RaylibColor color)
 {
-    DrawCircleSector(center, radius, 0, 360, 36, color);
+    RaylibDrawCircleSector(center, radius, 0, 360, 36, color);
 }
 
 // Draw a piece of a circle
-void DrawCircleSector(Vector2 center, float radius, float startAngle, float endAngle, int segments, Color color)
+void RaylibDrawCircleSector(RaylibVector2 center, float radius, float startAngle, float endAngle, int segments, RaylibColor color)
 {
     if (radius <= 0.0f) radius = 0.1f;  // Avoid div by zero
 
@@ -304,7 +304,7 @@ void DrawCircleSector(Vector2 center, float radius, float startAngle, float endA
     {
         // Calculate the maximum angle between segments based on the error rate (usually 0.5f)
         float th = acosf(2*powf(1 - SMOOTH_CIRCLE_ERROR_RATE/radius, 2) - 1);
-        segments = (int)((endAngle - startAngle)*ceilf(2*PI/th)/360);
+        segments = (int)((endAngle - startAngle)*ceilf(2*RAYLIB_PI/th)/360);
 
         if (segments <= 0) segments = minSegments;
     }
@@ -312,9 +312,9 @@ void DrawCircleSector(Vector2 center, float radius, float startAngle, float endA
     float stepLength = (endAngle - startAngle)/(float)segments;
     float angle = startAngle;
 
-#if defined(SUPPORT_QUADS_DRAW_MODE)
-    rlSetTexture(GetShapesTexture().id);
-    Rectangle shapeRect = GetShapesTextureRectangle();
+#if defined(RAYLIB_SUPPORT_QUADS_DRAW_MODE)
+    rlSetTexture(RaylibGetShapesTexture().id);
+    RaylibRectangle shapeRect = RaylibGetShapesTextureRectangle();
 
     rlBegin(RL_QUADS);
 
@@ -327,13 +327,13 @@ void DrawCircleSector(Vector2 center, float radius, float startAngle, float endA
             rlVertex2f(center.x, center.y);
 
             rlTexCoord2f((shapeRect.x + shapeRect.width)/texShapes.width, shapeRect.y/texShapes.height);
-            rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength*2.0f))*radius, center.y + sinf(DEG2RAD*(angle + stepLength*2.0f))*radius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength*2.0f))*radius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength*2.0f))*radius);
 
             rlTexCoord2f((shapeRect.x + shapeRect.width)/texShapes.width, (shapeRect.y + shapeRect.height)/texShapes.height);
-            rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*radius, center.y + sinf(DEG2RAD*(angle + stepLength))*radius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*radius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*radius);
 
             rlTexCoord2f(shapeRect.x/texShapes.width, (shapeRect.y + shapeRect.height)/texShapes.height);
-            rlVertex2f(center.x + cosf(DEG2RAD*angle)*radius, center.y + sinf(DEG2RAD*angle)*radius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*radius, center.y + sinf(RAYLIB_DEG2RAD*angle)*radius);
 
             angle += (stepLength*2.0f);
         }
@@ -347,10 +347,10 @@ void DrawCircleSector(Vector2 center, float radius, float startAngle, float endA
             rlVertex2f(center.x, center.y);
 
             rlTexCoord2f((shapeRect.x + shapeRect.width)/texShapes.width, (shapeRect.y + shapeRect.height)/texShapes.height);
-            rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*radius, center.y + sinf(DEG2RAD*(angle + stepLength))*radius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*radius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*radius);
 
             rlTexCoord2f(shapeRect.x/texShapes.width, (shapeRect.y + shapeRect.height)/texShapes.height);
-            rlVertex2f(center.x + cosf(DEG2RAD*angle)*radius, center.y + sinf(DEG2RAD*angle)*radius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*radius, center.y + sinf(RAYLIB_DEG2RAD*angle)*radius);
 
             rlTexCoord2f((shapeRect.x + shapeRect.width)/texShapes.width, shapeRect.y/texShapes.height);
             rlVertex2f(center.x, center.y);
@@ -366,8 +366,8 @@ void DrawCircleSector(Vector2 center, float radius, float startAngle, float endA
             rlColor4ub(color.r, color.g, color.b, color.a);
 
             rlVertex2f(center.x, center.y);
-            rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*radius, center.y + sinf(DEG2RAD*(angle + stepLength))*radius);
-            rlVertex2f(center.x + cosf(DEG2RAD*angle)*radius, center.y + sinf(DEG2RAD*angle)*radius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*radius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*radius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*radius, center.y + sinf(RAYLIB_DEG2RAD*angle)*radius);
 
             angle += stepLength;
         }
@@ -376,7 +376,7 @@ void DrawCircleSector(Vector2 center, float radius, float startAngle, float endA
 }
 
 // Draw a piece of a circle outlines
-void DrawCircleSectorLines(Vector2 center, float radius, float startAngle, float endAngle, int segments, Color color)
+void RaylibDrawCircleSectorLines(RaylibVector2 center, float radius, float startAngle, float endAngle, int segments, RaylibColor color)
 {
     if (radius <= 0.0f) radius = 0.1f;  // Avoid div by zero issue
 
@@ -395,7 +395,7 @@ void DrawCircleSectorLines(Vector2 center, float radius, float startAngle, float
     {
         // Calculate the maximum angle between segments based on the error rate (usually 0.5f)
         float th = acosf(2*powf(1 - SMOOTH_CIRCLE_ERROR_RATE/radius, 2) - 1);
-        segments = (int)((endAngle - startAngle)*ceilf(2*PI/th)/360);
+        segments = (int)((endAngle - startAngle)*ceilf(2*RAYLIB_PI/th)/360);
 
         if (segments <= 0) segments = minSegments;
     }
@@ -409,15 +409,15 @@ void DrawCircleSectorLines(Vector2 center, float radius, float startAngle, float
         {
             rlColor4ub(color.r, color.g, color.b, color.a);
             rlVertex2f(center.x, center.y);
-            rlVertex2f(center.x + cosf(DEG2RAD*angle)*radius, center.y + sinf(DEG2RAD*angle)*radius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*radius, center.y + sinf(RAYLIB_DEG2RAD*angle)*radius);
         }
 
         for (int i = 0; i < segments; i++)
         {
             rlColor4ub(color.r, color.g, color.b, color.a);
 
-            rlVertex2f(center.x + cosf(DEG2RAD*angle)*radius, center.y + sinf(DEG2RAD*angle)*radius);
-            rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*radius, center.y + sinf(DEG2RAD*(angle + stepLength))*radius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*radius, center.y + sinf(RAYLIB_DEG2RAD*angle)*radius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*radius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*radius);
 
             angle += stepLength;
         }
@@ -426,14 +426,14 @@ void DrawCircleSectorLines(Vector2 center, float radius, float startAngle, float
         {
             rlColor4ub(color.r, color.g, color.b, color.a);
             rlVertex2f(center.x, center.y);
-            rlVertex2f(center.x + cosf(DEG2RAD*angle)*radius, center.y + sinf(DEG2RAD*angle)*radius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*radius, center.y + sinf(RAYLIB_DEG2RAD*angle)*radius);
         }
     rlEnd();
 }
 
 // Draw a gradient-filled circle
 // NOTE: Gradient goes from center (color1) to border (color2)
-void DrawCircleGradient(int centerX, int centerY, float radius, Color color1, Color color2)
+void RaylibDrawCircleGradient(int centerX, int centerY, float radius, RaylibColor color1, RaylibColor color2)
 {
     rlBegin(RL_TRIANGLES);
         for (int i = 0; i < 360; i += 10)
@@ -441,21 +441,21 @@ void DrawCircleGradient(int centerX, int centerY, float radius, Color color1, Co
             rlColor4ub(color1.r, color1.g, color1.b, color1.a);
             rlVertex2f((float)centerX, (float)centerY);
             rlColor4ub(color2.r, color2.g, color2.b, color2.a);
-            rlVertex2f((float)centerX + cosf(DEG2RAD*(i + 10))*radius, (float)centerY + sinf(DEG2RAD*(i + 10))*radius);
+            rlVertex2f((float)centerX + cosf(RAYLIB_DEG2RAD*(i + 10))*radius, (float)centerY + sinf(RAYLIB_DEG2RAD*(i + 10))*radius);
             rlColor4ub(color2.r, color2.g, color2.b, color2.a);
-            rlVertex2f((float)centerX + cosf(DEG2RAD*i)*radius, (float)centerY + sinf(DEG2RAD*i)*radius);
+            rlVertex2f((float)centerX + cosf(RAYLIB_DEG2RAD*i)*radius, (float)centerY + sinf(RAYLIB_DEG2RAD*i)*radius);
         }
     rlEnd();
 }
 
 // Draw circle outline
-void DrawCircleLines(int centerX, int centerY, float radius, Color color)
+void RaylibDrawCircleLines(int centerX, int centerY, float radius, RaylibColor color)
 {
-    DrawCircleLinesV((Vector2){ (float)centerX, (float)centerY }, radius, color);
+    RaylibDrawCircleLinesV((RaylibVector2){ (float)centerX, (float)centerY }, radius, color);
 }
 
 // Draw circle outline (Vector version)
-void DrawCircleLinesV(Vector2 center, float radius, Color color)
+void RaylibDrawCircleLinesV(RaylibVector2 center, float radius, RaylibColor color)
 {
     rlBegin(RL_LINES);
         rlColor4ub(color.r, color.g, color.b, color.a);
@@ -463,41 +463,41 @@ void DrawCircleLinesV(Vector2 center, float radius, Color color)
         // NOTE: Circle outline is drawn pixel by pixel every degree (0 to 360)
         for (int i = 0; i < 360; i += 10)
         {
-            rlVertex2f(center.x + cosf(DEG2RAD*i)*radius, center.y + sinf(DEG2RAD*i)*radius);
-            rlVertex2f(center.x + cosf(DEG2RAD*(i + 10))*radius, center.y + sinf(DEG2RAD*(i + 10))*radius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*i)*radius, center.y + sinf(RAYLIB_DEG2RAD*i)*radius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(i + 10))*radius, center.y + sinf(RAYLIB_DEG2RAD*(i + 10))*radius);
         }
     rlEnd();
 }
 
 // Draw ellipse
-void DrawEllipse(int centerX, int centerY, float radiusH, float radiusV, Color color)
+void RaylibDrawEllipse(int centerX, int centerY, float radiusH, float radiusV, RaylibColor color)
 {
     rlBegin(RL_TRIANGLES);
         for (int i = 0; i < 360; i += 10)
         {
             rlColor4ub(color.r, color.g, color.b, color.a);
             rlVertex2f((float)centerX, (float)centerY);
-            rlVertex2f((float)centerX + cosf(DEG2RAD*(i + 10))*radiusH, (float)centerY + sinf(DEG2RAD*(i + 10))*radiusV);
-            rlVertex2f((float)centerX + cosf(DEG2RAD*i)*radiusH, (float)centerY + sinf(DEG2RAD*i)*radiusV);
+            rlVertex2f((float)centerX + cosf(RAYLIB_DEG2RAD*(i + 10))*radiusH, (float)centerY + sinf(RAYLIB_DEG2RAD*(i + 10))*radiusV);
+            rlVertex2f((float)centerX + cosf(RAYLIB_DEG2RAD*i)*radiusH, (float)centerY + sinf(RAYLIB_DEG2RAD*i)*radiusV);
         }
     rlEnd();
 }
 
 // Draw ellipse outline
-void DrawEllipseLines(int centerX, int centerY, float radiusH, float radiusV, Color color)
+void RaylibDrawEllipseLines(int centerX, int centerY, float radiusH, float radiusV, RaylibColor color)
 {
     rlBegin(RL_LINES);
         for (int i = 0; i < 360; i += 10)
         {
             rlColor4ub(color.r, color.g, color.b, color.a);
-            rlVertex2f(centerX + cosf(DEG2RAD*(i + 10))*radiusH, centerY + sinf(DEG2RAD*(i + 10))*radiusV);
-            rlVertex2f(centerX + cosf(DEG2RAD*i)*radiusH, centerY + sinf(DEG2RAD*i)*radiusV);
+            rlVertex2f(centerX + cosf(RAYLIB_DEG2RAD*(i + 10))*radiusH, centerY + sinf(RAYLIB_DEG2RAD*(i + 10))*radiusV);
+            rlVertex2f(centerX + cosf(RAYLIB_DEG2RAD*i)*radiusH, centerY + sinf(RAYLIB_DEG2RAD*i)*radiusV);
         }
     rlEnd();
 }
 
 // Draw ring
-void DrawRing(Vector2 center, float innerRadius, float outerRadius, float startAngle, float endAngle, int segments, Color color)
+void RaylibDrawRing(RaylibVector2 center, float innerRadius, float outerRadius, float startAngle, float endAngle, int segments, RaylibColor color)
 {
     if (startAngle == endAngle) return;
 
@@ -526,7 +526,7 @@ void DrawRing(Vector2 center, float innerRadius, float outerRadius, float startA
     {
         // Calculate the maximum angle between segments based on the error rate (usually 0.5f)
         float th = acosf(2*powf(1 - SMOOTH_CIRCLE_ERROR_RATE/outerRadius, 2) - 1);
-        segments = (int)((endAngle - startAngle)*ceilf(2*PI/th)/360);
+        segments = (int)((endAngle - startAngle)*ceilf(2*RAYLIB_PI/th)/360);
 
         if (segments <= 0) segments = minSegments;
     }
@@ -534,16 +534,16 @@ void DrawRing(Vector2 center, float innerRadius, float outerRadius, float startA
     // Not a ring
     if (innerRadius <= 0.0f)
     {
-        DrawCircleSector(center, outerRadius, startAngle, endAngle, segments, color);
+        RaylibDrawCircleSector(center, outerRadius, startAngle, endAngle, segments, color);
         return;
     }
 
     float stepLength = (endAngle - startAngle)/(float)segments;
     float angle = startAngle;
 
-#if defined(SUPPORT_QUADS_DRAW_MODE)
-    rlSetTexture(GetShapesTexture().id);
-    Rectangle shapeRect = GetShapesTextureRectangle();
+#if defined(RAYLIB_SUPPORT_QUADS_DRAW_MODE)
+    rlSetTexture(RaylibGetShapesTexture().id);
+    RaylibRectangle shapeRect = RaylibGetShapesTextureRectangle();
 
     rlBegin(RL_QUADS);
         for (int i = 0; i < segments; i++)
@@ -551,16 +551,16 @@ void DrawRing(Vector2 center, float innerRadius, float outerRadius, float startA
             rlColor4ub(color.r, color.g, color.b, color.a);
 
             rlTexCoord2f(shapeRect.x/texShapes.width, (shapeRect.y + shapeRect.height)/texShapes.height);
-            rlVertex2f(center.x + cosf(DEG2RAD*angle)*outerRadius, center.y + sinf(DEG2RAD*angle)*outerRadius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*outerRadius, center.y + sinf(RAYLIB_DEG2RAD*angle)*outerRadius);
 
             rlTexCoord2f(shapeRect.x/texShapes.width, shapeRect.y/texShapes.height);
-            rlVertex2f(center.x + cosf(DEG2RAD*angle)*innerRadius, center.y + sinf(DEG2RAD*angle)*innerRadius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*innerRadius, center.y + sinf(RAYLIB_DEG2RAD*angle)*innerRadius);
 
             rlTexCoord2f((shapeRect.x + shapeRect.width)/texShapes.width, shapeRect.y/texShapes.height);
-            rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*innerRadius, center.y + sinf(DEG2RAD*(angle + stepLength))*innerRadius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*innerRadius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*innerRadius);
 
             rlTexCoord2f((shapeRect.x + shapeRect.width)/texShapes.width, (shapeRect.y + shapeRect.height)/texShapes.height);
-            rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*outerRadius, center.y + sinf(DEG2RAD*(angle + stepLength))*outerRadius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*outerRadius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*outerRadius);
 
             angle += stepLength;
         }
@@ -573,13 +573,13 @@ void DrawRing(Vector2 center, float innerRadius, float outerRadius, float startA
         {
             rlColor4ub(color.r, color.g, color.b, color.a);
 
-            rlVertex2f(center.x + cosf(DEG2RAD*angle)*innerRadius, center.y + sinf(DEG2RAD*angle)*innerRadius);
-            rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*innerRadius, center.y + sinf(DEG2RAD*(angle + stepLength))*innerRadius);
-            rlVertex2f(center.x + cosf(DEG2RAD*angle)*outerRadius, center.y + sinf(DEG2RAD*angle)*outerRadius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*innerRadius, center.y + sinf(RAYLIB_DEG2RAD*angle)*innerRadius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*innerRadius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*innerRadius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*outerRadius, center.y + sinf(RAYLIB_DEG2RAD*angle)*outerRadius);
 
-            rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*innerRadius, center.y + sinf(DEG2RAD*(angle + stepLength))*innerRadius);
-            rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*outerRadius, center.y + sinf(DEG2RAD*(angle + stepLength))*outerRadius);
-            rlVertex2f(center.x + cosf(DEG2RAD*angle)*outerRadius, center.y + sinf(DEG2RAD*angle)*outerRadius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*innerRadius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*innerRadius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*outerRadius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*outerRadius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*outerRadius, center.y + sinf(RAYLIB_DEG2RAD*angle)*outerRadius);
 
             angle += stepLength;
         }
@@ -588,7 +588,7 @@ void DrawRing(Vector2 center, float innerRadius, float outerRadius, float startA
 }
 
 // Draw ring outline
-void DrawRingLines(Vector2 center, float innerRadius, float outerRadius, float startAngle, float endAngle, int segments, Color color)
+void RaylibDrawRingLines(RaylibVector2 center, float innerRadius, float outerRadius, float startAngle, float endAngle, int segments, RaylibColor color)
 {
     if (startAngle == endAngle) return;
 
@@ -617,14 +617,14 @@ void DrawRingLines(Vector2 center, float innerRadius, float outerRadius, float s
     {
         // Calculate the maximum angle between segments based on the error rate (usually 0.5f)
         float th = acosf(2*powf(1 - SMOOTH_CIRCLE_ERROR_RATE/outerRadius, 2) - 1);
-        segments = (int)((endAngle - startAngle)*ceilf(2*PI/th)/360);
+        segments = (int)((endAngle - startAngle)*ceilf(2*RAYLIB_PI/th)/360);
 
         if (segments <= 0) segments = minSegments;
     }
 
     if (innerRadius <= 0.0f)
     {
-        DrawCircleSectorLines(center, outerRadius, startAngle, endAngle, segments, color);
+        RaylibDrawCircleSectorLines(center, outerRadius, startAngle, endAngle, segments, color);
         return;
     }
 
@@ -636,19 +636,19 @@ void DrawRingLines(Vector2 center, float innerRadius, float outerRadius, float s
         if (showCapLines)
         {
             rlColor4ub(color.r, color.g, color.b, color.a);
-            rlVertex2f(center.x + cosf(DEG2RAD*angle)*outerRadius, center.y + sinf(DEG2RAD*angle)*outerRadius);
-            rlVertex2f(center.x + cosf(DEG2RAD*angle)*innerRadius, center.y + sinf(DEG2RAD*angle)*innerRadius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*outerRadius, center.y + sinf(RAYLIB_DEG2RAD*angle)*outerRadius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*innerRadius, center.y + sinf(RAYLIB_DEG2RAD*angle)*innerRadius);
         }
 
         for (int i = 0; i < segments; i++)
         {
             rlColor4ub(color.r, color.g, color.b, color.a);
 
-            rlVertex2f(center.x + cosf(DEG2RAD*angle)*outerRadius, center.y + sinf(DEG2RAD*angle)*outerRadius);
-            rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*outerRadius, center.y + sinf(DEG2RAD*(angle + stepLength))*outerRadius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*outerRadius, center.y + sinf(RAYLIB_DEG2RAD*angle)*outerRadius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*outerRadius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*outerRadius);
 
-            rlVertex2f(center.x + cosf(DEG2RAD*angle)*innerRadius, center.y + sinf(DEG2RAD*angle)*innerRadius);
-            rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*innerRadius, center.y + sinf(DEG2RAD*(angle + stepLength))*innerRadius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*innerRadius, center.y + sinf(RAYLIB_DEG2RAD*angle)*innerRadius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*innerRadius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*innerRadius);
 
             angle += stepLength;
         }
@@ -656,53 +656,53 @@ void DrawRingLines(Vector2 center, float innerRadius, float outerRadius, float s
         if (showCapLines)
         {
             rlColor4ub(color.r, color.g, color.b, color.a);
-            rlVertex2f(center.x + cosf(DEG2RAD*angle)*outerRadius, center.y + sinf(DEG2RAD*angle)*outerRadius);
-            rlVertex2f(center.x + cosf(DEG2RAD*angle)*innerRadius, center.y + sinf(DEG2RAD*angle)*innerRadius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*outerRadius, center.y + sinf(RAYLIB_DEG2RAD*angle)*outerRadius);
+            rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*innerRadius, center.y + sinf(RAYLIB_DEG2RAD*angle)*innerRadius);
         }
     rlEnd();
 }
 
 // Draw a color-filled rectangle
-void DrawRectangle(int posX, int posY, int width, int height, Color color)
+void RaylibDrawRectangle(int posX, int posY, int width, int height, RaylibColor color)
 {
-    DrawRectangleV((Vector2){ (float)posX, (float)posY }, (Vector2){ (float)width, (float)height }, color);
+    RaylibDrawRectangleV((RaylibVector2){ (float)posX, (float)posY }, (RaylibVector2){ (float)width, (float)height }, color);
 }
 
 // Draw a color-filled rectangle (Vector version)
 // NOTE: On OpenGL 3.3 and ES2 we use QUADS to avoid drawing order issues
-void DrawRectangleV(Vector2 position, Vector2 size, Color color)
+void RaylibDrawRectangleV(RaylibVector2 position, RaylibVector2 size, RaylibColor color)
 {
-    DrawRectanglePro((Rectangle){ position.x, position.y, size.x, size.y }, (Vector2){ 0.0f, 0.0f }, 0.0f, color);
+    RaylibDrawRectanglePro((RaylibRectangle){ position.x, position.y, size.x, size.y }, (RaylibVector2){ 0.0f, 0.0f }, 0.0f, color);
 }
 
 // Draw a color-filled rectangle
-void DrawRectangleRec(Rectangle rec, Color color)
+void RaylibDrawRectangleRec(RaylibRectangle rec, RaylibColor color)
 {
-    DrawRectanglePro(rec, (Vector2){ 0.0f, 0.0f }, 0.0f, color);
+    RaylibDrawRectanglePro(rec, (RaylibVector2){ 0.0f, 0.0f }, 0.0f, color);
 }
 
 // Draw a color-filled rectangle with pro parameters
-void DrawRectanglePro(Rectangle rec, Vector2 origin, float rotation, Color color)
+void RaylibDrawRectanglePro(RaylibRectangle rec, RaylibVector2 origin, float rotation, RaylibColor color)
 {
-    Vector2 topLeft = { 0 };
-    Vector2 topRight = { 0 };
-    Vector2 bottomLeft = { 0 };
-    Vector2 bottomRight = { 0 };
+    RaylibVector2 topLeft = { 0 };
+    RaylibVector2 topRight = { 0 };
+    RaylibVector2 bottomLeft = { 0 };
+    RaylibVector2 bottomRight = { 0 };
 
     // Only calculate rotation if needed
     if (rotation == 0.0f)
     {
         float x = rec.x - origin.x;
         float y = rec.y - origin.y;
-        topLeft = (Vector2){ x, y };
-        topRight = (Vector2){ x + rec.width, y };
-        bottomLeft = (Vector2){ x, y + rec.height };
-        bottomRight = (Vector2){ x + rec.width, y + rec.height };
+        topLeft = (RaylibVector2){ x, y };
+        topRight = (RaylibVector2){ x + rec.width, y };
+        bottomLeft = (RaylibVector2){ x, y + rec.height };
+        bottomRight = (RaylibVector2){ x + rec.width, y + rec.height };
     }
     else
     {
-        float sinRotation = sinf(rotation*DEG2RAD);
-        float cosRotation = cosf(rotation*DEG2RAD);
+        float sinRotation = sinf(rotation*RAYLIB_DEG2RAD);
+        float cosRotation = cosf(rotation*RAYLIB_DEG2RAD);
         float x = rec.x;
         float y = rec.y;
         float dx = -origin.x;
@@ -721,9 +721,9 @@ void DrawRectanglePro(Rectangle rec, Vector2 origin, float rotation, Color color
         bottomRight.y = y + (dx + rec.width)*sinRotation + (dy + rec.height)*cosRotation;
     }
 
-#if defined(SUPPORT_QUADS_DRAW_MODE)
-    rlSetTexture(GetShapesTexture().id);
-    Rectangle shapeRect = GetShapesTextureRectangle();
+#if defined(RAYLIB_SUPPORT_QUADS_DRAW_MODE)
+    rlSetTexture(RaylibGetShapesTexture().id);
+    RaylibRectangle shapeRect = RaylibGetShapesTextureRectangle();
 
     rlBegin(RL_QUADS);
 
@@ -764,24 +764,24 @@ void DrawRectanglePro(Rectangle rec, Vector2 origin, float rotation, Color color
 
 // Draw a vertical-gradient-filled rectangle
 // NOTE: Gradient goes from bottom (color1) to top (color2)
-void DrawRectangleGradientV(int posX, int posY, int width, int height, Color color1, Color color2)
+void RaylibDrawRectangleGradientV(int posX, int posY, int width, int height, RaylibColor color1, RaylibColor color2)
 {
-    DrawRectangleGradientEx((Rectangle){ (float)posX, (float)posY, (float)width, (float)height }, color1, color2, color2, color1);
+    RaylibDrawRectangleGradientEx((RaylibRectangle){ (float)posX, (float)posY, (float)width, (float)height }, color1, color2, color2, color1);
 }
 
 // Draw a horizontal-gradient-filled rectangle
 // NOTE: Gradient goes from bottom (color1) to top (color2)
-void DrawRectangleGradientH(int posX, int posY, int width, int height, Color color1, Color color2)
+void RaylibDrawRectangleGradientH(int posX, int posY, int width, int height, RaylibColor color1, RaylibColor color2)
 {
-    DrawRectangleGradientEx((Rectangle){ (float)posX, (float)posY, (float)width, (float)height }, color1, color1, color2, color2);
+    RaylibDrawRectangleGradientEx((RaylibRectangle){ (float)posX, (float)posY, (float)width, (float)height }, color1, color1, color2, color2);
 }
 
 // Draw a gradient-filled rectangle
 // NOTE: Colors refer to corners, starting at top-lef corner and counter-clockwise
-void DrawRectangleGradientEx(Rectangle rec, Color col1, Color col2, Color col3, Color col4)
+void RaylibDrawRectangleGradientEx(RaylibRectangle rec, RaylibColor col1, RaylibColor col2, RaylibColor col3, RaylibColor col4)
 {
-    rlSetTexture(GetShapesTexture().id);
-    Rectangle shapeRect = GetShapesTextureRectangle();
+    rlSetTexture(RaylibGetShapesTexture().id);
+    RaylibRectangle shapeRect = RaylibGetShapesTextureRectangle();
 
     rlBegin(RL_QUADS);
         rlNormal3f(0.0f, 0.0f, 1.0f);
@@ -811,7 +811,7 @@ void DrawRectangleGradientEx(Rectangle rec, Color col1, Color col2, Color col3, 
 // WARNING: All Draw*Lines() functions use RL_LINES for drawing,
 // it implies flushing the current batch and changing draw mode to RL_LINES
 // but it solves another issue: https://github.com/raysan5/raylib/issues/3884
-void DrawRectangleLines(int posX, int posY, int width, int height, Color color)
+void RaylibDrawRectangleLines(int posX, int posY, int width, int height, RaylibColor color)
 {
     rlBegin(RL_LINES);
         rlColor4ub(color.r, color.g, color.b, color.a);
@@ -830,7 +830,7 @@ void DrawRectangleLines(int posX, int posY, int width, int height, Color color)
 }
 
 // Draw rectangle outline with extended parameters
-void DrawRectangleLinesEx(Rectangle rec, float lineThick, Color color)
+void RaylibDrawRectangleLinesEx(RaylibRectangle rec, float lineThick, RaylibColor color)
 {
     if ((lineThick > rec.width) || (lineThick > rec.height))
     {
@@ -849,24 +849,24 @@ void DrawRectangleLinesEx(Rectangle rec, float lineThick, Color color)
     //   BBBBBBBB
     //
 
-    Rectangle top = { rec.x, rec.y, rec.width, lineThick };
-    Rectangle bottom = { rec.x, rec.y - lineThick + rec.height, rec.width, lineThick };
-    Rectangle left = { rec.x, rec.y + lineThick, lineThick, rec.height - lineThick*2.0f };
-    Rectangle right = { rec.x - lineThick + rec.width, rec.y + lineThick, lineThick, rec.height - lineThick*2.0f };
+    RaylibRectangle top = { rec.x, rec.y, rec.width, lineThick };
+    RaylibRectangle bottom = { rec.x, rec.y - lineThick + rec.height, rec.width, lineThick };
+    RaylibRectangle left = { rec.x, rec.y + lineThick, lineThick, rec.height - lineThick*2.0f };
+    RaylibRectangle right = { rec.x - lineThick + rec.width, rec.y + lineThick, lineThick, rec.height - lineThick*2.0f };
 
-    DrawRectangleRec(top, color);
-    DrawRectangleRec(bottom, color);
-    DrawRectangleRec(left, color);
-    DrawRectangleRec(right, color);
+    RaylibDrawRectangleRec(top, color);
+    RaylibDrawRectangleRec(bottom, color);
+    RaylibDrawRectangleRec(left, color);
+    RaylibDrawRectangleRec(right, color);
 }
 
 // Draw rectangle with rounded edges
-void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color color)
+void RaylibDrawRectangleRounded(RaylibRectangle rec, float roundness, int segments, RaylibColor color)
 {
     // Not a rounded rectangle
     if ((roundness <= 0.0f) || (rec.width < 1) || (rec.height < 1 ))
     {
-        DrawRectangleRec(rec, color);
+        RaylibDrawRectangleRec(rec, color);
         return;
     }
 
@@ -881,7 +881,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
     {
         // Calculate the maximum angle between segments based on the error rate (usually 0.5f)
         float th = acosf(2*powf(1 - SMOOTH_CIRCLE_ERROR_RATE/radius, 2) - 1);
-        segments = (int)(ceilf(2*PI/th)/4.0f);
+        segments = (int)(ceilf(2*RAYLIB_PI/th)/4.0f);
         if (segments <= 0) segments = 4;
     }
 
@@ -904,7 +904,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
           P5                    P4
     */
     // Coordinates of the 12 points that define the rounded rect
-    const Vector2 point[12] = {
+    const RaylibVector2 point[12] = {
         {(float)rec.x + radius, rec.y}, {(float)(rec.x + rec.width) - radius, rec.y}, { rec.x + rec.width, (float)rec.y + radius },     // PO, P1, P2
         {rec.x + rec.width, (float)(rec.y + rec.height) - radius}, {(float)(rec.x + rec.width) - radius, rec.y + rec.height},           // P3, P4
         {(float)rec.x + radius, rec.y + rec.height}, { rec.x, (float)(rec.y + rec.height) - radius}, {rec.x, (float)rec.y + radius},    // P5, P6, P7
@@ -912,19 +912,19 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
         {(float)(rec.x + rec.width) - radius, (float)(rec.y + rec.height) - radius}, {(float)rec.x + radius, (float)(rec.y + rec.height) - radius} // P10, P11
     };
 
-    const Vector2 centers[4] = { point[8], point[9], point[10], point[11] };
+    const RaylibVector2 centers[4] = { point[8], point[9], point[10], point[11] };
     const float angles[4] = { 180.0f, 270.0f, 0.0f, 90.0f };
 
-#if defined(SUPPORT_QUADS_DRAW_MODE)
-    rlSetTexture(GetShapesTexture().id);
-    Rectangle shapeRect = GetShapesTextureRectangle();
+#if defined(RAYLIB_SUPPORT_QUADS_DRAW_MODE)
+    rlSetTexture(RaylibGetShapesTexture().id);
+    RaylibRectangle shapeRect = RaylibGetShapesTextureRectangle();
 
     rlBegin(RL_QUADS);
         // Draw all the 4 corners: [1] Upper Left Corner, [3] Upper Right Corner, [5] Lower Right Corner, [7] Lower Left Corner
         for (int k = 0; k < 4; ++k) // Hope the compiler is smart enough to unroll this loop
         {
             float angle = angles[k];
-            const Vector2 center = centers[k];
+            const RaylibVector2 center = centers[k];
 
             // NOTE: Every QUAD actually represents two segments
             for (int i = 0; i < segments/2; i++)
@@ -934,13 +934,13 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
                 rlVertex2f(center.x, center.y);
 
                 rlTexCoord2f((shapeRect.x + shapeRect.width)/texShapes.width, shapeRect.y/texShapes.height);
-                rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength*2))*radius, center.y + sinf(DEG2RAD*(angle + stepLength*2))*radius);
+                rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength*2))*radius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength*2))*radius);
 
                 rlTexCoord2f((shapeRect.x + shapeRect.width)/texShapes.width, (shapeRect.y + shapeRect.height)/texShapes.height);
-                rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*radius, center.y + sinf(DEG2RAD*(angle + stepLength))*radius);
+                rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*radius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*radius);
 
                 rlTexCoord2f(shapeRect.x/texShapes.width, (shapeRect.y + shapeRect.height)/texShapes.height);
-                rlVertex2f(center.x + cosf(DEG2RAD*angle)*radius, center.y + sinf(DEG2RAD*angle)*radius);
+                rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*radius, center.y + sinf(RAYLIB_DEG2RAD*angle)*radius);
 
                 angle += (stepLength*2);
             }
@@ -953,17 +953,17 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
                 rlVertex2f(center.x, center.y);
 
                 rlTexCoord2f((shapeRect.x + shapeRect.width)/texShapes.width, (shapeRect.y + shapeRect.height)/texShapes.height);
-                rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*radius, center.y + sinf(DEG2RAD*(angle + stepLength))*radius);
+                rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*radius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*radius);
 
                 rlTexCoord2f(shapeRect.x/texShapes.width, (shapeRect.y + shapeRect.height)/texShapes.height);
-                rlVertex2f(center.x + cosf(DEG2RAD*angle)*radius, center.y + sinf(DEG2RAD*angle)*radius);
+                rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*radius, center.y + sinf(RAYLIB_DEG2RAD*angle)*radius);
 
                 rlTexCoord2f((shapeRect.x + shapeRect.width)/texShapes.width, shapeRect.y/texShapes.height);
                 rlVertex2f(center.x, center.y);
             }
         }
 
-        // [2] Upper Rectangle
+        // [2] Upper RaylibRectangle
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlTexCoord2f(shapeRect.x/texShapes.width, shapeRect.y/texShapes.height);
         rlVertex2f(point[0].x, point[0].y);
@@ -974,7 +974,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
         rlTexCoord2f((shapeRect.x + shapeRect.width)/texShapes.width, shapeRect.y/texShapes.height);
         rlVertex2f(point[1].x, point[1].y);
 
-        // [4] Right Rectangle
+        // [4] Right RaylibRectangle
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlTexCoord2f(shapeRect.x/texShapes.width, shapeRect.y/texShapes.height);
         rlVertex2f(point[2].x, point[2].y);
@@ -985,7 +985,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
         rlTexCoord2f((shapeRect.x + shapeRect.width)/texShapes.width, shapeRect.y/texShapes.height);
         rlVertex2f(point[3].x, point[3].y);
 
-        // [6] Bottom Rectangle
+        // [6] Bottom RaylibRectangle
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlTexCoord2f(shapeRect.x/texShapes.width, shapeRect.y/texShapes.height);
         rlVertex2f(point[11].x, point[11].y);
@@ -996,7 +996,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
         rlTexCoord2f((shapeRect.x + shapeRect.width)/texShapes.width, shapeRect.y/texShapes.height);
         rlVertex2f(point[10].x, point[10].y);
 
-        // [8] Left Rectangle
+        // [8] Left RaylibRectangle
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlTexCoord2f(shapeRect.x/texShapes.width, shapeRect.y/texShapes.height);
         rlVertex2f(point[7].x, point[7].y);
@@ -1007,7 +1007,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
         rlTexCoord2f((shapeRect.x + shapeRect.width)/texShapes.width, shapeRect.y/texShapes.height);
         rlVertex2f(point[8].x, point[8].y);
 
-        // [9] Middle Rectangle
+        // [9] Middle RaylibRectangle
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlTexCoord2f(shapeRect.x/texShapes.width, shapeRect.y/texShapes.height);
         rlVertex2f(point[8].x, point[8].y);
@@ -1027,18 +1027,18 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
         for (int k = 0; k < 4; ++k) // Hope the compiler is smart enough to unroll this loop
         {
             float angle = angles[k];
-            const Vector2 center = centers[k];
+            const RaylibVector2 center = centers[k];
             for (int i = 0; i < segments; i++)
             {
                 rlColor4ub(color.r, color.g, color.b, color.a);
                 rlVertex2f(center.x, center.y);
-                rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*radius, center.y + sinf(DEG2RAD*(angle + stepLength))*radius);
-                rlVertex2f(center.x + cosf(DEG2RAD*angle)*radius, center.y + sinf(DEG2RAD*angle)*radius);
+                rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*radius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*radius);
+                rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*radius, center.y + sinf(RAYLIB_DEG2RAD*angle)*radius);
                 angle += stepLength;
             }
         }
 
-        // [2] Upper Rectangle
+        // [2] Upper RaylibRectangle
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlVertex2f(point[0].x, point[0].y);
         rlVertex2f(point[8].x, point[8].y);
@@ -1047,7 +1047,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
         rlVertex2f(point[0].x, point[0].y);
         rlVertex2f(point[9].x, point[9].y);
 
-        // [4] Right Rectangle
+        // [4] Right RaylibRectangle
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlVertex2f(point[9].x, point[9].y);
         rlVertex2f(point[10].x, point[10].y);
@@ -1056,7 +1056,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
         rlVertex2f(point[9].x, point[9].y);
         rlVertex2f(point[3].x, point[3].y);
 
-        // [6] Bottom Rectangle
+        // [6] Bottom RaylibRectangle
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlVertex2f(point[11].x, point[11].y);
         rlVertex2f(point[5].x, point[5].y);
@@ -1065,7 +1065,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
         rlVertex2f(point[11].x, point[11].y);
         rlVertex2f(point[4].x, point[4].y);
 
-        // [8] Left Rectangle
+        // [8] Left RaylibRectangle
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlVertex2f(point[7].x, point[7].y);
         rlVertex2f(point[6].x, point[6].y);
@@ -1074,7 +1074,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
         rlVertex2f(point[7].x, point[7].y);
         rlVertex2f(point[11].x, point[11].y);
 
-        // [9] Middle Rectangle
+        // [9] Middle RaylibRectangle
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlVertex2f(point[8].x, point[8].y);
         rlVertex2f(point[11].x, point[11].y);
@@ -1088,20 +1088,20 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
 
 // Draw rectangle with rounded edges
 // TODO: This function should be refactored to use RL_LINES, for consistency with other Draw*Lines()
-void DrawRectangleRoundedLines(Rectangle rec, float roundness, int segments, Color color)
+void RaylibDrawRectangleRoundedLines(RaylibRectangle rec, float roundness, int segments, RaylibColor color)
 {
-    DrawRectangleRoundedLinesEx(rec, roundness, segments, 1.0f, color);
+    RaylibDrawRectangleRoundedLinesEx(rec, roundness, segments, 1.0f, color);
 }
 
 // Draw rectangle with rounded edges outline
-void DrawRectangleRoundedLinesEx(Rectangle rec, float roundness, int segments, float lineThick, Color color)
+void RaylibDrawRectangleRoundedLinesEx(RaylibRectangle rec, float roundness, int segments, float lineThick, RaylibColor color)
 {
     if (lineThick < 0) lineThick = 0;
 
     // Not a rounded rectangle
     if (roundness <= 0.0f)
     {
-        DrawRectangleLinesEx((Rectangle){rec.x-lineThick, rec.y-lineThick, rec.width+2*lineThick, rec.height+2*lineThick}, lineThick, color);
+        RaylibDrawRectangleLinesEx((RaylibRectangle){rec.x-lineThick, rec.y-lineThick, rec.width+2*lineThick, rec.height+2*lineThick}, lineThick, color);
         return;
     }
 
@@ -1116,7 +1116,7 @@ void DrawRectangleRoundedLinesEx(Rectangle rec, float roundness, int segments, f
     {
         // Calculate the maximum angle between segments based on the error rate (usually 0.5f)
         float th = acosf(2*powf(1 - SMOOTH_CIRCLE_ERROR_RATE/radius, 2) - 1);
-        segments = (int)(ceilf(2*PI/th)/2.0f);
+        segments = (int)(ceilf(2*RAYLIB_PI/th)/2.0f);
         if (segments <= 0) segments = 4;
     }
 
@@ -1139,7 +1139,7 @@ void DrawRectangleRoundedLinesEx(Rectangle rec, float roundness, int segments, f
           \\ P13              P12 //
            P5 ================== P4
     */
-    const Vector2 point[16] = {
+    const RaylibVector2 point[16] = {
         {(float)rec.x + innerRadius, rec.y - lineThick}, {(float)(rec.x + rec.width) - innerRadius, rec.y - lineThick}, { rec.x + rec.width + lineThick, (float)rec.y + innerRadius }, // PO, P1, P2
         {rec.x + rec.width + lineThick, (float)(rec.y + rec.height) - innerRadius}, {(float)(rec.x + rec.width) - innerRadius, rec.y + rec.height + lineThick}, // P3, P4
         {(float)rec.x + innerRadius, rec.y + rec.height + lineThick}, { rec.x - lineThick, (float)(rec.y + rec.height) - innerRadius}, {rec.x - lineThick, (float)rec.y + innerRadius}, // P5, P6, P7
@@ -1149,7 +1149,7 @@ void DrawRectangleRoundedLinesEx(Rectangle rec, float roundness, int segments, f
         { rec.x, (float)(rec.y + rec.height) - innerRadius}, {rec.x, (float)rec.y + innerRadius} // P14, P15
     };
 
-    const Vector2 centers[4] = {
+    const RaylibVector2 centers[4] = {
         {(float)rec.x + innerRadius, (float)rec.y + innerRadius}, {(float)(rec.x + rec.width) - innerRadius, (float)rec.y + innerRadius}, // P16, P17
         {(float)(rec.x + rec.width) - innerRadius, (float)(rec.y + rec.height) - innerRadius}, {(float)rec.x + innerRadius, (float)(rec.y + rec.height) - innerRadius} // P18, P19
     };
@@ -1158,9 +1158,9 @@ void DrawRectangleRoundedLinesEx(Rectangle rec, float roundness, int segments, f
 
     if (lineThick > 1)
     {
-#if defined(SUPPORT_QUADS_DRAW_MODE)
-        rlSetTexture(GetShapesTexture().id);
-        Rectangle shapeRect = GetShapesTextureRectangle();
+#if defined(RAYLIB_SUPPORT_QUADS_DRAW_MODE)
+        rlSetTexture(RaylibGetShapesTexture().id);
+        RaylibRectangle shapeRect = RaylibGetShapesTextureRectangle();
 
         rlBegin(RL_QUADS);
 
@@ -1168,22 +1168,22 @@ void DrawRectangleRoundedLinesEx(Rectangle rec, float roundness, int segments, f
             for (int k = 0; k < 4; ++k) // Hope the compiler is smart enough to unroll this loop
             {
                 float angle = angles[k];
-                const Vector2 center = centers[k];
+                const RaylibVector2 center = centers[k];
                 for (int i = 0; i < segments; i++)
                 {
                     rlColor4ub(color.r, color.g, color.b, color.a);
 
                     rlTexCoord2f(shapeRect.x/texShapes.width, shapeRect.y/texShapes.height);
-                    rlVertex2f(center.x + cosf(DEG2RAD*angle)*innerRadius, center.y + sinf(DEG2RAD*angle)*innerRadius);
+                    rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*innerRadius, center.y + sinf(RAYLIB_DEG2RAD*angle)*innerRadius);
 
                     rlTexCoord2f((shapeRect.x + shapeRect.width)/texShapes.width, shapeRect.y/texShapes.height);
-                    rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*innerRadius, center.y + sinf(DEG2RAD*(angle + stepLength))*innerRadius);
+                    rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*innerRadius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*innerRadius);
 
                     rlTexCoord2f((shapeRect.x + shapeRect.width)/texShapes.width, (shapeRect.y + shapeRect.height)/texShapes.height);
-                    rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*outerRadius, center.y + sinf(DEG2RAD*(angle + stepLength))*outerRadius);
+                    rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*outerRadius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*outerRadius);
 
                     rlTexCoord2f(shapeRect.x/texShapes.width, (shapeRect.y + shapeRect.height)/texShapes.height);
-                    rlVertex2f(center.x + cosf(DEG2RAD*angle)*outerRadius, center.y + sinf(DEG2RAD*angle)*outerRadius);
+                    rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*outerRadius, center.y + sinf(RAYLIB_DEG2RAD*angle)*outerRadius);
 
                     angle += stepLength;
                 }
@@ -1242,19 +1242,19 @@ void DrawRectangleRoundedLinesEx(Rectangle rec, float roundness, int segments, f
             for (int k = 0; k < 4; ++k) // Hope the compiler is smart enough to unroll this loop
             {
                 float angle = angles[k];
-                const Vector2 center = centers[k];
+                const RaylibVector2 center = centers[k];
 
                 for (int i = 0; i < segments; i++)
                 {
                     rlColor4ub(color.r, color.g, color.b, color.a);
 
-                    rlVertex2f(center.x + cosf(DEG2RAD*angle)*innerRadius, center.y + sinf(DEG2RAD*angle)*innerRadius);
-                    rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*innerRadius, center.y + sinf(DEG2RAD*(angle + stepLength))*innerRadius);
-                    rlVertex2f(center.x + cosf(DEG2RAD*angle)*outerRadius, center.y + sinf(DEG2RAD*angle)*outerRadius);
+                    rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*innerRadius, center.y + sinf(RAYLIB_DEG2RAD*angle)*innerRadius);
+                    rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*innerRadius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*innerRadius);
+                    rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*outerRadius, center.y + sinf(RAYLIB_DEG2RAD*angle)*outerRadius);
 
-                    rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*innerRadius, center.y + sinf(DEG2RAD*(angle + stepLength))*innerRadius);
-                    rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*outerRadius, center.y + sinf(DEG2RAD*(angle + stepLength))*outerRadius);
-                    rlVertex2f(center.x + cosf(DEG2RAD*angle)*outerRadius, center.y + sinf(DEG2RAD*angle)*outerRadius);
+                    rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*innerRadius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*innerRadius);
+                    rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*outerRadius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*outerRadius);
+                    rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*outerRadius, center.y + sinf(RAYLIB_DEG2RAD*angle)*outerRadius);
 
                     angle += stepLength;
                 }
@@ -1307,13 +1307,13 @@ void DrawRectangleRoundedLinesEx(Rectangle rec, float roundness, int segments, f
             for (int k = 0; k < 4; ++k) // Hope the compiler is smart enough to unroll this loop
             {
                 float angle = angles[k];
-                const Vector2 center = centers[k];
+                const RaylibVector2 center = centers[k];
 
                 for (int i = 0; i < segments; i++)
                 {
                     rlColor4ub(color.r, color.g, color.b, color.a);
-                    rlVertex2f(center.x + cosf(DEG2RAD*angle)*outerRadius, center.y + sinf(DEG2RAD*angle)*outerRadius);
-                    rlVertex2f(center.x + cosf(DEG2RAD*(angle + stepLength))*outerRadius, center.y + sinf(DEG2RAD*(angle + stepLength))*outerRadius);
+                    rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*angle)*outerRadius, center.y + sinf(RAYLIB_DEG2RAD*angle)*outerRadius);
+                    rlVertex2f(center.x + cosf(RAYLIB_DEG2RAD*(angle + stepLength))*outerRadius, center.y + sinf(RAYLIB_DEG2RAD*(angle + stepLength))*outerRadius);
                     angle += stepLength;
                 }
             }
@@ -1332,11 +1332,11 @@ void DrawRectangleRoundedLinesEx(Rectangle rec, float roundness, int segments, f
 
 // Draw a triangle
 // NOTE: Vertex must be provided in counter-clockwise order
-void DrawTriangle(Vector2 v1, Vector2 v2, Vector2 v3, Color color)
+void RaylibDrawTriangle(RaylibVector2 v1, RaylibVector2 v2, RaylibVector2 v3, RaylibColor color)
 {
-#if defined(SUPPORT_QUADS_DRAW_MODE)
-    rlSetTexture(GetShapesTexture().id);
-    Rectangle shapeRect = GetShapesTextureRectangle();
+#if defined(RAYLIB_SUPPORT_QUADS_DRAW_MODE)
+    rlSetTexture(RaylibGetShapesTexture().id);
+    RaylibRectangle shapeRect = RaylibGetShapesTextureRectangle();
 
     rlBegin(RL_QUADS);
         rlColor4ub(color.r, color.g, color.b, color.a);
@@ -1367,7 +1367,7 @@ void DrawTriangle(Vector2 v1, Vector2 v2, Vector2 v3, Color color)
 
 // Draw a triangle using lines
 // NOTE: Vertex must be provided in counter-clockwise order
-void DrawTriangleLines(Vector2 v1, Vector2 v2, Vector2 v3, Color color)
+void RaylibDrawTriangleLines(RaylibVector2 v1, RaylibVector2 v2, RaylibVector2 v3, RaylibColor color)
 {
     rlBegin(RL_LINES);
         rlColor4ub(color.r, color.g, color.b, color.a);
@@ -1385,12 +1385,12 @@ void DrawTriangleLines(Vector2 v1, Vector2 v2, Vector2 v3, Color color)
 // Draw a triangle fan defined by points
 // NOTE: First vertex provided is the center, shared by all triangles
 // By default, following vertex should be provided in counter-clockwise order
-void DrawTriangleFan(Vector2 *points, int pointCount, Color color)
+void RaylibDrawTriangleFan(RaylibVector2 *points, int pointCount, RaylibColor color)
 {
     if (pointCount >= 3)
     {
-        rlSetTexture(GetShapesTexture().id);
-        Rectangle shapeRect = GetShapesTextureRectangle();
+        rlSetTexture(RaylibGetShapesTexture().id);
+        RaylibRectangle shapeRect = RaylibGetShapesTextureRectangle();
 
         rlBegin(RL_QUADS);
             rlColor4ub(color.r, color.g, color.b, color.a);
@@ -1416,7 +1416,7 @@ void DrawTriangleFan(Vector2 *points, int pointCount, Color color)
 
 // Draw a triangle strip defined by points
 // NOTE: Every new vertex connects with previous two
-void DrawTriangleStrip(Vector2 *points, int pointCount, Color color)
+void RaylibDrawTriangleStrip(RaylibVector2 *points, int pointCount, RaylibColor color)
 {
     if (pointCount >= 3)
     {
@@ -1443,15 +1443,15 @@ void DrawTriangleStrip(Vector2 *points, int pointCount, Color color)
 }
 
 // Draw a regular polygon of n sides (Vector version)
-void DrawPoly(Vector2 center, int sides, float radius, float rotation, Color color)
+void RaylibDrawPoly(RaylibVector2 center, int sides, float radius, float rotation, RaylibColor color)
 {
     if (sides < 3) sides = 3;
-    float centralAngle = rotation*DEG2RAD;
-    float angleStep = 360.0f/(float)sides*DEG2RAD;
+    float centralAngle = rotation*RAYLIB_DEG2RAD;
+    float angleStep = 360.0f/(float)sides*RAYLIB_DEG2RAD;
 
-#if defined(SUPPORT_QUADS_DRAW_MODE)
-    rlSetTexture(GetShapesTexture().id);
-    Rectangle shapeRect = GetShapesTextureRectangle();
+#if defined(RAYLIB_SUPPORT_QUADS_DRAW_MODE)
+    rlSetTexture(RaylibGetShapesTexture().id);
+    RaylibRectangle shapeRect = RaylibGetShapesTextureRectangle();
 
     rlBegin(RL_QUADS);
         for (int i = 0; i < sides; i++)
@@ -1492,11 +1492,11 @@ void DrawPoly(Vector2 center, int sides, float radius, float rotation, Color col
 }
 
 // Draw a polygon outline of n sides
-void DrawPolyLines(Vector2 center, int sides, float radius, float rotation, Color color)
+void RaylibDrawPolyLines(RaylibVector2 center, int sides, float radius, float rotation, RaylibColor color)
 {
     if (sides < 3) sides = 3;
-    float centralAngle = rotation*DEG2RAD;
-    float angleStep = 360.0f/(float)sides*DEG2RAD;
+    float centralAngle = rotation*RAYLIB_DEG2RAD;
+    float angleStep = 360.0f/(float)sides*RAYLIB_DEG2RAD;
 
     rlBegin(RL_LINES);
         for (int i = 0; i < sides; i++)
@@ -1511,16 +1511,16 @@ void DrawPolyLines(Vector2 center, int sides, float radius, float rotation, Colo
     rlEnd();
 }
 
-void DrawPolyLinesEx(Vector2 center, int sides, float radius, float rotation, float lineThick, Color color)
+void RaylibDrawPolyLinesEx(RaylibVector2 center, int sides, float radius, float rotation, float lineThick, RaylibColor color)
 {
     if (sides < 3) sides = 3;
-    float centralAngle = rotation*DEG2RAD;
-    float exteriorAngle = 360.0f/(float)sides*DEG2RAD;
-    float innerRadius = radius - (lineThick*cosf(DEG2RAD*exteriorAngle/2.0f));
+    float centralAngle = rotation*RAYLIB_DEG2RAD;
+    float exteriorAngle = 360.0f/(float)sides*RAYLIB_DEG2RAD;
+    float innerRadius = radius - (lineThick*cosf(RAYLIB_DEG2RAD*exteriorAngle/2.0f));
 
-#if defined(SUPPORT_QUADS_DRAW_MODE)
-    rlSetTexture(GetShapesTexture().id);
-    Rectangle shapeRect = GetShapesTextureRectangle();
+#if defined(RAYLIB_SUPPORT_QUADS_DRAW_MODE)
+    rlSetTexture(RaylibGetShapesTexture().id);
+    RaylibRectangle shapeRect = RaylibGetShapesTextureRectangle();
 
     rlBegin(RL_QUADS);
         for (int i = 0; i < sides; i++)
@@ -1570,12 +1570,12 @@ void DrawPolyLinesEx(Vector2 center, int sides, float radius, float rotation, fl
 //----------------------------------------------------------------------------------
 
 // Draw spline: linear, minimum 2 points
-void DrawSplineLinear(Vector2 *points, int pointCount, float thick, Color color)
+void RaylibDrawSplineLinear(RaylibVector2 *points, int pointCount, float thick, RaylibColor color)
 {
     if (pointCount < 2) return;
 
 #if defined(SUPPORT_SPLINE_MITERS)
-    Vector2 prevNormal = (Vector2){-(points[1].y - points[0].y), (points[1].x - points[0].x)};
+    RaylibVector2 prevNormal = (RaylibVector2){-(points[1].y - points[0].y), (points[1].x - points[0].x)};
     float prevLength = sqrtf(prevNormal.x*prevNormal.x + prevNormal.y*prevNormal.y);
 
     if (prevLength > 0.0f)
@@ -1589,15 +1589,15 @@ void DrawSplineLinear(Vector2 *points, int pointCount, float thick, Color color)
         prevNormal.y = 0.0f;
     }
 
-    Vector2 prevRadius = { 0.5f*thick*prevNormal.x, 0.5f*thick*prevNormal.y };
+    RaylibVector2 prevRadius = { 0.5f*thick*prevNormal.x, 0.5f*thick*prevNormal.y };
 
     for (int i = 0; i < pointCount - 1; i++)
     {
-        Vector2 normal = { 0 };
+        RaylibVector2 normal = { 0 };
 
         if (i < pointCount - 2)
         {
-            normal = (Vector2){-(points[i + 2].y - points[i + 1].y), (points[i + 2].x - points[i + 1].x)};
+            normal = (RaylibVector2){-(points[i + 2].y - points[i + 1].y), (points[i + 2].x - points[i + 1].x)};
             float normalLength = sqrtf(normal.x*normal.x + normal.y*normal.y);
 
             if (normalLength > 0.0f)
@@ -1616,7 +1616,7 @@ void DrawSplineLinear(Vector2 *points, int pointCount, float thick, Color color)
             normal = prevNormal;
         }
 
-        Vector2 radius = { prevNormal.x + normal.x, prevNormal.y + normal.y };
+        RaylibVector2 radius = { prevNormal.x + normal.x, prevNormal.y + normal.y };
         float radiusLength = sqrtf(radius.x*radius.x + radius.y*radius.y);
 
         if (radiusLength > 0.0f)
@@ -1643,14 +1643,14 @@ void DrawSplineLinear(Vector2 *points, int pointCount, float thick, Color color)
             radius.y = 0.0f;
         }
 
-        Vector2 strip[4] = {
+        RaylibVector2 strip[4] = {
             { points[i].x - prevRadius.x, points[i].y - prevRadius.y },
             { points[i].x + prevRadius.x, points[i].y + prevRadius.y },
             { points[i + 1].x - radius.x, points[i + 1].y - radius.y },
             { points[i + 1].x + radius.x, points[i + 1].y + radius.y }
         };
 
-        DrawTriangleStrip(strip, 4, color);
+        RaylibDrawTriangleStrip(strip, 4, color);
 
         prevRadius = radius;
         prevNormal = normal;
@@ -1658,26 +1658,26 @@ void DrawSplineLinear(Vector2 *points, int pointCount, float thick, Color color)
 
 #else   // !SUPPORT_SPLINE_MITTERS
 
-    Vector2 delta = { 0 };
+    RaylibVector2 delta = { 0 };
     float length = 0.0f;
     float scale = 0.0f;
 
     for (int i = 0; i < pointCount - 1; i++)
     {
-        delta = (Vector2){ points[i + 1].x - points[i].x, points[i + 1].y - points[i].y };
+        delta = (RaylibVector2){ points[i + 1].x - points[i].x, points[i + 1].y - points[i].y };
         length = sqrtf(delta.x*delta.x + delta.y*delta.y);
 
         if (length > 0) scale = thick/(2*length);
 
-        Vector2 radius = { -scale*delta.y, scale*delta.x };
-        Vector2 strip[4] = {
+        RaylibVector2 radius = { -scale*delta.y, scale*delta.x };
+        RaylibVector2 strip[4] = {
             { points[i].x - radius.x, points[i].y - radius.y },
             { points[i].x + radius.x, points[i].y + radius.y },
             { points[i + 1].x - radius.x, points[i + 1].y - radius.y },
             { points[i + 1].x + radius.x, points[i + 1].y + radius.y }
         };
 
-        DrawTriangleStrip(strip, 4, color);
+        RaylibDrawTriangleStrip(strip, 4, color);
     }
 #endif
 
@@ -1687,7 +1687,7 @@ void DrawSplineLinear(Vector2 *points, int pointCount, float thick, Color color)
 }
 
 // Draw spline: B-Spline, minimum 4 points
-void DrawSplineBasis(Vector2 *points, int pointCount, float thick, Color color)
+void RaylibDrawSplineBasis(RaylibVector2 *points, int pointCount, float thick, RaylibColor color)
 {
     if (pointCount < 4) return;
 
@@ -1697,14 +1697,14 @@ void DrawSplineBasis(Vector2 *points, int pointCount, float thick, Color color)
     float dx = 0.0f;
     float size = 0.0f;
 
-    Vector2 currentPoint = { 0 };
-    Vector2 nextPoint = { 0 };
-    Vector2 vertices[2*SPLINE_SEGMENT_DIVISIONS + 2] = { 0 };
+    RaylibVector2 currentPoint = { 0 };
+    RaylibVector2 nextPoint = { 0 };
+    RaylibVector2 vertices[2*RAYLIB_SPLINE_SEGMENT_DIVISIONS + 2] = { 0 };
 
     for (int i = 0; i < (pointCount - 3); i++)
     {
         float t = 0.0f;
-        Vector2 p1 = points[i], p2 = points[i + 1], p3 = points[i + 2], p4 = points[i + 3];
+        RaylibVector2 p1 = points[i], p2 = points[i + 1], p3 = points[i + 2], p4 = points[i + 3];
 
         a[0] = (-p1.x + 3.0f*p2.x - 3.0f*p3.x + p4.x)/6.0f;
         a[1] = (3.0f*p1.x - 6.0f*p2.x + 3.0f*p3.x)/6.0f;
@@ -1719,7 +1719,7 @@ void DrawSplineBasis(Vector2 *points, int pointCount, float thick, Color color)
         currentPoint.x = a[3];
         currentPoint.y = b[3];
 
-        if (i == 0) DrawCircleV(currentPoint, thick/2.0f, color);   // Draw init line circle-cap
+        if (i == 0) RaylibDrawCircleV(currentPoint, thick/2.0f, color);   // Draw init line circle-cap
 
         if (i > 0)
         {
@@ -1729,9 +1729,9 @@ void DrawSplineBasis(Vector2 *points, int pointCount, float thick, Color color)
             vertices[1].y = currentPoint.y + dx*size;
         }
 
-        for (int j = 1; j <= SPLINE_SEGMENT_DIVISIONS; j++)
+        for (int j = 1; j <= RAYLIB_SPLINE_SEGMENT_DIVISIONS; j++)
         {
-            t = ((float)j)/((float)SPLINE_SEGMENT_DIVISIONS);
+            t = ((float)j)/((float)RAYLIB_SPLINE_SEGMENT_DIVISIONS);
 
             nextPoint.x = a[3] + t*(a[2] + t*(a[1] + t*a[0]));
             nextPoint.y = b[3] + t*(b[2] + t*(b[1] + t*b[0]));
@@ -1756,14 +1756,14 @@ void DrawSplineBasis(Vector2 *points, int pointCount, float thick, Color color)
             currentPoint = nextPoint;
         }
 
-        DrawTriangleStrip(vertices, 2*SPLINE_SEGMENT_DIVISIONS + 2, color);
+        RaylibDrawTriangleStrip(vertices, 2*RAYLIB_SPLINE_SEGMENT_DIVISIONS + 2, color);
     }
 
-    DrawCircleV(currentPoint, thick/2.0f, color);   // Draw end line circle-cap
+    RaylibDrawCircleV(currentPoint, thick/2.0f, color);   // Draw end line circle-cap
 }
 
 // Draw spline: Catmull-Rom, minimum 4 points
-void DrawSplineCatmullRom(Vector2 *points, int pointCount, float thick, Color color)
+void RaylibDrawSplineCatmullRom(RaylibVector2 *points, int pointCount, float thick, RaylibColor color)
 {
     if (pointCount < 4) return;
 
@@ -1771,16 +1771,16 @@ void DrawSplineCatmullRom(Vector2 *points, int pointCount, float thick, Color co
     float dx = 0.0f;
     float size = 0.0f;
 
-    Vector2 currentPoint = points[1];
-    Vector2 nextPoint = { 0 };
-    Vector2 vertices[2*SPLINE_SEGMENT_DIVISIONS + 2] = { 0 };
+    RaylibVector2 currentPoint = points[1];
+    RaylibVector2 nextPoint = { 0 };
+    RaylibVector2 vertices[2*RAYLIB_SPLINE_SEGMENT_DIVISIONS + 2] = { 0 };
 
-    DrawCircleV(currentPoint, thick/2.0f, color);   // Draw init line circle-cap
+    RaylibDrawCircleV(currentPoint, thick/2.0f, color);   // Draw init line circle-cap
 
     for (int i = 0; i < (pointCount - 3); i++)
     {
         float t = 0.0f;
-        Vector2 p1 = points[i], p2 = points[i + 1], p3 = points[i + 2], p4 = points[i + 3];
+        RaylibVector2 p1 = points[i], p2 = points[i + 1], p3 = points[i + 2], p4 = points[i + 3];
 
         if (i > 0)
         {
@@ -1790,9 +1790,9 @@ void DrawSplineCatmullRom(Vector2 *points, int pointCount, float thick, Color co
             vertices[1].y = currentPoint.y + dx*size;
         }
 
-        for (int j = 1; j <= SPLINE_SEGMENT_DIVISIONS; j++)
+        for (int j = 1; j <= RAYLIB_SPLINE_SEGMENT_DIVISIONS; j++)
         {
-            t = ((float)j)/((float)SPLINE_SEGMENT_DIVISIONS);
+            t = ((float)j)/((float)RAYLIB_SPLINE_SEGMENT_DIVISIONS);
 
             float q0 = (-1.0f*t*t*t) + (2.0f*t*t) + (-1.0f*t);
             float q1 = (3.0f*t*t*t) + (-5.0f*t*t) + 2.0f;
@@ -1822,68 +1822,68 @@ void DrawSplineCatmullRom(Vector2 *points, int pointCount, float thick, Color co
             currentPoint = nextPoint;
         }
 
-        DrawTriangleStrip(vertices, 2*SPLINE_SEGMENT_DIVISIONS + 2, color);
+        RaylibDrawTriangleStrip(vertices, 2*RAYLIB_SPLINE_SEGMENT_DIVISIONS + 2, color);
     }
 
-    DrawCircleV(currentPoint, thick/2.0f, color);   // Draw end line circle-cap
+    RaylibDrawCircleV(currentPoint, thick/2.0f, color);   // Draw end line circle-cap
 }
 
 // Draw spline: Quadratic Bezier, minimum 3 points (1 control point): [p1, c2, p3, c4...]
-void DrawSplineBezierQuadratic(Vector2 *points, int pointCount, float thick, Color color)
+void RaylibDrawSplineBezierQuadratic(RaylibVector2 *points, int pointCount, float thick, RaylibColor color)
 {
     if (pointCount < 3) return;
 
     for (int i = 0; i < pointCount - 2; i++)
     {
-        DrawSplineSegmentBezierQuadratic(points[i], points[i + 1], points[i + 2], thick, color);
+        RaylibDrawSplineSegmentBezierQuadratic(points[i], points[i + 1], points[i + 2], thick, color);
     }
 }
 
 // Draw spline: Cubic Bezier, minimum 4 points (2 control points): [p1, c2, c3, p4, c5, c6...]
-void DrawSplineBezierCubic(Vector2 *points, int pointCount, float thick, Color color)
+void RaylibDrawSplineBezierCubic(RaylibVector2 *points, int pointCount, float thick, RaylibColor color)
 {
     if (pointCount < 4) return;
 
     for (int i = 0; i < pointCount - 3; i++)
     {
-        DrawSplineSegmentBezierCubic(points[i], points[i + 1], points[i + 2], points[i + 3], thick, color);
+        RaylibDrawSplineSegmentBezierCubic(points[i], points[i + 1], points[i + 2], points[i + 3], thick, color);
     }
 }
 
 // Draw spline segment: Linear, 2 points
-void DrawSplineSegmentLinear(Vector2 p1, Vector2 p2, float thick, Color color)
+void RaylibDrawSplineSegmentLinear(RaylibVector2 p1, RaylibVector2 p2, float thick, RaylibColor color)
 {
     // NOTE: For the linear spline we don't use subdivisions, just a single quad
 
-    Vector2 delta = { p2.x - p1.x, p2.y - p1.y };
+    RaylibVector2 delta = { p2.x - p1.x, p2.y - p1.y };
     float length = sqrtf(delta.x*delta.x + delta.y*delta.y);
 
     if ((length > 0) && (thick > 0))
     {
         float scale = thick/(2*length);
 
-        Vector2 radius = { -scale*delta.y, scale*delta.x };
-        Vector2 strip[4] = {
+        RaylibVector2 radius = { -scale*delta.y, scale*delta.x };
+        RaylibVector2 strip[4] = {
             { p1.x - radius.x, p1.y - radius.y },
             { p1.x + radius.x, p1.y + radius.y },
             { p2.x - radius.x, p2.y - radius.y },
             { p2.x + radius.x, p2.y + radius.y }
         };
 
-        DrawTriangleStrip(strip, 4, color);
+        RaylibDrawTriangleStrip(strip, 4, color);
     }
 }
 
 // Draw spline segment: B-Spline, 4 points
-void DrawSplineSegmentBasis(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float thick, Color color)
+void RaylibDrawSplineSegmentBasis(RaylibVector2 p1, RaylibVector2 p2, RaylibVector2 p3, RaylibVector2 p4, float thick, RaylibColor color)
 {
-    const float step = 1.0f/SPLINE_SEGMENT_DIVISIONS;
+    const float step = 1.0f/RAYLIB_SPLINE_SEGMENT_DIVISIONS;
 
-    Vector2 currentPoint = { 0 };
-    Vector2 nextPoint = { 0 };
+    RaylibVector2 currentPoint = { 0 };
+    RaylibVector2 nextPoint = { 0 };
     float t = 0.0f;
 
-    Vector2 points[2*SPLINE_SEGMENT_DIVISIONS + 2] = { 0 };
+    RaylibVector2 points[2*RAYLIB_SPLINE_SEGMENT_DIVISIONS + 2] = { 0 };
 
     float a[4] = { 0 };
     float b[4] = { 0 };
@@ -1901,7 +1901,7 @@ void DrawSplineSegmentBasis(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, floa
     currentPoint.x = a[3];
     currentPoint.y = b[3];
 
-    for (int i = 0; i <= SPLINE_SEGMENT_DIVISIONS; i++)
+    for (int i = 0; i <= RAYLIB_SPLINE_SEGMENT_DIVISIONS; i++)
     {
         t = step*(float)i;
 
@@ -1928,21 +1928,21 @@ void DrawSplineSegmentBasis(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, floa
         currentPoint = nextPoint;
     }
 
-    DrawTriangleStrip(points, 2*SPLINE_SEGMENT_DIVISIONS+2, color);
+    RaylibDrawTriangleStrip(points, 2*RAYLIB_SPLINE_SEGMENT_DIVISIONS+2, color);
 }
 
 // Draw spline segment: Catmull-Rom, 4 points
-void DrawSplineSegmentCatmullRom(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float thick, Color color)
+void RaylibDrawSplineSegmentCatmullRom(RaylibVector2 p1, RaylibVector2 p2, RaylibVector2 p3, RaylibVector2 p4, float thick, RaylibColor color)
 {
-    const float step = 1.0f/SPLINE_SEGMENT_DIVISIONS;
+    const float step = 1.0f/RAYLIB_SPLINE_SEGMENT_DIVISIONS;
 
-    Vector2 currentPoint = p1;
-    Vector2 nextPoint = { 0 };
+    RaylibVector2 currentPoint = p1;
+    RaylibVector2 nextPoint = { 0 };
     float t = 0.0f;
 
-    Vector2 points[2*SPLINE_SEGMENT_DIVISIONS + 2] = { 0 };
+    RaylibVector2 points[2*RAYLIB_SPLINE_SEGMENT_DIVISIONS + 2] = { 0 };
 
-    for (int i = 0; i <= SPLINE_SEGMENT_DIVISIONS; i++)
+    for (int i = 0; i <= RAYLIB_SPLINE_SEGMENT_DIVISIONS; i++)
     {
         t = step*(float)i;
 
@@ -1974,21 +1974,21 @@ void DrawSplineSegmentCatmullRom(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4,
         currentPoint = nextPoint;
     }
 
-    DrawTriangleStrip(points, 2*SPLINE_SEGMENT_DIVISIONS + 2, color);
+    RaylibDrawTriangleStrip(points, 2*RAYLIB_SPLINE_SEGMENT_DIVISIONS + 2, color);
 }
 
 // Draw spline segment: Quadratic Bezier, 2 points, 1 control point
-void DrawSplineSegmentBezierQuadratic(Vector2 p1, Vector2 c2, Vector2 p3, float thick, Color color)
+void RaylibDrawSplineSegmentBezierQuadratic(RaylibVector2 p1, RaylibVector2 c2, RaylibVector2 p3, float thick, RaylibColor color)
 {
-    const float step = 1.0f/SPLINE_SEGMENT_DIVISIONS;
+    const float step = 1.0f/RAYLIB_SPLINE_SEGMENT_DIVISIONS;
 
-    Vector2 previous = p1;
-    Vector2 current = { 0 };
+    RaylibVector2 previous = p1;
+    RaylibVector2 current = { 0 };
     float t = 0.0f;
 
-    Vector2 points[2*SPLINE_SEGMENT_DIVISIONS + 2] = { 0 };
+    RaylibVector2 points[2*RAYLIB_SPLINE_SEGMENT_DIVISIONS + 2] = { 0 };
 
-    for (int i = 1; i <= SPLINE_SEGMENT_DIVISIONS; i++)
+    for (int i = 1; i <= RAYLIB_SPLINE_SEGMENT_DIVISIONS; i++)
     {
         t = step*(float)i;
 
@@ -2020,21 +2020,21 @@ void DrawSplineSegmentBezierQuadratic(Vector2 p1, Vector2 c2, Vector2 p3, float 
         previous = current;
     }
 
-    DrawTriangleStrip(points, 2*SPLINE_SEGMENT_DIVISIONS + 2, color);
+    RaylibDrawTriangleStrip(points, 2*RAYLIB_SPLINE_SEGMENT_DIVISIONS + 2, color);
 }
 
 // Draw spline segment: Cubic Bezier, 2 points, 2 control points
-void DrawSplineSegmentBezierCubic(Vector2 p1, Vector2 c2, Vector2 c3, Vector2 p4, float thick, Color color)
+void RaylibDrawSplineSegmentBezierCubic(RaylibVector2 p1, RaylibVector2 c2, RaylibVector2 c3, RaylibVector2 p4, float thick, RaylibColor color)
 {
-    const float step = 1.0f/SPLINE_SEGMENT_DIVISIONS;
+    const float step = 1.0f/RAYLIB_SPLINE_SEGMENT_DIVISIONS;
 
-    Vector2 previous = p1;
-    Vector2 current = { 0 };
+    RaylibVector2 previous = p1;
+    RaylibVector2 current = { 0 };
     float t = 0.0f;
 
-    Vector2 points[2*SPLINE_SEGMENT_DIVISIONS + 2] = { 0 };
+    RaylibVector2 points[2*RAYLIB_SPLINE_SEGMENT_DIVISIONS + 2] = { 0 };
 
-    for (int i = 1; i <= SPLINE_SEGMENT_DIVISIONS; i++)
+    for (int i = 1; i <= RAYLIB_SPLINE_SEGMENT_DIVISIONS; i++)
     {
         t = step*(float)i;
 
@@ -2066,13 +2066,13 @@ void DrawSplineSegmentBezierCubic(Vector2 p1, Vector2 c2, Vector2 c3, Vector2 p4
         previous = current;
     }
 
-    DrawTriangleStrip(points, 2*SPLINE_SEGMENT_DIVISIONS + 2, color);
+    RaylibDrawTriangleStrip(points, 2*RAYLIB_SPLINE_SEGMENT_DIVISIONS + 2, color);
 }
 
 // Get spline point for a given t [0.0f .. 1.0f], Linear
-Vector2 GetSplinePointLinear(Vector2 startPos, Vector2 endPos, float t)
+RaylibVector2 RaylibGetSplinePointLinear(RaylibVector2 startPos, RaylibVector2 endPos, float t)
 {
-    Vector2 point = { 0 };
+    RaylibVector2 point = { 0 };
 
     point.x = startPos.x*(1.0f - t) + endPos.x*t;
     point.y = startPos.y*(1.0f - t) + endPos.y*t;
@@ -2081,9 +2081,9 @@ Vector2 GetSplinePointLinear(Vector2 startPos, Vector2 endPos, float t)
 }
 
 // Get spline point for a given t [0.0f .. 1.0f], B-Spline
-Vector2 GetSplinePointBasis(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float t)
+RaylibVector2 RaylibGetSplinePointBasis(RaylibVector2 p1, RaylibVector2 p2, RaylibVector2 p3, RaylibVector2 p4, float t)
 {
-    Vector2 point = { 0 };
+    RaylibVector2 point = { 0 };
 
     float a[4] = { 0 };
     float b[4] = { 0 };
@@ -2105,9 +2105,9 @@ Vector2 GetSplinePointBasis(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, floa
 }
 
 // Get spline point for a given t [0.0f .. 1.0f], Catmull-Rom
-Vector2 GetSplinePointCatmullRom(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float t)
+RaylibVector2 RaylibGetSplinePointCatmullRom(RaylibVector2 p1, RaylibVector2 p2, RaylibVector2 p3, RaylibVector2 p4, float t)
 {
-    Vector2 point = { 0 };
+    RaylibVector2 point = { 0 };
 
     float q0 = (-1*t*t*t) + (2*t*t) + (-1*t);
     float q1 = (3*t*t*t) + (-5*t*t) + 2;
@@ -2121,9 +2121,9 @@ Vector2 GetSplinePointCatmullRom(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4,
 }
 
 // Get spline point for a given t [0.0f .. 1.0f], Quadratic Bezier
-Vector2 GetSplinePointBezierQuad(Vector2 startPos, Vector2 controlPos, Vector2 endPos, float t)
+RaylibVector2 RaylibGetSplinePointBezierQuad(RaylibVector2 startPos, RaylibVector2 controlPos, RaylibVector2 endPos, float t)
 {
-    Vector2 point = { 0 };
+    RaylibVector2 point = { 0 };
 
     float a = powf(1.0f - t, 2);
     float b = 2.0f*(1.0f - t)*t;
@@ -2136,9 +2136,9 @@ Vector2 GetSplinePointBezierQuad(Vector2 startPos, Vector2 controlPos, Vector2 e
 }
 
 // Get spline point for a given t [0.0f .. 1.0f], Cubic Bezier
-Vector2 GetSplinePointBezierCubic(Vector2 startPos, Vector2 startControlPos, Vector2 endControlPos, Vector2 endPos, float t)
+RaylibVector2 RaylibGetSplinePointBezierCubic(RaylibVector2 startPos, RaylibVector2 startControlPos, RaylibVector2 endControlPos, RaylibVector2 endPos, float t)
 {
-    Vector2 point = { 0 };
+    RaylibVector2 point = { 0 };
 
     float a = powf(1.0f - t, 3);
     float b = 3.0f*powf(1.0f - t, 2)*t;
@@ -2156,7 +2156,7 @@ Vector2 GetSplinePointBezierCubic(Vector2 startPos, Vector2 startControlPos, Vec
 //----------------------------------------------------------------------------------
 
 // Check if point is inside rectangle
-bool CheckCollisionPointRec(Vector2 point, Rectangle rec)
+bool RaylibCheckCollisionPointRec(RaylibVector2 point, RaylibRectangle rec)
 {
     bool collision = false;
 
@@ -2166,17 +2166,17 @@ bool CheckCollisionPointRec(Vector2 point, Rectangle rec)
 }
 
 // Check if point is inside circle
-bool CheckCollisionPointCircle(Vector2 point, Vector2 center, float radius)
+bool RaylibCheckCollisionPointCircle(RaylibVector2 point, RaylibVector2 center, float radius)
 {
     bool collision = false;
 
-    collision = CheckCollisionCircles(point, 0, center, radius);
+    collision = RaylibCheckCollisionCircles(point, 0, center, radius);
 
     return collision;
 }
 
 // Check if point is inside a triangle defined by three points (p1, p2, p3)
-bool CheckCollisionPointTriangle(Vector2 point, Vector2 p1, Vector2 p2, Vector2 p3)
+bool RaylibCheckCollisionPointTriangle(RaylibVector2 point, RaylibVector2 p1, RaylibVector2 p2, RaylibVector2 p3)
 {
     bool collision = false;
 
@@ -2195,7 +2195,7 @@ bool CheckCollisionPointTriangle(Vector2 point, Vector2 p1, Vector2 p2, Vector2 
 
 // Check if point is within a polygon described by array of vertices
 // NOTE: Based on http://jeffreythompson.org/collision-detection/poly-point.php
-bool CheckCollisionPointPoly(Vector2 point, Vector2 *points, int pointCount)
+bool RaylibCheckCollisionPointPoly(RaylibVector2 point, RaylibVector2 *points, int pointCount)
 {
     bool inside = false;
 
@@ -2215,7 +2215,7 @@ bool CheckCollisionPointPoly(Vector2 point, Vector2 *points, int pointCount)
 }
 
 // Check collision between two rectangles
-bool CheckCollisionRecs(Rectangle rec1, Rectangle rec2)
+bool RaylibCheckCollisionRecs(RaylibRectangle rec1, RaylibRectangle rec2)
 {
     bool collision = false;
 
@@ -2226,7 +2226,7 @@ bool CheckCollisionRecs(Rectangle rec1, Rectangle rec2)
 }
 
 // Check collision between two circles
-bool CheckCollisionCircles(Vector2 center1, float radius1, Vector2 center2, float radius2)
+bool RaylibCheckCollisionCircles(RaylibVector2 center1, float radius1, RaylibVector2 center2, float radius2)
 {
     bool collision = false;
 
@@ -2242,7 +2242,7 @@ bool CheckCollisionCircles(Vector2 center1, float radius1, Vector2 center2, floa
 
 // Check collision between circle and rectangle
 // NOTE: Reviewed version to take into account corner limit case
-bool CheckCollisionCircleRec(Vector2 center, float radius, Rectangle rec)
+bool RaylibCheckCollisionCircleRec(RaylibVector2 center, float radius, RaylibRectangle rec)
 {
     bool collision = false;
 
@@ -2267,7 +2267,7 @@ bool CheckCollisionCircleRec(Vector2 center, float radius, Rectangle rec)
 }
 
 // Check the collision between two lines defined by two points each, returns collision point by reference
-bool CheckCollisionLines(Vector2 startPos1, Vector2 endPos1, Vector2 startPos2, Vector2 endPos2, Vector2 *collisionPoint)
+bool RaylibCheckCollisionLines(RaylibVector2 startPos1, RaylibVector2 endPos1, RaylibVector2 startPos2, RaylibVector2 endPos2, RaylibVector2 *collisionPoint)
 {
     bool collision = false;
 
@@ -2296,7 +2296,7 @@ bool CheckCollisionLines(Vector2 startPos1, Vector2 endPos1, Vector2 startPos2, 
 }
 
 // Check if point belongs to line created between two points [p1] and [p2] with defined margin in pixels [threshold]
-bool CheckCollisionPointLine(Vector2 point, Vector2 p1, Vector2 p2, int threshold)
+bool RaylibCheckCollisionPointLine(RaylibVector2 point, RaylibVector2 p1, RaylibVector2 p2, int threshold)
 {
     bool collision = false;
 
@@ -2316,14 +2316,14 @@ bool CheckCollisionPointLine(Vector2 point, Vector2 p1, Vector2 p2, int threshol
 }
 
 // Check if circle collides with a line created betweeen two points [p1] and [p2]
-RLAPI bool CheckCollisionCircleLine(Vector2 center, float radius, Vector2 p1, Vector2 p2)
+RAYLIB_RLAPI bool RaylibCheckCollisionCircleLine(RaylibVector2 center, float radius, RaylibVector2 p1, RaylibVector2 p2)
 {
     float dx = p1.x - p2.x;
     float dy = p1.y - p2.y;
 
     if ((fabsf(dx) + fabsf(dy)) <= FLT_EPSILON)
     {
-        return CheckCollisionCircles(p1, 0, center, radius);
+        return RaylibCheckCollisionCircles(p1, 0, center, radius);
     }
 
     float lengthSQ = ((dx * dx) + (dy * dy));
@@ -2340,9 +2340,9 @@ RLAPI bool CheckCollisionCircleLine(Vector2 center, float radius, Vector2 p1, Ve
 }
 
 // Get collision rectangle for two rectangles collision
-Rectangle GetCollisionRec(Rectangle rec1, Rectangle rec2)
+RaylibRectangle RaylibGetCollisionRec(RaylibRectangle rec1, RaylibRectangle rec2)
 {
-    Rectangle overlap = { 0 };
+    RaylibRectangle overlap = { 0 };
 
     float left = (rec1.x > rec2.x)? rec1.x : rec2.x;
     float right1 = rec1.x + rec1.width;
@@ -2369,7 +2369,7 @@ Rectangle GetCollisionRec(Rectangle rec1, Rectangle rec2)
 //----------------------------------------------------------------------------------
 
 // Cubic easing in-out
-// NOTE: Used by DrawLineBezier() only
+// NOTE: Used by RaylibDrawLineBezier() only
 static float EaseCubicInOut(float t, float b, float c, float d)
 {
     float result = 0.0f;
@@ -2384,4 +2384,4 @@ static float EaseCubicInOut(float t, float b, float c, float d)
     return result;
 }
 
-#endif      // SUPPORT_MODULE_RSHAPES
+#endif      // RAYLIB_SUPPORT_MODULE_RSHAPES

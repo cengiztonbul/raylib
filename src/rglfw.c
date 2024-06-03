@@ -40,11 +40,11 @@
 //----------------------------------------------------------------------------------
 // Feature Test Macros required for this module
 //----------------------------------------------------------------------------------
-#if (defined(__linux__) || defined(PLATFORM_WEB)) && (_POSIX_C_SOURCE < 199309L)
+#if (defined(__linux__) || defined(RAYLIB_PLATFORM_WEB)) && (_POSIX_C_SOURCE < 199309L)
     #undef _POSIX_C_SOURCE
     #define _POSIX_C_SOURCE 199309L // Required for: CLOCK_MONOTONIC if compiled with c99 without gnu ext.
 #endif
-#if (defined(__linux__) || defined(PLATFORM_WEB)) && !defined(_GNU_SOURCE)
+#if (defined(__linux__) || defined(RAYLIB_PLATFORM_WEB)) && !defined(_GNU_SOURCE)
     #undef _GNU_SOURCE
     #define _GNU_SOURCE // Required for: ppoll if compiled with c99 without gnu ext.
 #endif

@@ -83,7 +83,7 @@ if (WITH_PIC OR BUILD_SHARED_LIBS)
 endif ()
 
 if (BUILD_SHARED_LIBS)
-    # Hide raylib's symbols by default so RLAPI can expose them
+    # Hide raylib's symbols by default so RAYLIB_RLAPI can expose them
     set_property(TARGET raylib PROPERTY C_VISIBILITY_PRESET hidden)
 endif ()
 

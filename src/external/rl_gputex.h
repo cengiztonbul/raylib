@@ -48,8 +48,8 @@
 #ifndef RL_GPUTEX_H
 #define RL_GPUTEX_H
 
-#ifndef RLAPI
-    #define RLAPI       // Functions defined as 'extern' by default (implicit specifiers)
+#ifndef RAYLIB_RLAPI
+    #define RAYLIB_RLAPI       // Functions defined as 'extern' by default (implicit specifiers)
 #endif
 
 //----------------------------------------------------------------------------------
@@ -60,13 +60,13 @@ extern "C" {            // Prevents name mangling of functions
 #endif
 
 // Load image data from memory data files
-RLAPI void *rl_load_dds_from_memory(const unsigned char *file_data, unsigned int file_size, int *width, int *height, int *format, int *mips);
-RLAPI void *rl_load_pkm_from_memory(const unsigned char *file_data, unsigned int file_size, int *width, int *height, int *format, int *mips);
-RLAPI void *rl_load_ktx_from_memory(const unsigned char *file_data, unsigned int file_size, int *width, int *height, int *format, int *mips);
-RLAPI void *rl_load_pvr_from_memory(const unsigned char *file_data, unsigned int file_size, int *width, int *height, int *format, int *mips);
-RLAPI void *rl_load_astc_from_memory(const unsigned char *file_data, unsigned int file_size, int *width, int *height, int *format, int *mips);
+RAYLIB_RLAPI void *rl_load_dds_from_memory(const unsigned char *file_data, unsigned int file_size, int *width, int *height, int *format, int *mips);
+RAYLIB_RLAPI void *rl_load_pkm_from_memory(const unsigned char *file_data, unsigned int file_size, int *width, int *height, int *format, int *mips);
+RAYLIB_RLAPI void *rl_load_ktx_from_memory(const unsigned char *file_data, unsigned int file_size, int *width, int *height, int *format, int *mips);
+RAYLIB_RLAPI void *rl_load_pvr_from_memory(const unsigned char *file_data, unsigned int file_size, int *width, int *height, int *format, int *mips);
+RAYLIB_RLAPI void *rl_load_astc_from_memory(const unsigned char *file_data, unsigned int file_size, int *width, int *height, int *format, int *mips);
 
-RLAPI int rl_save_ktx_to_memory(const char *fileName, void *data, int width, int height, int format, int mipmaps);  // Save image data as KTX file
+RAYLIB_RLAPI int rl_save_ktx_to_memory(const char *fileName, void *data, int width, int height, int format, int mipmaps);  // Save image data as KTX file
 
 #if defined(__cplusplus)
 }
@@ -86,10 +86,10 @@ RLAPI int rl_save_ktx_to_memory(const char *fileName, void *data, int width, int
 // Simple log system to avoid RPNG_LOG() calls if required
 // NOTE: Avoiding those calls, also avoids const strings memory usage
 #define RL_GPUTEX_SHOW_LOG_INFO
-#if defined(RL_GPUTEX_SHOW_LOG_INFO) && !defined(LOG)
-#define LOG(...) printf(__VA_ARGS__)
+#if defined(RL_GPUTEX_SHOW_LOG_INFO) && !defined(RAYLIB_LOG)
+#define RAYLIB_LOG(...) printf(__VA_ARGS__)
 #else
-#define LOG(...)
+#define RAYLIB_LOG(...)
 #endif
 
 //----------------------------------------------------------------------------------
@@ -105,8 +105,8 @@ static int get_pixel_data_size(int width, int height, int format);
 // Loading DDS from memory image data (compressed or uncompressed)
 void *rl_load_dds_from_memory(const unsigned char *file_data, unsigned int file_size, int *width, int *height, int *format, int *mips)
 {
-    void *image_data = NULL;        // Image data pointer
-    int image_pixel_size = 0;       // Image pixel size
+    void *image_data = NULL;        // RaylibImage data pointer
+    int image_pixel_size = 0;       // RaylibImage pixel size
 
     unsigned char *file_data_ptr = (unsigned char *)file_data;
 
@@ -119,9 +119,9 @@ void *rl_load_dds_from_memory(const unsigned char *file_data, unsigned int file_
     // GL_COMPRESSED_RGBA_S3TC_DXT3_EXT     0x83F2
     // GL_COMPRESSED_RGBA_S3TC_DXT5_EXT     0x83F3
 
-    #define FOURCC_DXT1 0x31545844  // Equivalent to "DXT1" in ASCII
-    #define FOURCC_DXT3 0x33545844  // Equivalent to "DXT3" in ASCII
-    #define FOURCC_DXT5 0x35545844  // Equivalent to "DXT5" in ASCII
+    #define RAYLIB_FOURCC_DXT1 0x31545844  // Equivalent to "DXT1" in ASCII
+    #define RAYLIB_FOURCC_DXT3 0x33545844  // Equivalent to "DXT3" in ASCII
+    #define RAYLIB_FOURCC_DXT5 0x35545844  // Equivalent to "DXT5" in ASCII
 
     // DDS Pixel Format
     typedef struct {
@@ -161,7 +161,7 @@ void *rl_load_dds_from_memory(const unsigned char *file_data, unsigned int file_
 
         if ((dds_header_id[0] != 'D') || (dds_header_id[1] != 'D') || (dds_header_id[2] != 'S') || (dds_header_id[3] != ' '))
         {
-            LOG("WARNING: IMAGE: DDS file data not valid");
+            RAYLIB_LOG("WARNING: IMAGE: DDS file data not valid");
         }
         else
         {
@@ -185,7 +185,7 @@ void *rl_load_dds_from_memory(const unsigned char *file_data, unsigned int file_
 
                     memcpy(image_data, file_data_ptr, data_size);
 
-                    *format = PIXELFORMAT_UNCOMPRESSED_R5G6B5;
+                    *format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G6B5;
                 }
                 else if (header->ddspf.flags == 0x41)           // With alpha channel
                 {
@@ -206,7 +206,7 @@ void *rl_load_dds_from_memory(const unsigned char *file_data, unsigned int file_
                             ((unsigned short *)image_data)[i] += alpha;
                         }
 
-                        *format = PIXELFORMAT_UNCOMPRESSED_R5G5B5A1;
+                        *format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1;
                     }
                     else if (header->ddspf.a_bit_mask == 0xf000)   // 4bit alpha
                     {
@@ -225,7 +225,7 @@ void *rl_load_dds_from_memory(const unsigned char *file_data, unsigned int file_
                             ((unsigned short *)image_data)[i] += alpha;
                         }
 
-                        *format = PIXELFORMAT_UNCOMPRESSED_R4G4B4A4;
+                        *format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4;
                     }
                 }
             }
@@ -236,7 +236,7 @@ void *rl_load_dds_from_memory(const unsigned char *file_data, unsigned int file_
 
                 memcpy(image_data, file_data_ptr, data_size);
 
-                *format = PIXELFORMAT_UNCOMPRESSED_R8G8B8;
+                *format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8;
             }
             else if ((header->ddspf.flags == 0x41) && (header->ddspf.rgb_bit_count == 32)) // DDS_RGBA, no compressed
             {
@@ -257,7 +257,7 @@ void *rl_load_dds_from_memory(const unsigned char *file_data, unsigned int file_
                     ((unsigned char *)image_data)[i + 2] = blue;
                 }
 
-                *format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+                *format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
             }
             else if (((header->ddspf.flags == 0x04) || (header->ddspf.flags == 0x05)) && (header->ddspf.fourcc > 0)) // Compressed
             {
@@ -271,13 +271,13 @@ void *rl_load_dds_from_memory(const unsigned char *file_data, unsigned int file_
 
                 switch (header->ddspf.fourcc)
                 {
-                    case FOURCC_DXT1:
+                    case RAYLIB_FOURCC_DXT1:
                     {
-                        if (header->ddspf.flags == 0x04) *format = PIXELFORMAT_COMPRESSED_DXT1_RGB;
-                        else *format = PIXELFORMAT_COMPRESSED_DXT1_RGBA;
+                        if (header->ddspf.flags == 0x04) *format = RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB;
+                        else *format = RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGBA;
                     } break;
-                    case FOURCC_DXT3: *format = PIXELFORMAT_COMPRESSED_DXT3_RGBA; break;
-                    case FOURCC_DXT5: *format = PIXELFORMAT_COMPRESSED_DXT5_RGBA; break;
+                    case RAYLIB_FOURCC_DXT3: *format = RAYLIB_PIXELFORMAT_COMPRESSED_DXT3_RGBA; break;
+                    case RAYLIB_FOURCC_DXT5: *format = RAYLIB_PIXELFORMAT_COMPRESSED_DXT5_RGBA; break;
                     default: break;
                 }
             }
@@ -294,7 +294,7 @@ void *rl_load_dds_from_memory(const unsigned char *file_data, unsigned int file_
 // PKM is a much simpler file format used mainly to contain a single ETC1/ETC2 compressed image (no mipmaps)
 void *rl_load_pkm_from_memory(const unsigned char *file_data, unsigned int file_size, int *width, int *height, int *format, int *mips)
 {
-    void *image_data = NULL;        // Image data pointer
+    void *image_data = NULL;        // RaylibImage data pointer
 
     unsigned char *file_data_ptr = (unsigned char *)file_data;
 
@@ -312,8 +312,8 @@ void *rl_load_pkm_from_memory(const unsigned char *file_data, unsigned int file_
         char id[4];                 // "PKM "
         char version[2];            // "10" or "20"
         unsigned short format;      // Data format (big-endian) (Check list below)
-        unsigned short width;       // Texture width (big-endian) (orig_width rounded to multiple of 4)
-        unsigned short height;      // Texture height (big-endian) (orig_height rounded to multiple of 4)
+        unsigned short width;       // RaylibTexture width (big-endian) (orig_width rounded to multiple of 4)
+        unsigned short height;      // RaylibTexture height (big-endian) (orig_height rounded to multiple of 4)
         unsigned short orig_width;   // Original width (big-endian)
         unsigned short orig_height;  // Original height (big-endian)
     } pkm_header;
@@ -331,7 +331,7 @@ void *rl_load_pkm_from_memory(const unsigned char *file_data, unsigned int file_
 
         if ((header->id[0] != 'P') || (header->id[1] != 'K') || (header->id[2] != 'M') || (header->id[3] != ' '))
         {
-            LOG("WARNING: IMAGE: PKM file data not valid");
+            RAYLIB_LOG("WARNING: IMAGE: PKM file data not valid");
         }
         else
         {
@@ -355,9 +355,9 @@ void *rl_load_pkm_from_memory(const unsigned char *file_data, unsigned int file_
 
             memcpy(image_data, file_data_ptr, data_size);
 
-            if (header->format == 0) *format = PIXELFORMAT_COMPRESSED_ETC1_RGB;
-            else if (header->format == 1) *format = PIXELFORMAT_COMPRESSED_ETC2_RGB;
-            else if (header->format == 3) *format = PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA;
+            if (header->format == 0) *format = RAYLIB_PIXELFORMAT_COMPRESSED_ETC1_RGB;
+            else if (header->format == 1) *format = RAYLIB_PIXELFORMAT_COMPRESSED_ETC2_RGB;
+            else if (header->format == 3) *format = RAYLIB_PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA;
         }
     }
 
@@ -370,7 +370,7 @@ void *rl_load_pkm_from_memory(const unsigned char *file_data, unsigned int file_
 // TODO: Review KTX loading, many things changed!
 void *rl_load_ktx_from_memory(const unsigned char *file_data, unsigned int file_size, int *width, int *height, int *format, int *mips)
 {
-    void *image_data = NULL;        // Image data pointer
+    void *image_data = NULL;        // RaylibImage data pointer
 
     unsigned char *file_data_ptr = (unsigned char *)file_data;
 
@@ -397,8 +397,8 @@ void *rl_load_ktx_from_memory(const unsigned char *file_data, unsigned int file_
         unsigned int gl_format;                 // For compressed textures is 0
         unsigned int gl_internal_format;        // Compressed internal format
         unsigned int gl_base_internal_format;   // Same as glFormat (RGB, RGBA, ALPHA...)
-        unsigned int width;                     // Texture image width in pixels
-        unsigned int height;                    // Texture image height in pixels
+        unsigned int width;                     // RaylibTexture image width in pixels
+        unsigned int height;                    // RaylibTexture image height in pixels
         unsigned int depth;                     // For 2D textures is 0
         unsigned int elements;                  // Number of array elements, usually 0
         unsigned int faces;                     // Cubemap faces, for no-cubemap = 1
@@ -415,7 +415,7 @@ void *rl_load_ktx_from_memory(const unsigned char *file_data, unsigned int file_
         if ((header->id[1] != 'K') || (header->id[2] != 'T') || (header->id[3] != 'X') ||
             (header->id[4] != ' ') || (header->id[5] != '1') || (header->id[6] != '1'))
         {
-            LOG("WARNING: IMAGE: KTX file data not valid");
+            RAYLIB_LOG("WARNING: IMAGE: KTX file data not valid");
         }
         else
         {
@@ -434,9 +434,9 @@ void *rl_load_ktx_from_memory(const unsigned char *file_data, unsigned int file_
 
             memcpy(image_data, file_data_ptr, data_size);
 
-            if (header->gl_internal_format == 0x8D64) *format = PIXELFORMAT_COMPRESSED_ETC1_RGB;
-            else if (header->gl_internal_format == 0x9274) *format = PIXELFORMAT_COMPRESSED_ETC2_RGB;
-            else if (header->gl_internal_format == 0x9278) *format = PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA;
+            if (header->gl_internal_format == 0x8D64) *format = RAYLIB_PIXELFORMAT_COMPRESSED_ETC1_RGB;
+            else if (header->gl_internal_format == 0x9274) *format = RAYLIB_PIXELFORMAT_COMPRESSED_ETC2_RGB;
+            else if (header->gl_internal_format == 0x9278) *format = RAYLIB_PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA;
 
             // TODO: Support uncompressed data formats? Right now it returns format = 0!
         }
@@ -461,8 +461,8 @@ int rl_save_ktx(const char *file_name, void *data, int width, int height, int fo
         unsigned int gl_format;                 // For compressed textures is 0
         unsigned int gl_internal_format;        // Compressed internal format
         unsigned int gl_base_internal_format;   // Same as glFormat (RGB, RGBA, ALPHA...)   // KTX 2.0: UInt32 vkFormat
-        unsigned int width;                     // Texture image width in pixels
-        unsigned int height;                    // Texture image height in pixels
+        unsigned int width;                     // RaylibTexture image width in pixels
+        unsigned int height;                    // RaylibTexture image height in pixels
         unsigned int depth;                     // For 2D textures is 0
         unsigned int elements;                  // Number of array elements, usually 0
         unsigned int faces;                     // Cubemap faces, for no-cubemap = 1
@@ -513,7 +513,7 @@ int rl_save_ktx(const char *file_name, void *data, int width, int height, int fo
 
     // NOTE: We can save into a .ktx all PixelFormats supported by raylib, including compressed formats like DXT, ETC or ASTC
 
-    if (header.gl_format == -1) LOG("WARNING: IMAGE: GL format not supported for KTX export (%i)", header.gl_format);
+    if (header.gl_format == -1) RAYLIB_LOG("WARNING: IMAGE: GL format not supported for KTX export (%i)", header.gl_format);
     else
     {
         memcpy(file_data_ptr, &header, sizeof(ktx_header));
@@ -546,14 +546,14 @@ int rl_save_ktx(const char *file_name, void *data, int width, int height, int fo
     {
         unsigned int count = (unsigned int)fwrite(file_data, sizeof(unsigned char), data_size, file);
 
-        if (count == 0) LOG("WARNING: FILEIO: [%s] Failed to write file", file_name);
-        else if (count != data_size) LOG("WARNING: FILEIO: [%s] File partially written", file_name);
-        else LOG("INFO: FILEIO: [%s] File saved successfully", file_name);
+        if (count == 0) RAYLIB_LOG("WARNING: FILEIO: [%s] Failed to write file", file_name);
+        else if (count != data_size) RAYLIB_LOG("WARNING: FILEIO: [%s] File partially written", file_name);
+        else RAYLIB_LOG("INFO: FILEIO: [%s] File saved successfully", file_name);
 
         int result = fclose(file);
         if (result == 0) success = true;
     }
-    else LOG("WARNING: FILEIO: [%s] Failed to open file", file_name);
+    else RAYLIB_LOG("WARNING: FILEIO: [%s] Failed to open file", file_name);
 
     RL_FREE(file_data);    // Free file data buffer
 
@@ -567,7 +567,7 @@ int rl_save_ktx(const char *file_name, void *data, int width, int height, int fo
 // NOTE: PVR v2 not supported, use PVR v3 instead
 void *rl_load_pvr_from_memory(const unsigned char *file_data, unsigned int file_size, int *width, int *height, int *format, int *mips)
 {
-    void *image_data = NULL;        // Image data pointer
+    void *image_data = NULL;        // RaylibImage data pointer
 
     unsigned char *file_data_ptr = (unsigned char *)file_data;
 
@@ -637,7 +637,7 @@ void *rl_load_pvr_from_memory(const unsigned char *file_data, unsigned int file_
 
             if ((header->id[0] != 'P') || (header->id[1] != 'V') || (header->id[2] != 'R') || (header->id[3] != 3))
             {
-                LOG("WARNING: IMAGE: PVR file data not valid");
+                RAYLIB_LOG("WARNING: IMAGE: PVR file data not valid");
             }
             else
             {
@@ -648,24 +648,24 @@ void *rl_load_pvr_from_memory(const unsigned char *file_data, unsigned int file_
                 *mips = header->num_mipmaps;
 
                 // Check data format
-                if (((header->channels[0] == 'l') && (header->channels[1] == 0)) && (header->channel_depth[0] == 8)) *format = PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
-                else if (((header->channels[0] == 'l') && (header->channels[1] == 'a')) && ((header->channel_depth[0] == 8) && (header->channel_depth[1] == 8))) *format = PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA;
+                if (((header->channels[0] == 'l') && (header->channels[1] == 0)) && (header->channel_depth[0] == 8)) *format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
+                else if (((header->channels[0] == 'l') && (header->channels[1] == 'a')) && ((header->channel_depth[0] == 8) && (header->channel_depth[1] == 8))) *format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA;
                 else if ((header->channels[0] == 'r') && (header->channels[1] == 'g') && (header->channels[2] == 'b'))
                 {
                     if (header->channels[3] == 'a')
                     {
-                        if ((header->channel_depth[0] == 5) && (header->channel_depth[1] == 5) && (header->channel_depth[2] == 5) && (header->channel_depth[3] == 1)) *format = PIXELFORMAT_UNCOMPRESSED_R5G5B5A1;
-                        else if ((header->channel_depth[0] == 4) && (header->channel_depth[1] == 4) && (header->channel_depth[2] == 4) && (header->channel_depth[3] == 4)) *format = PIXELFORMAT_UNCOMPRESSED_R4G4B4A4;
-                        else if ((header->channel_depth[0] == 8) && (header->channel_depth[1] == 8) && (header->channel_depth[2] == 8) && (header->channel_depth[3] == 8)) *format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+                        if ((header->channel_depth[0] == 5) && (header->channel_depth[1] == 5) && (header->channel_depth[2] == 5) && (header->channel_depth[3] == 1)) *format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1;
+                        else if ((header->channel_depth[0] == 4) && (header->channel_depth[1] == 4) && (header->channel_depth[2] == 4) && (header->channel_depth[3] == 4)) *format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4;
+                        else if ((header->channel_depth[0] == 8) && (header->channel_depth[1] == 8) && (header->channel_depth[2] == 8) && (header->channel_depth[3] == 8)) *format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
                     }
                     else if (header->channels[3] == 0)
                     {
-                        if ((header->channel_depth[0] == 5) && (header->channel_depth[1] == 6) && (header->channel_depth[2] == 5)) *format = PIXELFORMAT_UNCOMPRESSED_R5G6B5;
-                        else if ((header->channel_depth[0] == 8) && (header->channel_depth[1] == 8) && (header->channel_depth[2] == 8)) *format = PIXELFORMAT_UNCOMPRESSED_R8G8B8;
+                        if ((header->channel_depth[0] == 5) && (header->channel_depth[1] == 6) && (header->channel_depth[2] == 5)) *format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G6B5;
+                        else if ((header->channel_depth[0] == 8) && (header->channel_depth[1] == 8) && (header->channel_depth[2] == 8)) *format = RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8;
                     }
                 }
-                else if (header->channels[0] == 2) *format = PIXELFORMAT_COMPRESSED_PVRT_RGB;
-                else if (header->channels[0] == 3) *format = PIXELFORMAT_COMPRESSED_PVRT_RGBA;
+                else if (header->channels[0] == 2) *format = RAYLIB_PIXELFORMAT_COMPRESSED_PVRT_RGB;
+                else if (header->channels[0] == 3) *format = RAYLIB_PIXELFORMAT_COMPRESSED_PVRT_RGBA;
 
                 file_data_ptr += header->metadata_size;    // Skip meta data header
 
@@ -673,15 +673,15 @@ void *rl_load_pvr_from_memory(const unsigned char *file_data, unsigned int file_
                 int bpp = 0;
                 switch (*format)
                 {
-                    case PIXELFORMAT_UNCOMPRESSED_GRAYSCALE: bpp = 8; break;
-                    case PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
-                    case PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
-                    case PIXELFORMAT_UNCOMPRESSED_R5G6B5:
-                    case PIXELFORMAT_UNCOMPRESSED_R4G4B4A4: bpp = 16; break;
-                    case PIXELFORMAT_UNCOMPRESSED_R8G8B8A8: bpp = 32; break;
-                    case PIXELFORMAT_UNCOMPRESSED_R8G8B8: bpp = 24; break;
-                    case PIXELFORMAT_COMPRESSED_PVRT_RGB:
-                    case PIXELFORMAT_COMPRESSED_PVRT_RGBA: bpp = 4; break;
+                    case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE: bpp = 8; break;
+                    case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
+                    case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
+                    case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G6B5:
+                    case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4: bpp = 16; break;
+                    case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8: bpp = 32; break;
+                    case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8: bpp = 24; break;
+                    case RAYLIB_PIXELFORMAT_COMPRESSED_PVRT_RGB:
+                    case RAYLIB_PIXELFORMAT_COMPRESSED_PVRT_RGBA: bpp = 4; break;
                     default: break;
                 }
 
@@ -691,7 +691,7 @@ void *rl_load_pvr_from_memory(const unsigned char *file_data, unsigned int file_
                 memcpy(image_data, file_data_ptr, data_size);
             }
         }
-        else if (pvr_version == 52) LOG("INFO: IMAGE: PVRv2 format not supported, update your files to PVRv3");
+        else if (pvr_version == 52) RAYLIB_LOG("INFO: IMAGE: PVRv2 format not supported, update your files to PVRv3");
     }
 
     return image_data;
@@ -702,7 +702,7 @@ void *rl_load_pvr_from_memory(const unsigned char *file_data, unsigned int file_
 // Load ASTC compressed image data (ASTC compression)
 void *rl_load_astc_from_memory(const unsigned char *file_data, unsigned int file_size, int *width, int *height, int *format, int *mips)
 {
-    void *image_data = NULL;        // Image data pointer
+    void *image_data = NULL;        // RaylibImage data pointer
 
     unsigned char *file_data_ptr = (unsigned char *)file_data;
 
@@ -731,7 +731,7 @@ void *rl_load_astc_from_memory(const unsigned char *file_data, unsigned int file
 
         if ((header->id[3] != 0x5c) || (header->id[2] != 0xa1) || (header->id[1] != 0xab) || (header->id[0] != 0x13))
         {
-            LOG("WARNING: IMAGE: ASTC file data not valid");
+            RAYLIB_LOG("WARNING: IMAGE: ASTC file data not valid");
         }
         else
         {
@@ -754,10 +754,10 @@ void *rl_load_astc_from_memory(const unsigned char *file_data, unsigned int file
 
                 memcpy(image_data, file_data_ptr, data_size);
 
-                if (bpp == 8) *format = PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA;
-                else if (bpp == 2) *format = PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA;
+                if (bpp == 8) *format = RAYLIB_PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA;
+                else if (bpp == 2) *format = RAYLIB_PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA;
             }
-            else LOG("WARNING: IMAGE: ASTC block size configuration not supported");
+            else RAYLIB_LOG("WARNING: IMAGE: ASTC block size configuration not supported");
         }
     }
 
@@ -776,27 +776,27 @@ static int get_pixel_data_size(int width, int height, int format)
 
     switch (format)
     {
-        case PIXELFORMAT_UNCOMPRESSED_GRAYSCALE: bpp = 8; break;
-        case PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
-        case PIXELFORMAT_UNCOMPRESSED_R5G6B5:
-        case PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
-        case PIXELFORMAT_UNCOMPRESSED_R4G4B4A4: bpp = 16; break;
-        case PIXELFORMAT_UNCOMPRESSED_R8G8B8A8: bpp = 32; break;
-        case PIXELFORMAT_UNCOMPRESSED_R8G8B8: bpp = 24; break;
-        case PIXELFORMAT_UNCOMPRESSED_R32: bpp = 32; break;
-        case PIXELFORMAT_UNCOMPRESSED_R32G32B32: bpp = 32*3; break;
-        case PIXELFORMAT_UNCOMPRESSED_R32G32B32A32: bpp = 32*4; break;
-        case PIXELFORMAT_COMPRESSED_DXT1_RGB:
-        case PIXELFORMAT_COMPRESSED_DXT1_RGBA:
-        case PIXELFORMAT_COMPRESSED_ETC1_RGB:
-        case PIXELFORMAT_COMPRESSED_ETC2_RGB:
-        case PIXELFORMAT_COMPRESSED_PVRT_RGB:
-        case PIXELFORMAT_COMPRESSED_PVRT_RGBA: bpp = 4; break;
-        case PIXELFORMAT_COMPRESSED_DXT3_RGBA:
-        case PIXELFORMAT_COMPRESSED_DXT5_RGBA:
-        case PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA:
-        case PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA: bpp = 8; break;
-        case PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA: bpp = 2; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE: bpp = 8; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G6B5:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1:
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4: bpp = 16; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8: bpp = 32; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8: bpp = 24; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32: bpp = 32; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32: bpp = 32*3; break;
+        case RAYLIB_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32: bpp = 32*4; break;
+        case RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB:
+        case RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGBA:
+        case RAYLIB_PIXELFORMAT_COMPRESSED_ETC1_RGB:
+        case RAYLIB_PIXELFORMAT_COMPRESSED_ETC2_RGB:
+        case RAYLIB_PIXELFORMAT_COMPRESSED_PVRT_RGB:
+        case RAYLIB_PIXELFORMAT_COMPRESSED_PVRT_RGBA: bpp = 4; break;
+        case RAYLIB_PIXELFORMAT_COMPRESSED_DXT3_RGBA:
+        case RAYLIB_PIXELFORMAT_COMPRESSED_DXT5_RGBA:
+        case RAYLIB_PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA:
+        case RAYLIB_PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA: bpp = 8; break;
+        case RAYLIB_PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA: bpp = 2; break;
         default: break;
     }
 
@@ -806,8 +806,8 @@ static int get_pixel_data_size(int width, int height, int format)
     // if texture is smaller, minimum dataSize is 8 or 16
     if ((width < 4) && (height < 4))
     {
-        if ((format >= PIXELFORMAT_COMPRESSED_DXT1_RGB) && (format < PIXELFORMAT_COMPRESSED_DXT3_RGBA)) data_size = 8;
-        else if ((format >= PIXELFORMAT_COMPRESSED_DXT3_RGBA) && (format < PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA)) data_size = 16;
+        if ((format >= RAYLIB_PIXELFORMAT_COMPRESSED_DXT1_RGB) && (format < RAYLIB_PIXELFORMAT_COMPRESSED_DXT3_RGBA)) data_size = 8;
+        else if ((format >= RAYLIB_PIXELFORMAT_COMPRESSED_DXT3_RGBA) && (format < RAYLIB_PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA)) data_size = 16;
     }
 
     return data_size;

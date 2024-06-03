@@ -3,7 +3,7 @@
 *   rcore - Window/display management, Graphic device/context management and input management
 *
 *   PLATFORMS SUPPORTED:
-*       > PLATFORM_DESKTOP (GLFW backend):
+*       > RAYLIB_PLATFORM_DESKTOP (GLFW backend):
 *           - Windows (Win32, Win64)
 *           - Linux (X11/Wayland desktop mode)
 *           - macOS/OSX (x64, arm64)
@@ -12,51 +12,51 @@
 *           - Windows (Win32, Win64)
 *           - Linux (X11/Wayland desktop mode)
 *           - Others (not tested)
-*       > PLATFORM_WEB:
+*       > RAYLIB_PLATFORM_WEB:
 *           - HTML5 (WebAssembly)
-*       > PLATFORM_DRM:
+*       > RAYLIB_PLATFORM_DRM:
 *           - Raspberry Pi 0-5 (DRM/KMS)
 *           - Linux DRM subsystem (KMS mode)
-*       > PLATFORM_ANDROID:
+*       > RAYLIB_PLATFORM_ANDROID:
 *           - Android (ARM, ARM64)
 *
 *   CONFIGURATION:
-*       #define SUPPORT_DEFAULT_FONT (default)
+*       #define RAYLIB_SUPPORT_DEFAULT_FONT (default)
 *           Default font is loaded on window initialization to be available for the user to render simple text.
 *           NOTE: If enabled, uses external module functions to load default raylib font (module: text)
 *
-*       #define SUPPORT_CAMERA_SYSTEM
+*       #define RAYLIB_SUPPORT_CAMERA_SYSTEM
 *           Camera module is included (rcamera.h) and multiple predefined cameras are available:
 *               free, 1st/3rd person, orbital, custom
 *
-*       #define SUPPORT_GESTURES_SYSTEM
+*       #define RAYLIB_SUPPORT_GESTURES_SYSTEM
 *           Gestures module is included (rgestures.h) to support gestures detection: tap, hold, swipe, drag
 *
-*       #define SUPPORT_MOUSE_GESTURES
+*       #define RAYLIB_SUPPORT_MOUSE_GESTURES
 *           Mouse gestures are directly mapped like touches and processed by gestures system.
 *
-*       #define SUPPORT_BUSY_WAIT_LOOP
+*       #define RAYLIB_SUPPORT_BUSY_WAIT_LOOP
 *           Use busy wait loop for timing sync, if not defined, a high-resolution timer is setup and used
 *
-*       #define SUPPORT_PARTIALBUSY_WAIT_LOOP
+*       #define RAYLIB_SUPPORT_PARTIALBUSY_WAIT_LOOP
 *           Use a partial-busy wait loop, in this case frame sleeps for most of the time and runs a busy-wait-loop at the end
 *
-*       #define SUPPORT_SCREEN_CAPTURE
+*       #define RAYLIB_SUPPORT_SCREEN_CAPTURE
 *           Allow automatic screen capture of current screen pressing F12, defined in KeyCallback()
 *
-*       #define SUPPORT_GIF_RECORDING
+*       #define RAYLIB_SUPPORT_GIF_RECORDING
 *           Allow automatic gif recording of current screen pressing CTRL+F12, defined in KeyCallback()
 *
-*       #define SUPPORT_COMPRESSION_API
-*           Support CompressData() and DecompressData() functions, those functions use zlib implementation
+*       #define RAYLIB_SUPPORT_COMPRESSION_API
+*           Support RaylibCompressData() and RaylibDecompressData() functions, those functions use zlib implementation
 *           provided by stb_image and stb_image_write libraries, so, those libraries must be enabled on textures module
 *           for linkage
 *
-*       #define SUPPORT_AUTOMATION_EVENTS
+*       #define RAYLIB_SUPPORT_AUTOMATION_EVENTS
 *           Support automatic events recording and playing, useful for automated testing systems or AI based game playing
 *
 *   DEPENDENCIES:
-*       raymath  - 3D math functionality (Vector2, Vector3, Matrix, Quaternion)
+*       raymath  - 3D math functionality (RaylibVector2, RaylibVector3, RaylibMatrix, Quaternion)
 *       camera   - Multiple 3D camera modes (free, orbital, 1st person, 3rd person)
 *       gestures - Gestures system for touch-ready devices (or simulated from mouse inputs)
 *
@@ -85,12 +85,12 @@
 //----------------------------------------------------------------------------------
 // Feature Test Macros required for this module
 //----------------------------------------------------------------------------------
-#if (defined(__linux__) || defined(PLATFORM_WEB)) && (_XOPEN_SOURCE < 500)
+#if (defined(__linux__) || defined(RAYLIB_PLATFORM_WEB)) && (_XOPEN_SOURCE < 500)
     #undef _XOPEN_SOURCE
     #define _XOPEN_SOURCE 500 // Required for: readlink if compiled with c99 without gnu ext.
 #endif
 
-#if (defined(__linux__) || defined(PLATFORM_WEB)) && (_POSIX_C_SOURCE < 199309L)
+#if (defined(__linux__) || defined(RAYLIB_PLATFORM_WEB)) && (_POSIX_C_SOURCE < 199309L)
     #undef _POSIX_C_SOURCE
     #define _POSIX_C_SOURCE 199309L // Required for: CLOCK_MONOTONIC if compiled with c99 without gnu ext.
 #endif
@@ -102,31 +102,31 @@
     #include "config.h"             // Defines module configuration flags
 #endif
 
-#include "utils.h"                  // Required for: TRACELOG() macros
+#include "utils.h"                  // Required for: RAYLIB_TRACELOG() macros
 
 #include <stdlib.h>                 // Required for: srand(), rand(), atexit()
-#include <stdio.h>                  // Required for: sprintf() [Used in OpenURL()]
+#include <stdio.h>                  // Required for: sprintf() [Used in RaylibOpenURL()]
 #include <string.h>                 // Required for: strrchr(), strcmp(), strlen(), memset()
 #include <time.h>                   // Required for: time() [Used in InitTimer()]
-#include <math.h>                   // Required for: tan() [Used in BeginMode3D()], atan2f() [Used in LoadVrStereoConfig()]
+#include <math.h>                   // Required for: tan() [Used in RaylibBeginMode3D()], atan2f() [Used in RaylibLoadVrStereoConfig()]
 
 #define RLGL_IMPLEMENTATION
 #include "rlgl.h"                   // OpenGL abstraction layer to OpenGL 1.1, 3.3+ or ES2
 
 #define RAYMATH_IMPLEMENTATION
-#include "raymath.h"                // Vector2, Vector3, Quaternion and Matrix functionality
+#include "raymath.h"                // RaylibVector2, RaylibVector3, Quaternion and RaylibMatrix functionality
 
-#if defined(SUPPORT_GESTURES_SYSTEM)
+#if defined(RAYLIB_SUPPORT_GESTURES_SYSTEM)
     #define RGESTURES_IMPLEMENTATION
     #include "rgestures.h"          // Gestures detection functionality
 #endif
 
-#if defined(SUPPORT_CAMERA_SYSTEM)
+#if defined(RAYLIB_SUPPORT_CAMERA_SYSTEM)
     #define RCAMERA_IMPLEMENTATION
     #include "rcamera.h"            // Camera system functionality
 #endif
 
-#if defined(SUPPORT_GIF_RECORDING)
+#if defined(RAYLIB_SUPPORT_GIF_RECORDING)
     #define MSF_GIF_MALLOC(contextPointer, newSize) RL_MALLOC(newSize)
     #define MSF_GIF_REALLOC(contextPointer, oldMemory, oldSize, newSize) RL_REALLOC(oldMemory, newSize)
     #define MSF_GIF_FREE(contextPointer, oldMemory, oldSize) RL_FREE(oldMemory)
@@ -135,7 +135,7 @@
     #include "external/msf_gif.h"   // GIF recording functionality
 #endif
 
-#if defined(SUPPORT_COMPRESSION_API)
+#if defined(RAYLIB_SUPPORT_COMPRESSION_API)
     #define SINFL_IMPLEMENTATION
     #define SINFL_NO_SIMD
     #include "external/sinfl.h"     // Deflate (RFC 1951) decompressor
@@ -144,7 +144,7 @@
     #include "external/sdefl.h"     // Deflate (RFC 1951) compressor
 #endif
 
-#if defined(SUPPORT_RPRAND_GENERATOR)
+#if defined(RAYLIB_SUPPORT_RPRAND_GENERATOR)
     #define RPRAND_IMPLEMENTATION
     #include "external/rprand.h"
 #endif
@@ -153,7 +153,7 @@
     #define _GNU_SOURCE
 #endif
 
-// Platform specific defines to handle GetApplicationDirectory()
+// Platform specific defines to handle RaylibGetApplicationDirectory()
 #if (defined(_WIN32) && !defined(PLATFORM_DESKTOP_RGFW)) || (defined(_MSC_VER) && defined(PLATFORM_DESKTOP_RGFW))
     #ifndef MAX_PATH
         #define MAX_PATH 1025
@@ -171,7 +171,7 @@ unsigned int __stdcall timeEndPeriod(unsigned int uPeriod);
 #endif // OSs
 
 #define _CRT_INTERNAL_NONSTDC_NAMES  1
-#include <sys/stat.h>               // Required for: stat(), S_ISREG [Used in GetFileModTime(), IsFilePath()]
+#include <sys/stat.h>               // Required for: stat(), S_ISREG [Used in RaylibGetFileModTime(), IsFilePath()]
 
 #if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
     #define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
@@ -181,16 +181,16 @@ unsigned int __stdcall timeEndPeriod(unsigned int uPeriod);
     #define DIRENT_MALLOC RL_MALLOC
     #define DIRENT_FREE RL_FREE
 
-    #include "external/dirent.h"    // Required for: DIR, opendir(), closedir() [Used in LoadDirectoryFiles()]
+    #include "external/dirent.h"    // Required for: DIR, opendir(), closedir() [Used in RaylibLoadDirectoryFiles()]
 #else
-    #include <dirent.h>             // Required for: DIR, opendir(), closedir() [Used in LoadDirectoryFiles()]
+    #include <dirent.h>             // Required for: DIR, opendir(), closedir() [Used in RaylibLoadDirectoryFiles()]
 #endif
 
 #if defined(_WIN32)
     #include <direct.h>             // Required for: _getch(), _chdir()
     #define GETCWD _getcwd          // NOTE: MSDN recommends not to use getcwd(), chdir()
     #define CHDIR _chdir
-    #include <io.h>                 // Required for: _access() [Used in FileExists()]
+    #include <io.h>                 // Required for: _access() [Used in RaylibFileExists()]
 #else
     #include <unistd.h>             // Required for: getch(), chdir() (POSIX), access()
     #define GETCWD getcwd
@@ -200,51 +200,51 @@ unsigned int __stdcall timeEndPeriod(unsigned int uPeriod);
 //----------------------------------------------------------------------------------
 // Defines and Macros
 //----------------------------------------------------------------------------------
-#ifndef MAX_FILEPATH_CAPACITY
-    #define MAX_FILEPATH_CAPACITY       8192        // Maximum capacity for filepath
+#ifndef RAYLIB_MAX_FILEPATH_CAPACITY
+    #define RAYLIB_MAX_FILEPATH_CAPACITY       8192        // Maximum capacity for filepath
 #endif
-#ifndef MAX_FILEPATH_LENGTH
+#ifndef RAYLIB_MAX_FILEPATH_LENGTH
     #if defined(_WIN32)
-        #define MAX_FILEPATH_LENGTH      256        // On Win32, MAX_PATH = 260 (limits.h) but Windows 10, Version 1607 enables long paths...
+        #define RAYLIB_MAX_FILEPATH_LENGTH      256        // On Win32, MAX_PATH = 260 (limits.h) but Windows 10, Version 1607 enables long paths...
     #else
-        #define MAX_FILEPATH_LENGTH     4096        // On Linux, PATH_MAX = 4096 by default (limits.h)
+        #define RAYLIB_MAX_FILEPATH_LENGTH     4096        // On Linux, PATH_MAX = 4096 by default (limits.h)
     #endif
 #endif
 
-#ifndef MAX_KEYBOARD_KEYS
-    #define MAX_KEYBOARD_KEYS            512        // Maximum number of keyboard keys supported
+#ifndef RAYLIB_MAX_KEYBOARD_KEYS
+    #define RAYLIB_MAX_KEYBOARD_KEYS            512        // Maximum number of keyboard keys supported
 #endif
-#ifndef MAX_MOUSE_BUTTONS
-    #define MAX_MOUSE_BUTTONS              8        // Maximum number of mouse buttons supported
+#ifndef RAYLIB_MAX_MOUSE_BUTTONS
+    #define RAYLIB_MAX_MOUSE_BUTTONS              8        // Maximum number of mouse buttons supported
 #endif
-#ifndef MAX_GAMEPADS
-    #define MAX_GAMEPADS                   4        // Maximum number of gamepads supported
+#ifndef RAYLIB_MAX_GAMEPADS
+    #define RAYLIB_MAX_GAMEPADS                   4        // Maximum number of gamepads supported
 #endif
-#ifndef MAX_GAMEPAD_AXIS
-    #define MAX_GAMEPAD_AXIS               8        // Maximum number of axis supported (per gamepad)
+#ifndef RAYLIB_MAX_GAMEPAD_AXIS
+    #define RAYLIB_MAX_GAMEPAD_AXIS               8        // Maximum number of axis supported (per gamepad)
 #endif
-#ifndef MAX_GAMEPAD_BUTTONS
-    #define MAX_GAMEPAD_BUTTONS           32        // Maximum number of buttons supported (per gamepad)
+#ifndef RAYLIB_MAX_GAMEPAD_BUTTONS
+    #define RAYLIB_MAX_GAMEPAD_BUTTONS           32        // Maximum number of buttons supported (per gamepad)
 #endif
-#ifndef MAX_GAMEPAD_VIBRATION_TIME
-    #define MAX_GAMEPAD_VIBRATION_TIME     2.0f     // Maximum vibration time in seconds
+#ifndef RAYLIB_MAX_GAMEPAD_VIBRATION_TIME
+    #define RAYLIB_MAX_GAMEPAD_VIBRATION_TIME     2.0f     // Maximum vibration time in seconds
 #endif
-#ifndef MAX_TOUCH_POINTS
-    #define MAX_TOUCH_POINTS               8        // Maximum number of touch points supported
+#ifndef RAYLIB_MAX_TOUCH_POINTS
+    #define RAYLIB_MAX_TOUCH_POINTS               8        // Maximum number of touch points supported
 #endif
-#ifndef MAX_KEY_PRESSED_QUEUE
-    #define MAX_KEY_PRESSED_QUEUE         16        // Maximum number of keys in the key input queue
+#ifndef RAYLIB_MAX_KEY_PRESSED_QUEUE
+    #define RAYLIB_MAX_KEY_PRESSED_QUEUE         16        // Maximum number of keys in the key input queue
 #endif
-#ifndef MAX_CHAR_PRESSED_QUEUE
-    #define MAX_CHAR_PRESSED_QUEUE        16        // Maximum number of characters in the char input queue
-#endif
-
-#ifndef MAX_DECOMPRESSION_SIZE
-    #define MAX_DECOMPRESSION_SIZE        64        // Maximum size allocated for decompression in MB
+#ifndef RAYLIB_MAX_CHAR_PRESSED_QUEUE
+    #define RAYLIB_MAX_CHAR_PRESSED_QUEUE        16        // Maximum number of characters in the char input queue
 #endif
 
-#ifndef MAX_AUTOMATION_EVENTS
-    #define MAX_AUTOMATION_EVENTS      16384        // Maximum number of automation events to record
+#ifndef RAYLIB_MAX_DECOMPRESSION_SIZE
+    #define RAYLIB_MAX_DECOMPRESSION_SIZE        64        // Maximum size allocated for decompression in MB
+#endif
+
+#ifndef RAYLIB_MAX_AUTOMATION_EVENTS
+    #define RAYLIB_MAX_AUTOMATION_EVENTS      16384        // Maximum number of automation events to record
 #endif
 
 // Flags operation macros
@@ -269,7 +269,7 @@ typedef struct CoreData {
         bool shouldClose;                   // Check if window set for closing
         bool resizedLastFrame;              // Check if window has been resized last frame
         bool eventWaiting;                  // Wait for events before ending frame
-        bool usingFbo;                      // Using FBO (RenderTexture) for rendering instead of default framebuffer
+        bool usingFbo;                      // Using FBO (RaylibRenderTexture) for rendering instead of default framebuffer
 
         Point position;                     // Window position (required on fullscreen toggle)
         Point previousPosition;             // Window previous position (required on borderless windowed toggle)
@@ -281,7 +281,7 @@ typedef struct CoreData {
         Point renderOffset;                 // Offset from render area (must be divided by 2)
         Size screenMin;                     // Screen minimum width and height (for resizable window)
         Size screenMax;                     // Screen maximum width and height (for resizable window)
-        Matrix screenScale;                 // Matrix to scale screen (framebuffer rendering)
+        RaylibMatrix screenScale;                 // RaylibMatrix to scale screen (framebuffer rendering)
 
         char **dropFilepaths;               // Store dropped files paths pointers (provided by GLFW)
         unsigned int dropFileCount;         // Count dropped files strings
@@ -294,51 +294,51 @@ typedef struct CoreData {
     struct {
         struct {
             int exitKey;                    // Default exit key
-            char currentKeyState[MAX_KEYBOARD_KEYS];        // Registers current frame key state
-            char previousKeyState[MAX_KEYBOARD_KEYS];       // Registers previous frame key state
+            char currentKeyState[RAYLIB_MAX_KEYBOARD_KEYS];        // Registers current frame key state
+            char previousKeyState[RAYLIB_MAX_KEYBOARD_KEYS];       // Registers previous frame key state
 
             // NOTE: Since key press logic involves comparing prev vs cur key state, we need to handle key repeats specially
-            char keyRepeatInFrame[MAX_KEYBOARD_KEYS];       // Registers key repeats for current frame
+            char keyRepeatInFrame[RAYLIB_MAX_KEYBOARD_KEYS];       // Registers key repeats for current frame
 
-            int keyPressedQueue[MAX_KEY_PRESSED_QUEUE];     // Input keys queue
+            int keyPressedQueue[RAYLIB_MAX_KEY_PRESSED_QUEUE];     // Input keys queue
             int keyPressedQueueCount;       // Input keys queue count
 
-            int charPressedQueue[MAX_CHAR_PRESSED_QUEUE];   // Input characters queue (unicode)
+            int charPressedQueue[RAYLIB_MAX_CHAR_PRESSED_QUEUE];   // Input characters queue (unicode)
             int charPressedQueueCount;      // Input characters queue count
 
         } Keyboard;
         struct {
-            Vector2 offset;                 // Mouse offset
-            Vector2 scale;                  // Mouse scaling
-            Vector2 currentPosition;        // Mouse position on screen
-            Vector2 previousPosition;       // Previous mouse position
+            RaylibVector2 offset;                 // Mouse offset
+            RaylibVector2 scale;                  // Mouse scaling
+            RaylibVector2 currentPosition;        // Mouse position on screen
+            RaylibVector2 previousPosition;       // Previous mouse position
 
             int cursor;                     // Tracks current mouse cursor
             bool cursorHidden;              // Track if cursor is hidden
             bool cursorOnScreen;            // Tracks if cursor is inside client area
 
-            char currentButtonState[MAX_MOUSE_BUTTONS];     // Registers current mouse button state
-            char previousButtonState[MAX_MOUSE_BUTTONS];    // Registers previous mouse button state
-            Vector2 currentWheelMove;       // Registers current mouse wheel variation
-            Vector2 previousWheelMove;      // Registers previous mouse wheel variation
+            char currentButtonState[RAYLIB_MAX_MOUSE_BUTTONS];     // Registers current mouse button state
+            char previousButtonState[RAYLIB_MAX_MOUSE_BUTTONS];    // Registers previous mouse button state
+            RaylibVector2 currentWheelMove;       // Registers current mouse wheel variation
+            RaylibVector2 previousWheelMove;      // Registers previous mouse wheel variation
 
         } Mouse;
         struct {
             int pointCount;                             // Number of touch points active
-            int pointId[MAX_TOUCH_POINTS];              // Point identifiers
-            Vector2 position[MAX_TOUCH_POINTS];         // Touch position on screen
-            char currentTouchState[MAX_TOUCH_POINTS];   // Registers current touch state
-            char previousTouchState[MAX_TOUCH_POINTS];  // Registers previous touch state
+            int pointId[RAYLIB_MAX_TOUCH_POINTS];              // Point identifiers
+            RaylibVector2 position[RAYLIB_MAX_TOUCH_POINTS];         // Touch position on screen
+            char currentTouchState[RAYLIB_MAX_TOUCH_POINTS];   // Registers current touch state
+            char previousTouchState[RAYLIB_MAX_TOUCH_POINTS];  // Registers previous touch state
 
         } Touch;
         struct {
             int lastButtonPressed;          // Register last gamepad button pressed
-            int axisCount[MAX_GAMEPADS];    // Register number of available gamepad axis
-            bool ready[MAX_GAMEPADS];       // Flag to know if gamepad is ready
-            char name[MAX_GAMEPADS][64];    // Gamepad name holder
-            char currentButtonState[MAX_GAMEPADS][MAX_GAMEPAD_BUTTONS];     // Current gamepad buttons state
-            char previousButtonState[MAX_GAMEPADS][MAX_GAMEPAD_BUTTONS];    // Previous gamepad buttons state
-            float axisState[MAX_GAMEPADS][MAX_GAMEPAD_AXIS];                // Gamepad axis state
+            int axisCount[RAYLIB_MAX_GAMEPADS];    // Register number of available gamepad axis
+            bool ready[RAYLIB_MAX_GAMEPADS];       // Flag to know if gamepad is ready
+            char name[RAYLIB_MAX_GAMEPADS][64];    // Gamepad name holder
+            char currentButtonState[RAYLIB_MAX_GAMEPADS][RAYLIB_MAX_GAMEPAD_BUTTONS];     // Current gamepad buttons state
+            char previousButtonState[RAYLIB_MAX_GAMEPADS][RAYLIB_MAX_GAMEPAD_BUTTONS];    // Previous gamepad buttons state
+            float axisState[RAYLIB_MAX_GAMEPADS][RAYLIB_MAX_GAMEPAD_AXIS];                // Gamepad axis state
 
         } Gamepad;
     } Input;
@@ -349,7 +349,7 @@ typedef struct CoreData {
         double draw;                        // Time measure for frame draw
         double frame;                       // Time measure for one frame
         double target;                      // Desired time for one frame, if 0 not applied
-        unsigned long long int base;        // Base time measure for hi-res timer (PLATFORM_ANDROID, PLATFORM_DRM)
+        unsigned long long int base;        // Base time measure for hi-res timer (RAYLIB_PLATFORM_ANDROID, RAYLIB_PLATFORM_DRM)
         unsigned int frameCounter;          // Frame counter
 
     } Time;
@@ -358,21 +358,21 @@ typedef struct CoreData {
 //----------------------------------------------------------------------------------
 // Global Variables Definition
 //----------------------------------------------------------------------------------
-RLAPI const char *raylib_version = RAYLIB_VERSION;  // raylib version exported symbol, required for some bindings
+RAYLIB_RLAPI const char *raylib_version = RAYLIB_VERSION;  // raylib version exported symbol, required for some bindings
 
 CoreData CORE = { 0 };               // Global CORE state context
 
-#if defined(SUPPORT_SCREEN_CAPTURE)
+#if defined(RAYLIB_SUPPORT_SCREEN_CAPTURE)
 static int screenshotCounter = 0;    // Screenshots counter
 #endif
 
-#if defined(SUPPORT_GIF_RECORDING)
+#if defined(RAYLIB_SUPPORT_GIF_RECORDING)
 unsigned int gifFrameCounter = 0;    // GIF frames counter
 bool gifRecording = false;           // GIF recording state
 MsfGifState gifState = { 0 };        // MSGIF context state
 #endif
 
-#if defined(SUPPORT_AUTOMATION_EVENTS)
+#if defined(RAYLIB_SUPPORT_AUTOMATION_EVENTS)
 // Automation events type
 typedef enum AutomationEventType {
     EVENT_NONE = 0,
@@ -447,14 +447,14 @@ static const char *autoEventTypeName[] = {
 /*
 // Automation event (24 bytes)
 // NOTE: Opaque struct, internal to raylib
-struct AutomationEvent {
+struct RaylibAutomationEvent {
     unsigned int frame;                 // Event frame
     unsigned int type;                  // Event type (AutomationEventType)
     int params[4];                      // Event parameters (if required)
 };
 */
 
-static AutomationEventList *currentEventList = NULL;        // Current automation events list, set by user, keep internal pointer
+static RaylibAutomationEventList *currentEventList = NULL;        // Current automation events list, set by user, keep internal pointer
 static bool automationEventRecording = false;               // Recording automation events flag
 //static short automationEventEnabled = 0b0000001111111111; // TODO: Automation events enabled for recording/playing
 #endif
@@ -465,8 +465,8 @@ static bool automationEventRecording = false;               // Recording automat
 // NOTE: Those functions are common for all platforms!
 //----------------------------------------------------------------------------------
 
-#if defined(SUPPORT_MODULE_RTEXT) && defined(SUPPORT_DEFAULT_FONT)
-extern void LoadFontDefault(void);      // [Module: text] Loads default font on InitWindow()
+#if defined(RAYLIB_SUPPORT_MODULE_RTEXT) && defined(RAYLIB_SUPPORT_DEFAULT_FONT)
+extern void LoadFontDefault(void);      // [Module: text] Loads default font on RaylibInitWindow()
 extern void UnloadFontDefault(void);    // [Module: text] Unloads default font from GPU memory
 #endif
 
@@ -477,21 +477,21 @@ static void InitTimer(void);                                // Initialize timer,
 static void SetupFramebuffer(int width, int height);        // Setup main framebuffer (required by InitPlatform())
 static void SetupViewport(int width, int height);           // Set viewport for a provided width and height
 
-static void ScanDirectoryFiles(const char *basePath, FilePathList *list, const char *filter);   // Scan all files and directories in a base path
-static void ScanDirectoryFilesRecursively(const char *basePath, FilePathList *list, const char *filter);  // Scan all files and directories recursively from a base path
+static void ScanDirectoryFiles(const char *basePath, RaylibFilePathList *list, const char *filter);   // Scan all files and directories in a base path
+static void ScanDirectoryFilesRecursively(const char *basePath, RaylibFilePathList *list, const char *filter);  // Scan all files and directories recursively from a base path
 
-#if defined(SUPPORT_AUTOMATION_EVENTS)
+#if defined(RAYLIB_SUPPORT_AUTOMATION_EVENTS)
 static void RecordAutomationEvent(void); // Record frame events (to internal events array)
 #endif
 
 #if defined(_WIN32) && !defined(PLATFORM_DESKTOP_RGFW)
 // NOTE: We declare Sleep() function symbol to avoid including windows.h (kernel32.lib linkage required)
-void __stdcall Sleep(unsigned long msTimeout);              // Required for: WaitTime()
+void __stdcall Sleep(unsigned long msTimeout);              // Required for: RaylibWaitTime()
 #endif
 
-#if !defined(SUPPORT_MODULE_RTEXT)
-const char *TextFormat(const char *text, ...);              // Formatting of text with variables to 'embed'
-#endif // !SUPPORT_MODULE_RTEXT
+#if !defined(RAYLIB_SUPPORT_MODULE_RTEXT)
+const char *RaylibTextFormat(const char *text, ...);              // Formatting of text with variables to 'embed'
+#endif // !RAYLIB_SUPPORT_MODULE_RTEXT
 
 // Include platform-specific submodules
 #if defined(PLATFORM_DESKTOP)
@@ -516,112 +516,112 @@ const char *TextFormat(const char *text, ...);              // Formatting of tex
 //----------------------------------------------------------------------------------
 
 // NOTE: Functions with a platform-specific implementation on rcore_<platform>.c
-//bool WindowShouldClose(void)
-//void ToggleFullscreen(void)
-//void ToggleBorderlessWindowed(void)
-//void MaximizeWindow(void)
-//void MinimizeWindow(void)
-//void RestoreWindow(void)
+//bool RaylibWindowShouldClose(void)
+//void RaylibToggleFullscreen(void)
+//void RaylibToggleBorderlessWindowed(void)
+//void RaylibMaximizeWindow(void)
+//void RaylibMinimizeWindow(void)
+//void RaylibRestoreWindow(void)
 
-//void SetWindowState(unsigned int flags)
-//void ClearWindowState(unsigned int flags)
+//void RaylibSetWindowState(unsigned int flags)
+//void RaylibClearWindowState(unsigned int flags)
 
-//void SetWindowIcon(Image image)
-//void SetWindowIcons(Image *images, int count)
-//void SetWindowTitle(const char *title)
-//void SetWindowPosition(int x, int y)
-//void SetWindowMonitor(int monitor)
-//void SetWindowMinSize(int width, int height)
-//void SetWindowMaxSize(int width, int height)
-//void SetWindowSize(int width, int height)
-//void SetWindowOpacity(float opacity)
-//void SetWindowFocused(void)
-//void *GetWindowHandle(void)
-//Vector2 GetWindowPosition(void)
-//Vector2 GetWindowScaleDPI(void)
+//void RaylibSetWindowIcon(RaylibImage image)
+//void RaylibSetWindowIcons(RaylibImage *images, int count)
+//void RaylibSetWindowTitle(const char *title)
+//void RaylibSetWindowPosition(int x, int y)
+//void RaylibSetWindowMonitor(int monitor)
+//void RaylibSetWindowMinSize(int width, int height)
+//void RaylibSetWindowMaxSize(int width, int height)
+//void RaylibSetWindowSize(int width, int height)
+//void RaylibSetWindowOpacity(float opacity)
+//void RaylibSetWindowFocused(void)
+//void *RaylibGetWindowHandle(void)
+//RaylibVector2 RaylibGetWindowPosition(void)
+//RaylibVector2 RaylibGetWindowScaleDPI(void)
 
-//int GetMonitorCount(void)
-//int GetCurrentMonitor(void)
-//int GetMonitorWidth(int monitor)
-//int GetMonitorHeight(int monitor)
-//int GetMonitorPhysicalWidth(int monitor)
-//int GetMonitorPhysicalHeight(int monitor)
-//int GetMonitorRefreshRate(int monitor)
-//Vector2 GetMonitorPosition(int monitor)
-//const char *GetMonitorName(int monitor)
+//int RaylibGetMonitorCount(void)
+//int RaylibGetCurrentMonitor(void)
+//int RaylibGetMonitorWidth(int monitor)
+//int RaylibGetMonitorHeight(int monitor)
+//int RaylibGetMonitorPhysicalWidth(int monitor)
+//int RaylibGetMonitorPhysicalHeight(int monitor)
+//int RaylibGetMonitorRefreshRate(int monitor)
+//RaylibVector2 RaylibGetMonitorPosition(int monitor)
+//const char *RaylibGetMonitorName(int monitor)
 
-//void SetClipboardText(const char *text)
-//const char *GetClipboardText(void)
+//void RaylibSetClipboardText(const char *text)
+//const char *RaylibGetClipboardText(void)
 
-//void ShowCursor(void)
-//void HideCursor(void)
-//void EnableCursor(void)
-//void DisableCursor(void)
+//void RaylibShowCursor(void)
+//void RaylibHideCursor(void)
+//void RaylibEnableCursor(void)
+//void RaylibDisableCursor(void)
 
 // Initialize window and OpenGL context
 // NOTE: data parameter could be used to pass any kind of required data to the initialization
-void InitWindow(int width, int height, const char *title)
+void RaylibInitWindow(int width, int height, const char *title)
 {
-    TRACELOG(LOG_INFO, "Initializing raylib %s", RAYLIB_VERSION);
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "Initializing raylib %s", RAYLIB_VERSION);
 
-#if defined(PLATFORM_DESKTOP)
-    TRACELOG(LOG_INFO, "Platform backend: DESKTOP (GLFW)");
+#if defined(RAYLIB_PLATFORM_DESKTOP)
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "Platform backend: DESKTOP (GLFW)");
 #elif defined(PLATFORM_DESKTOP_SDL)
-    TRACELOG(LOG_INFO, "Platform backend: DESKTOP (SDL)");
-#elif defined(PLATFORM_WEB)
-    TRACELOG(LOG_INFO, "Platform backend: WEB (HTML5)");
-#elif defined(PLATFORM_DRM)
-    TRACELOG(LOG_INFO, "Platform backend: NATIVE DRM");
-#elif defined(PLATFORM_ANDROID)
-    TRACELOG(LOG_INFO, "Platform backend: ANDROID");
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "Platform backend: DESKTOP (SDL)");
+#elif defined(RAYLIB_PLATFORM_WEB)
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "Platform backend: WEB (HTML5)");
+#elif defined(RAYLIB_PLATFORM_DRM)
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "Platform backend: NATIVE DRM");
+#elif defined(RAYLIB_PLATFORM_ANDROID)
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "Platform backend: ANDROID");
 #else
     // TODO: Include your custom platform backend!
     // i.e software rendering backend or console backend!
-    TRACELOG(LOG_INFO, "Platform backend: CUSTOM");
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "Platform backend: CUSTOM");
 #endif
 
-    TRACELOG(LOG_INFO, "Supported raylib modules:");
-    TRACELOG(LOG_INFO, "    > rcore:..... loaded (mandatory)");
-    TRACELOG(LOG_INFO, "    > rlgl:...... loaded (mandatory)");
-#if defined(SUPPORT_MODULE_RSHAPES)
-    TRACELOG(LOG_INFO, "    > rshapes:... loaded (optional)");
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "Supported raylib modules:");
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "    > rcore:..... loaded (mandatory)");
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "    > rlgl:...... loaded (mandatory)");
+#if defined(RAYLIB_SUPPORT_MODULE_RSHAPES)
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "    > rshapes:... loaded (optional)");
 #else
-    TRACELOG(LOG_INFO, "    > rshapes:... not loaded (optional)");
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "    > rshapes:... not loaded (optional)");
 #endif
-#if defined(SUPPORT_MODULE_RTEXTURES)
-    TRACELOG(LOG_INFO, "    > rtextures:. loaded (optional)");
+#if defined(RAYLIB_SUPPORT_MODULE_RTEXTURES)
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "    > rtextures:. loaded (optional)");
 #else
-    TRACELOG(LOG_INFO, "    > rtextures:. not loaded (optional)");
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "    > rtextures:. not loaded (optional)");
 #endif
-#if defined(SUPPORT_MODULE_RTEXT)
-    TRACELOG(LOG_INFO, "    > rtext:..... loaded (optional)");
+#if defined(RAYLIB_SUPPORT_MODULE_RTEXT)
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "    > rtext:..... loaded (optional)");
 #else
-    TRACELOG(LOG_INFO, "    > rtext:..... not loaded (optional)");
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "    > rtext:..... not loaded (optional)");
 #endif
-#if defined(SUPPORT_MODULE_RMODELS)
-    TRACELOG(LOG_INFO, "    > rmodels:... loaded (optional)");
+#if defined(RAYLIB_SUPPORT_MODULE_RMODELS)
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "    > rmodels:... loaded (optional)");
 #else
-    TRACELOG(LOG_INFO, "    > rmodels:... not loaded (optional)");
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "    > rmodels:... not loaded (optional)");
 #endif
-#if defined(SUPPORT_MODULE_RAUDIO)
-    TRACELOG(LOG_INFO, "    > raudio:.... loaded (optional)");
+#if defined(RAYLIB_SUPPORT_MODULE_RAUDIO)
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "    > raudio:.... loaded (optional)");
 #else
-    TRACELOG(LOG_INFO, "    > raudio:.... not loaded (optional)");
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "    > raudio:.... not loaded (optional)");
 #endif
 
     // Initialize window data
     CORE.Window.screen.width = width;
     CORE.Window.screen.height = height;
     CORE.Window.eventWaiting = false;
-    CORE.Window.screenScale = MatrixIdentity();     // No draw scaling required by default
+    CORE.Window.screenScale = RaylibMatrixIdentity();     // No draw scaling required by default
     if ((title != NULL) && (title[0] != 0)) CORE.Window.title = title;
 
     // Initialize global input state
     memset(&CORE.Input, 0, sizeof(CORE.Input));     // Reset CORE.Input structure to 0
-    CORE.Input.Keyboard.exitKey = KEY_ESCAPE;
-    CORE.Input.Mouse.scale = (Vector2){ 1.0f, 1.0f };
-    CORE.Input.Mouse.cursor = MOUSE_CURSOR_ARROW;
-    CORE.Input.Gamepad.lastButtonPressed = GAMEPAD_BUTTON_UNKNOWN;
+    CORE.Input.Keyboard.exitKey = RAYLIB_KEY_ESCAPE;
+    CORE.Input.Mouse.scale = (RaylibVector2){ 1.0f, 1.0f };
+    CORE.Input.Mouse.cursor = RAYLIB_MOUSE_CURSOR_ARROW;
+    CORE.Input.Gamepad.lastButtonPressed = RAYLIB_GAMEPAD_BUTTON_UNKNOWN;
 
     // Initialize platform
     //--------------------------------------------------------------
@@ -635,40 +635,40 @@ void InitWindow(int width, int height, const char *title)
     // Setup default viewport
     SetupViewport(CORE.Window.currentFbo.width, CORE.Window.currentFbo.height);
 
-#if defined(SUPPORT_MODULE_RTEXT) && defined(SUPPORT_DEFAULT_FONT)
+#if defined(RAYLIB_SUPPORT_MODULE_RTEXT) && defined(RAYLIB_SUPPORT_DEFAULT_FONT)
     // Load default font
     // WARNING: External function: Module required: rtext
     LoadFontDefault();
-    #if defined(SUPPORT_MODULE_RSHAPES)
+    #if defined(RAYLIB_SUPPORT_MODULE_RSHAPES)
     // Set font white rectangle for shapes drawing, so shapes and text can be batched together
     // WARNING: rshapes module is required, if not available, default internal white rectangle is used
-    Rectangle rec = GetFontDefault().recs[95];
-    if (CORE.Window.flags & FLAG_MSAA_4X_HINT)
+    RaylibRectangle rec = RaylibGetFontDefault().recs[95];
+    if (CORE.Window.flags & RAYLIB_FLAG_MSAA_4X_HINT)
     {
         // NOTE: We try to maxime rec padding to avoid pixel bleeding on MSAA filtering
-        SetShapesTexture(GetFontDefault().texture, (Rectangle){ rec.x + 2, rec.y + 2, 1, 1 });
+        RaylibSetShapesTexture(RaylibGetFontDefault().texture, (RaylibRectangle){ rec.x + 2, rec.y + 2, 1, 1 });
     }
     else
     {
         // NOTE: We set up a 1px padding on char rectangle to avoid pixel bleeding
-        SetShapesTexture(GetFontDefault().texture, (Rectangle){ rec.x + 1, rec.y + 1, rec.width - 2, rec.height - 2 });
+        RaylibSetShapesTexture(RaylibGetFontDefault().texture, (RaylibRectangle){ rec.x + 1, rec.y + 1, rec.width - 2, rec.height - 2 });
     }
     #endif
 #else
-    #if defined(SUPPORT_MODULE_RSHAPES)
+    #if defined(RAYLIB_SUPPORT_MODULE_RSHAPES)
     // Set default texture and rectangle to be used for shapes drawing
     // NOTE: rlgl default texture is a 1x1 pixel UNCOMPRESSED_R8G8B8A8
-    Texture2D texture = { rlGetTextureIdDefault(), 1, 1, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 };
-    SetShapesTexture(texture, (Rectangle){ 0.0f, 0.0f, 1.0f, 1.0f });    // WARNING: Module required: rshapes
+    Texture2D texture = { rlGetTextureIdDefault(), 1, 1, 1, RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 };
+    RaylibSetShapesTexture(texture, (RaylibRectangle){ 0.0f, 0.0f, 1.0f, 1.0f });    // WARNING: Module required: rshapes
     #endif
 #endif
-#if defined(SUPPORT_MODULE_RTEXT) && defined(SUPPORT_DEFAULT_FONT)
-    if ((CORE.Window.flags & FLAG_WINDOW_HIGHDPI) > 0)
+#if defined(RAYLIB_SUPPORT_MODULE_RTEXT) && defined(RAYLIB_SUPPORT_DEFAULT_FONT)
+    if ((CORE.Window.flags & RAYLIB_FLAG_WINDOW_HIGHDPI) > 0)
     {
         // Set default font texture filter for HighDPI (blurry)
         // RL_TEXTURE_FILTER_LINEAR - tex filter: BILINEAR, no mipmaps
-        rlTextureParameters(GetFontDefault().texture.id, RL_TEXTURE_MIN_FILTER, RL_TEXTURE_FILTER_LINEAR);
-        rlTextureParameters(GetFontDefault().texture.id, RL_TEXTURE_MAG_FILTER, RL_TEXTURE_FILTER_LINEAR);
+        rlTextureParameters(RaylibGetFontDefault().texture.id, RL_TEXTURE_MIN_FILTER, RL_TEXTURE_FILTER_LINEAR);
+        rlTextureParameters(RaylibGetFontDefault().texture.id, RL_TEXTURE_MAG_FILTER, RL_TEXTURE_FILTER_LINEAR);
     }
 #endif
 
@@ -676,13 +676,13 @@ void InitWindow(int width, int height, const char *title)
     CORE.Window.shouldClose = false;
 
     // Initialize random seed
-    SetRandomSeed((unsigned int)time(NULL));
+    RaylibSetRandomSeed((unsigned int)time(NULL));
 }
 
 // Close window and unload OpenGL context
-void CloseWindow(void)
+void RaylibCloseWindow(void)
 {
-#if defined(SUPPORT_GIF_RECORDING)
+#if defined(RAYLIB_SUPPORT_GIF_RECORDING)
     if (gifRecording)
     {
         MsfGifResult result = msf_gif_end(&gifState);
@@ -691,7 +691,7 @@ void CloseWindow(void)
     }
 #endif
 
-#if defined(SUPPORT_MODULE_RTEXT) && defined(SUPPORT_DEFAULT_FONT)
+#if defined(RAYLIB_SUPPORT_MODULE_RTEXT) && defined(RAYLIB_SUPPORT_DEFAULT_FONT)
     UnloadFontDefault();        // WARNING: Module required: rtext
 #endif
 
@@ -703,75 +703,75 @@ void CloseWindow(void)
     //--------------------------------------------------------------
 
     CORE.Window.ready = false;
-    TRACELOG(LOG_INFO, "Window closed successfully");
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "Window closed successfully");
 }
 
 // Check if window has been initialized successfully
-bool IsWindowReady(void)
+bool RaylibIsWindowReady(void)
 {
     return CORE.Window.ready;
 }
 
 // Check if window is currently fullscreen
-bool IsWindowFullscreen(void)
+bool RaylibIsWindowFullscreen(void)
 {
     return CORE.Window.fullscreen;
 }
 
 // Check if window is currently hidden
-bool IsWindowHidden(void)
+bool RaylibIsWindowHidden(void)
 {
-    return ((CORE.Window.flags & FLAG_WINDOW_HIDDEN) > 0);
+    return ((CORE.Window.flags & RAYLIB_FLAG_WINDOW_HIDDEN) > 0);
 }
 
 // Check if window has been minimized
-bool IsWindowMinimized(void)
+bool RaylibIsWindowMinimized(void)
 {
-    return ((CORE.Window.flags & FLAG_WINDOW_MINIMIZED) > 0);
+    return ((CORE.Window.flags & RAYLIB_FLAG_WINDOW_MINIMIZED) > 0);
 }
 
 // Check if window has been maximized
-bool IsWindowMaximized(void)
+bool RaylibIsWindowMaximized(void)
 {
-    return ((CORE.Window.flags & FLAG_WINDOW_MAXIMIZED) > 0);
+    return ((CORE.Window.flags & RAYLIB_FLAG_WINDOW_MAXIMIZED) > 0);
 }
 
 // Check if window has the focus
-bool IsWindowFocused(void)
+bool RaylibIsWindowFocused(void)
 {
-    return ((CORE.Window.flags & FLAG_WINDOW_UNFOCUSED) == 0);
+    return ((CORE.Window.flags & RAYLIB_FLAG_WINDOW_UNFOCUSED) == 0);
 }
 
 // Check if window has been resizedLastFrame
-bool IsWindowResized(void)
+bool RaylibIsWindowResized(void)
 {
     return CORE.Window.resizedLastFrame;
 }
 
 // Check if one specific window flag is enabled
-bool IsWindowState(unsigned int flag)
+bool RaylibIsWindowState(unsigned int flag)
 {
     return ((CORE.Window.flags & flag) > 0);
 }
 
 // Get current screen width
-int GetScreenWidth(void)
+int RaylibGetScreenWidth(void)
 {
     return CORE.Window.screen.width;
 }
 
 // Get current screen height
-int GetScreenHeight(void)
+int RaylibGetScreenHeight(void)
 {
     return CORE.Window.screen.height;
 }
 
 // Get current render width which is equal to screen width*dpi scale
-int GetRenderWidth(void)
+int RaylibGetRenderWidth(void)
 {
     int width = 0;
 #if defined(__APPLE__)
-    Vector2 scale = GetWindowScaleDPI();
+    RaylibVector2 scale = RaylibGetWindowScaleDPI();
     width = (int)((float)CORE.Window.render.width*scale.x);
 #else
     width = CORE.Window.render.width;
@@ -780,11 +780,11 @@ int GetRenderWidth(void)
 }
 
 // Get current screen height which is equal to screen height*dpi scale
-int GetRenderHeight(void)
+int RaylibGetRenderHeight(void)
 {
     int height = 0;
 #if defined(__APPLE__)
-    Vector2 scale = GetWindowScaleDPI();
+    RaylibVector2 scale = RaylibGetWindowScaleDPI();
     height = (int)((float)CORE.Window.render.height*scale.y);
 #else
     height = CORE.Window.render.height;
@@ -792,26 +792,26 @@ int GetRenderHeight(void)
     return height;
 }
 
-// Enable waiting for events on EndDrawing(), no automatic event polling
-void EnableEventWaiting(void)
+// Enable waiting for events on RaylibEndDrawing(), no automatic event polling
+void RaylibEnableEventWaiting(void)
 {
     CORE.Window.eventWaiting = true;
 }
 
-// Disable waiting for events on EndDrawing(), automatic events polling
-void DisableEventWaiting(void)
+// Disable waiting for events on RaylibEndDrawing(), automatic events polling
+void RaylibDisableEventWaiting(void)
 {
     CORE.Window.eventWaiting = false;
 }
 
 // Check if cursor is not visible
-bool IsCursorHidden(void)
+bool RaylibIsCursorHidden(void)
 {
     return CORE.Input.Mouse.cursorHidden;
 }
 
 // Check if cursor is on the current screen
-bool IsCursorOnScreen(void)
+bool RaylibIsCursorOnScreen(void)
 {
     return CORE.Input.Mouse.cursorOnScreen;
 }
@@ -821,49 +821,49 @@ bool IsCursorOnScreen(void)
 //----------------------------------------------------------------------------------
 
 // Set background color (framebuffer clear color)
-void ClearBackground(Color color)
+void RaylibClearBackground(RaylibColor color)
 {
     rlClearColor(color.r, color.g, color.b, color.a);   // Set clear color
     rlClearScreenBuffers();                             // Clear current framebuffers
 }
 
 // Setup canvas (framebuffer) to start drawing
-void BeginDrawing(void)
+void RaylibBeginDrawing(void)
 {
-    // WARNING: Previously to BeginDrawing() other render textures drawing could happen,
+    // WARNING: Previously to RaylibBeginDrawing() other render textures drawing could happen,
     // consequently the measure for update vs draw is not accurate (only the total frame time is accurate)
 
-    CORE.Time.current = GetTime();      // Number of elapsed seconds since InitTimer()
+    CORE.Time.current = RaylibGetTime();      // Number of elapsed seconds since InitTimer()
     CORE.Time.update = CORE.Time.current - CORE.Time.previous;
     CORE.Time.previous = CORE.Time.current;
 
     rlLoadIdentity();                   // Reset current matrix (modelview)
-    rlMultMatrixf(MatrixToFloat(CORE.Window.screenScale)); // Apply screen scaling
+    rlMultMatrixf(RAYLIB_MatrixToFloat(CORE.Window.screenScale)); // Apply screen scaling
 
     //rlTranslatef(0.375, 0.375, 0);    // HACK to have 2D pixel-perfect drawing on OpenGL 1.1
                                         // NOTE: Not required with OpenGL 3.3+
 }
 
 // End canvas drawing and swap buffers (double buffering)
-void EndDrawing(void)
+void RaylibEndDrawing(void)
 {
     rlDrawRenderBatchActive();      // Update and draw internal render batch
 
-#if defined(SUPPORT_GIF_RECORDING)
+#if defined(RAYLIB_SUPPORT_GIF_RECORDING)
     // Draw record indicator
     if (gifRecording)
     {
         #ifndef GIF_RECORD_FRAMERATE
         #define GIF_RECORD_FRAMERATE    10
         #endif
-        gifFrameCounter += GetFrameTime()*1000;
+        gifFrameCounter += RaylibGetFrameTime()*1000;
 
         // NOTE: We record one gif frame depending on the desired gif framerate
         if (gifFrameCounter > 1000/GIF_RECORD_FRAMERATE)
         {
             // Get image data for the current frame (from backbuffer)
             // NOTE: This process is quite slow... :(
-            Vector2 scale = GetWindowScaleDPI();
+            RaylibVector2 scale = RaylibGetWindowScaleDPI();
             unsigned char *screenData = rlReadScreenPixels((int)((float)CORE.Window.render.width*scale.x), (int)((float)CORE.Window.render.height*scale.y));
 
             #ifndef GIF_RECORD_BITRATE
@@ -877,12 +877,12 @@ void EndDrawing(void)
             RL_FREE(screenData);    // Free image data
         }
 
-    #if defined(SUPPORT_MODULE_RSHAPES) && defined(SUPPORT_MODULE_RTEXT)
+    #if defined(RAYLIB_SUPPORT_MODULE_RSHAPES) && defined(RAYLIB_SUPPORT_MODULE_RTEXT)
         // Display the recording indicator every half-second
-        if ((int)(GetTime()/0.5)%2 == 1)
+        if ((int)(RaylibGetTime()/0.5)%2 == 1)
         {
-            DrawCircle(30, CORE.Window.screen.height - 20, 10, MAROON);                 // WARNING: Module required: rshapes
-            DrawText("GIF RECORDING", 50, CORE.Window.screen.height - 25, 10, RED);     // WARNING: Module required: rtext
+            RaylibDrawCircle(30, CORE.Window.screen.height - 20, 10, RAYLIB_MAROON);                 // WARNING: Module required: rshapes
+            RaylibDrawText("GIF RECORDING", 50, CORE.Window.screen.height - 25, 10, RAYLIB_RED);     // WARNING: Module required: rtext
         }
     #endif
 
@@ -890,15 +890,15 @@ void EndDrawing(void)
     }
 #endif
 
-#if defined(SUPPORT_AUTOMATION_EVENTS)
+#if defined(RAYLIB_SUPPORT_AUTOMATION_EVENTS)
     if (automationEventRecording) RecordAutomationEvent();    // Event recording
 #endif
 
 #if !defined(SUPPORT_CUSTOM_FRAME_CONTROL)
-    SwapScreenBuffer();                  // Copy back buffer to front buffer (screen)
+    RaylibSwapScreenBuffer();                  // Copy back buffer to front buffer (screen)
 
     // Frame time control system
-    CORE.Time.current = GetTime();
+    CORE.Time.current = RaylibGetTime();
     CORE.Time.draw = CORE.Time.current - CORE.Time.previous;
     CORE.Time.previous = CORE.Time.current;
 
@@ -907,23 +907,23 @@ void EndDrawing(void)
     // Wait for some milliseconds...
     if (CORE.Time.frame < CORE.Time.target)
     {
-        WaitTime(CORE.Time.target - CORE.Time.frame);
+        RaylibWaitTime(CORE.Time.target - CORE.Time.frame);
 
-        CORE.Time.current = GetTime();
+        CORE.Time.current = RaylibGetTime();
         double waitTime = CORE.Time.current - CORE.Time.previous;
         CORE.Time.previous = CORE.Time.current;
 
         CORE.Time.frame += waitTime;    // Total frame time: update + draw + wait
     }
 
-    PollInputEvents();      // Poll user events (before next frame update)
+    RaylibPollInputEvents();      // Poll user events (before next frame update)
 #endif
 
-#if defined(SUPPORT_SCREEN_CAPTURE)
-    if (IsKeyPressed(KEY_F12))
+#if defined(RAYLIB_SUPPORT_SCREEN_CAPTURE)
+    if (RaylibIsKeyPressed(RAYLIB_KEY_F12))
     {
-#if defined(SUPPORT_GIF_RECORDING)
-        if (IsKeyDown(KEY_LEFT_CONTROL))
+#if defined(RAYLIB_SUPPORT_GIF_RECORDING)
+        if (RaylibIsKeyDown(RAYLIB_KEY_LEFT_CONTROL))
         {
             if (gifRecording)
             {
@@ -931,58 +931,58 @@ void EndDrawing(void)
 
                 MsfGifResult result = msf_gif_end(&gifState);
 
-                SaveFileData(TextFormat("%s/screenrec%03i.gif", CORE.Storage.basePath, screenshotCounter), result.data, (unsigned int)result.dataSize);
+                RaylibSaveFileData(RaylibTextFormat("%s/screenrec%03i.gif", CORE.Storage.basePath, screenshotCounter), result.data, (unsigned int)result.dataSize);
                 msf_gif_free(result);
 
-                TRACELOG(LOG_INFO, "SYSTEM: Finish animated GIF recording");
+                RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "SYSTEM: Finish animated GIF recording");
             }
             else
             {
                 gifRecording = true;
                 gifFrameCounter = 0;
 
-                Vector2 scale = GetWindowScaleDPI();
+                RaylibVector2 scale = RaylibGetWindowScaleDPI();
                 msf_gif_begin(&gifState, (int)((float)CORE.Window.render.width*scale.x), (int)((float)CORE.Window.render.height*scale.y));
                 screenshotCounter++;
 
-                TRACELOG(LOG_INFO, "SYSTEM: Start animated GIF recording: %s", TextFormat("screenrec%03i.gif", screenshotCounter));
+                RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "SYSTEM: Start animated GIF recording: %s", RaylibTextFormat("screenrec%03i.gif", screenshotCounter));
             }
         }
         else
-#endif  // SUPPORT_GIF_RECORDING
+#endif  // RAYLIB_SUPPORT_GIF_RECORDING
         {
-            TakeScreenshot(TextFormat("screenshot%03i.png", screenshotCounter));
+            RaylibTakeScreenshot(RaylibTextFormat("screenshot%03i.png", screenshotCounter));
             screenshotCounter++;
         }
     }
-#endif  // SUPPORT_SCREEN_CAPTURE
+#endif  // RAYLIB_SUPPORT_SCREEN_CAPTURE
 
     CORE.Time.frameCounter++;
 }
 
 // Initialize 2D mode with custom camera (2D)
-void BeginMode2D(Camera2D camera)
+void RaylibBeginMode2D(RaylibCamera2D camera)
 {
     rlDrawRenderBatchActive();      // Update and draw internal render batch
 
     rlLoadIdentity();               // Reset current matrix (modelview)
 
     // Apply 2d camera transformation to modelview
-    rlMultMatrixf(MatrixToFloat(GetCameraMatrix2D(camera)));
+    rlMultMatrixf(RAYLIB_MatrixToFloat(RaylibGetCameraMatrix2D(camera)));
 }
 
 // Ends 2D mode with custom camera
-void EndMode2D(void)
+void RaylibEndMode2D(void)
 {
     rlDrawRenderBatchActive();      // Update and draw internal render batch
 
     rlLoadIdentity();               // Reset current matrix (modelview)
 
-    if (rlGetActiveFramebuffer() == 0) rlMultMatrixf(MatrixToFloat(CORE.Window.screenScale)); // Apply screen scaling if required
+    if (rlGetActiveFramebuffer() == 0) rlMultMatrixf(RAYLIB_MatrixToFloat(CORE.Window.screenScale)); // Apply screen scaling if required
 }
 
 // Initializes 3D mode with custom camera (3D)
-void BeginMode3D(Camera camera)
+void RaylibBeginMode3D(Camera camera)
 {
     rlDrawRenderBatchActive();      // Update and draw internal render batch
 
@@ -993,15 +993,15 @@ void BeginMode3D(Camera camera)
     float aspect = (float)CORE.Window.currentFbo.width/(float)CORE.Window.currentFbo.height;
 
     // NOTE: zNear and zFar values are important when computing depth buffer values
-    if (camera.projection == CAMERA_PERSPECTIVE)
+    if (camera.projection == RAYLIB_CAMERA_PERSPECTIVE)
     {
         // Setup perspective projection
-        double top = rlGetCullDistanceNear()*tan(camera.fovy*0.5*DEG2RAD);
+        double top = rlGetCullDistanceNear()*tan(camera.fovy*0.5*RAYLIB_DEG2RAD);
         double right = top*aspect;
 
         rlFrustum(-right, right, -top, top, rlGetCullDistanceNear(), rlGetCullDistanceFar());
     }
-    else if (camera.projection == CAMERA_ORTHOGRAPHIC)
+    else if (camera.projection == RAYLIB_CAMERA_ORTHOGRAPHIC)
     {
         // Setup orthographic projection
         double top = camera.fovy/2.0;
@@ -1014,14 +1014,14 @@ void BeginMode3D(Camera camera)
     rlLoadIdentity();               // Reset current matrix (modelview)
 
     // Setup Camera view
-    Matrix matView = MatrixLookAt(camera.position, camera.target, camera.up);
-    rlMultMatrixf(MatrixToFloat(matView));      // Multiply modelview matrix by view matrix (camera)
+    RaylibMatrix matView = RaylibMatrixLookAt(camera.position, camera.target, camera.up);
+    rlMultMatrixf(RAYLIB_MatrixToFloat(matView));      // Multiply modelview matrix by view matrix (camera)
 
     rlEnableDepthTest();            // Enable DEPTH_TEST for 3D
 }
 
 // Ends 3D mode and returns to default 2D orthographic mode
-void EndMode3D(void)
+void RaylibEndMode3D(void)
 {
     rlDrawRenderBatchActive();      // Update and draw internal render batch
 
@@ -1031,13 +1031,13 @@ void EndMode3D(void)
     rlMatrixMode(RL_MODELVIEW);     // Switch back to modelview matrix
     rlLoadIdentity();               // Reset current matrix (modelview)
 
-    if (rlGetActiveFramebuffer() == 0) rlMultMatrixf(MatrixToFloat(CORE.Window.screenScale)); // Apply screen scaling if required
+    if (rlGetActiveFramebuffer() == 0) rlMultMatrixf(RAYLIB_MatrixToFloat(CORE.Window.screenScale)); // Apply screen scaling if required
 
     rlDisableDepthTest();           // Disable DEPTH_TEST for 2D
 }
 
 // Initializes render texture for drawing
-void BeginTextureMode(RenderTexture2D target)
+void RaylibBeginTextureMode(RenderTexture2D target)
 {
     rlDrawRenderBatchActive();      // Update and draw internal render batch
 
@@ -1061,14 +1061,14 @@ void BeginTextureMode(RenderTexture2D target)
     //rlScalef(0.0f, -1.0f, 0.0f);  // Flip Y-drawing (?)
 
     // Setup current width/height for proper aspect ratio
-    // calculation when using BeginMode3D()
+    // calculation when using RaylibBeginMode3D()
     CORE.Window.currentFbo.width = target.texture.width;
     CORE.Window.currentFbo.height = target.texture.height;
     CORE.Window.usingFbo = true;
 }
 
 // Ends drawing to render texture
-void EndTextureMode(void)
+void RaylibEndTextureMode(void)
 {
     rlDrawRenderBatchActive();      // Update and draw internal render batch
 
@@ -1077,10 +1077,10 @@ void EndTextureMode(void)
     // Set viewport to default framebuffer size
     SetupViewport(CORE.Window.render.width, CORE.Window.render.height);
 
-    // Go back to the modelview state from BeginDrawing since we are back to the default FBO
+    // Go back to the modelview state from RaylibBeginDrawing since we are back to the default FBO
     rlMatrixMode(RL_MODELVIEW);     // Switch back to modelview matrix
     rlLoadIdentity();               // Reset current matrix (modelview)
-    rlMultMatrixf(MatrixToFloat(CORE.Window.screenScale)); // Apply screen scaling if required
+    rlMultMatrixf(RAYLIB_MatrixToFloat(CORE.Window.screenScale)); // Apply screen scaling if required
 
     // Reset current fbo to screen size
     CORE.Window.currentFbo.width = CORE.Window.render.width;
@@ -1089,33 +1089,33 @@ void EndTextureMode(void)
 }
 
 // Begin custom shader mode
-void BeginShaderMode(Shader shader)
+void RaylibBeginShaderMode(RaylibShader shader)
 {
     rlSetShader(shader.id, shader.locs);
 }
 
 // End custom shader mode (returns to default shader)
-void EndShaderMode(void)
+void RaylibEndShaderMode(void)
 {
     rlSetShader(rlGetShaderIdDefault(), rlGetShaderLocsDefault());
 }
 
 // Begin blending mode (alpha, additive, multiplied, subtract, custom)
-// NOTE: Blend modes supported are enumerated in BlendMode enum
-void BeginBlendMode(int mode)
+// NOTE: Blend modes supported are enumerated in RaylibBlendMode enum
+void RaylibBeginBlendMode(int mode)
 {
     rlSetBlendMode(mode);
 }
 
 // End blending mode (reset to default: alpha blending)
-void EndBlendMode(void)
+void RaylibEndBlendMode(void)
 {
-    rlSetBlendMode(BLEND_ALPHA);
+    rlSetBlendMode(RAYLIB_BLEND_ALPHA);
 }
 
 // Begin scissor mode (define screen area for following drawing)
 // NOTE: Scissor rec refers to bottom-left corner, we change it to upper-left
-void BeginScissorMode(int x, int y, int width, int height)
+void RaylibBeginScissorMode(int x, int y, int width, int height)
 {
     rlDrawRenderBatchActive();      // Update and draw internal render batch
 
@@ -1124,13 +1124,13 @@ void BeginScissorMode(int x, int y, int width, int height)
 #if defined(__APPLE__)
     if (!CORE.Window.usingFbo)
     {
-        Vector2 scale = GetWindowScaleDPI();
-        rlScissor((int)(x*scale.x), (int)(GetScreenHeight()*scale.y - (((y + height)*scale.y))), (int)(width*scale.x), (int)(height*scale.y));
+        RaylibVector2 scale = RaylibGetWindowScaleDPI();
+        rlScissor((int)(x*scale.x), (int)(RaylibGetScreenHeight()*scale.y - (((y + height)*scale.y))), (int)(width*scale.x), (int)(height*scale.y));
     }
 #else
-    if (!CORE.Window.usingFbo && ((CORE.Window.flags & FLAG_WINDOW_HIGHDPI) > 0))
+    if (!CORE.Window.usingFbo && ((CORE.Window.flags & RAYLIB_FLAG_WINDOW_HIGHDPI) > 0))
     {
-        Vector2 scale = GetWindowScaleDPI();
+        RaylibVector2 scale = RaylibGetWindowScaleDPI();
         rlScissor((int)(x*scale.x), (int)(CORE.Window.currentFbo.height - (y + height)*scale.y), (int)(width*scale.x), (int)(height*scale.y));
     }
 #endif
@@ -1141,7 +1141,7 @@ void BeginScissorMode(int x, int y, int width, int height)
 }
 
 // End scissor mode
-void EndScissorMode(void)
+void RaylibEndScissorMode(void)
 {
     rlDrawRenderBatchActive();      // Update and draw internal render batch
     rlDisableScissorTest();
@@ -1152,7 +1152,7 @@ void EndScissorMode(void)
 //----------------------------------------------------------------------------------
 
 // Begin VR drawing configuration
-void BeginVrStereoMode(VrStereoConfig config)
+void RaylibBeginVrStereoMode(RaylibVrStereoConfig config)
 {
     rlEnableStereoRender();
 
@@ -1162,15 +1162,15 @@ void BeginVrStereoMode(VrStereoConfig config)
 }
 
 // End VR drawing process (and desktop mirror)
-void EndVrStereoMode(void)
+void RaylibEndVrStereoMode(void)
 {
     rlDisableStereoRender();
 }
 
 // Load VR stereo config for VR simulator device parameters
-VrStereoConfig LoadVrStereoConfig(VrDeviceInfo device)
+RaylibVrStereoConfig RaylibLoadVrStereoConfig(RaylibVrDeviceInfo device)
 {
-    VrStereoConfig config = { 0 };
+    RaylibVrStereoConfig config = { 0 };
 
     if (rlGetVersion() != RL_OPENGL_11)
     {
@@ -1211,17 +1211,17 @@ VrStereoConfig LoadVrStereoConfig(VrDeviceInfo device)
 
         // Compute camera projection matrices
         float projOffset = 4.0f*lensShift;      // Scaled to projection space coordinates [-1..1]
-        Matrix proj = MatrixPerspective(fovy, aspect, rlGetCullDistanceNear(), rlGetCullDistanceFar());
+        RaylibMatrix proj = RaylibMatrixPerspective(fovy, aspect, rlGetCullDistanceNear(), rlGetCullDistanceFar());
 
-        config.projection[0] = MatrixMultiply(proj, MatrixTranslate(projOffset, 0.0f, 0.0f));
-        config.projection[1] = MatrixMultiply(proj, MatrixTranslate(-projOffset, 0.0f, 0.0f));
+        config.projection[0] = RaylibMatrixMultiply(proj, RaylibMatrixTranslate(projOffset, 0.0f, 0.0f));
+        config.projection[1] = RaylibMatrixMultiply(proj, RaylibMatrixTranslate(-projOffset, 0.0f, 0.0f));
 
         // Compute camera transformation matrices
         // NOTE: Camera movement might seem more natural if we model the head
         // Our axis of rotation is the base of our head, so we might want to add
         // some y (base of head to eye level) and -z (center of head to eye protrusion) to the camera positions
-        config.viewOffset[0] = MatrixTranslate(device.interpupillaryDistance*0.5f, 0.075f, 0.045f);
-        config.viewOffset[1] = MatrixTranslate(-device.interpupillaryDistance*0.5f, 0.075f, 0.045f);
+        config.viewOffset[0] = RaylibMatrixTranslate(device.interpupillaryDistance*0.5f, 0.075f, 0.045f);
+        config.viewOffset[1] = RaylibMatrixTranslate(-device.interpupillaryDistance*0.5f, 0.075f, 0.045f);
 
         // Compute eyes Viewports
         /*
@@ -1236,15 +1236,15 @@ VrStereoConfig LoadVrStereoConfig(VrDeviceInfo device)
         config.eyeViewportLeft[3] = device.vResolution;
         */
     }
-    else TRACELOG(LOG_WARNING, "RLGL: VR Simulator not supported on OpenGL 1.1");
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RLGL: VR Simulator not supported on OpenGL 1.1");
 
     return config;
 }
 
 // Unload VR stereo config properties
-void UnloadVrStereoConfig(VrStereoConfig config)
+void RaylibUnloadVrStereoConfig(RaylibVrStereoConfig config)
 {
-    TRACELOG(LOG_INFO, "UnloadVrStereoConfig not implemented in rcore.c");
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "RaylibUnloadVrStereoConfig not implemented in rcore.c");
 }
 
 //----------------------------------------------------------------------------------
@@ -1253,28 +1253,28 @@ void UnloadVrStereoConfig(VrStereoConfig config)
 
 // Load shader from files and bind default locations
 // NOTE: If shader string is NULL, using default vertex/fragment shaders
-Shader LoadShader(const char *vsFileName, const char *fsFileName)
+RaylibShader RaylibLoadShader(const char *vsFileName, const char *fsFileName)
 {
-    Shader shader = { 0 };
+    RaylibShader shader = { 0 };
 
     char *vShaderStr = NULL;
     char *fShaderStr = NULL;
 
-    if (vsFileName != NULL) vShaderStr = LoadFileText(vsFileName);
-    if (fsFileName != NULL) fShaderStr = LoadFileText(fsFileName);
+    if (vsFileName != NULL) vShaderStr = RaylibLoadFileText(vsFileName);
+    if (fsFileName != NULL) fShaderStr = RaylibLoadFileText(fsFileName);
 
-    shader = LoadShaderFromMemory(vShaderStr, fShaderStr);
+    shader = RaylibLoadShaderFromMemory(vShaderStr, fShaderStr);
 
-    UnloadFileText(vShaderStr);
-    UnloadFileText(fShaderStr);
+    RaylibUnloadFileText(vShaderStr);
+    RaylibUnloadFileText(fShaderStr);
 
     return shader;
 }
 
 // Load shader from code strings and bind default locations
-Shader LoadShaderFromMemory(const char *vsCode, const char *fsCode)
+RaylibShader RaylibLoadShaderFromMemory(const char *vsCode, const char *fsCode)
 {
-    Shader shader = { 0 };
+    RaylibShader shader = { 0 };
 
     shader.id = rlLoadShaderCode(vsCode, fsCode);
 
@@ -1297,64 +1297,64 @@ Shader LoadShaderFromMemory(const char *vsCode, const char *fsCode)
         for (int i = 0; i < RL_MAX_SHADER_LOCATIONS; i++) shader.locs[i] = -1;
 
         // Get handles to GLSL input attribute locations
-        shader.locs[SHADER_LOC_VERTEX_POSITION] = rlGetLocationAttrib(shader.id, RL_DEFAULT_SHADER_ATTRIB_NAME_POSITION);
-        shader.locs[SHADER_LOC_VERTEX_TEXCOORD01] = rlGetLocationAttrib(shader.id, RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD);
-        shader.locs[SHADER_LOC_VERTEX_TEXCOORD02] = rlGetLocationAttrib(shader.id, RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD2);
-        shader.locs[SHADER_LOC_VERTEX_NORMAL] = rlGetLocationAttrib(shader.id, RL_DEFAULT_SHADER_ATTRIB_NAME_NORMAL);
-        shader.locs[SHADER_LOC_VERTEX_TANGENT] = rlGetLocationAttrib(shader.id, RL_DEFAULT_SHADER_ATTRIB_NAME_TANGENT);
-        shader.locs[SHADER_LOC_VERTEX_COLOR] = rlGetLocationAttrib(shader.id, RL_DEFAULT_SHADER_ATTRIB_NAME_COLOR);
+        shader.locs[RAYLIB_SHADER_LOC_VERTEX_POSITION] = rlGetLocationAttrib(shader.id, RL_DEFAULT_SHADER_ATTRIB_NAME_POSITION);
+        shader.locs[RAYLIB_SHADER_LOC_VERTEX_TEXCOORD01] = rlGetLocationAttrib(shader.id, RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD);
+        shader.locs[RAYLIB_SHADER_LOC_VERTEX_TEXCOORD02] = rlGetLocationAttrib(shader.id, RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD2);
+        shader.locs[RAYLIB_SHADER_LOC_VERTEX_NORMAL] = rlGetLocationAttrib(shader.id, RL_DEFAULT_SHADER_ATTRIB_NAME_NORMAL);
+        shader.locs[RAYLIB_SHADER_LOC_VERTEX_TANGENT] = rlGetLocationAttrib(shader.id, RL_DEFAULT_SHADER_ATTRIB_NAME_TANGENT);
+        shader.locs[RAYLIB_SHADER_LOC_VERTEX_COLOR] = rlGetLocationAttrib(shader.id, RL_DEFAULT_SHADER_ATTRIB_NAME_COLOR);
 
         // Get handles to GLSL uniform locations (vertex shader)
-        shader.locs[SHADER_LOC_MATRIX_MVP] = rlGetLocationUniform(shader.id, RL_DEFAULT_SHADER_UNIFORM_NAME_MVP);
-        shader.locs[SHADER_LOC_MATRIX_VIEW] = rlGetLocationUniform(shader.id, RL_DEFAULT_SHADER_UNIFORM_NAME_VIEW);
-        shader.locs[SHADER_LOC_MATRIX_PROJECTION] = rlGetLocationUniform(shader.id, RL_DEFAULT_SHADER_UNIFORM_NAME_PROJECTION);
-        shader.locs[SHADER_LOC_MATRIX_MODEL] = rlGetLocationUniform(shader.id, RL_DEFAULT_SHADER_UNIFORM_NAME_MODEL);
-        shader.locs[SHADER_LOC_MATRIX_NORMAL] = rlGetLocationUniform(shader.id, RL_DEFAULT_SHADER_UNIFORM_NAME_NORMAL);
+        shader.locs[RAYLIB_SHADER_LOC_MATRIX_MVP] = rlGetLocationUniform(shader.id, RL_DEFAULT_SHADER_UNIFORM_NAME_MVP);
+        shader.locs[RAYLIB_SHADER_LOC_MATRIX_VIEW] = rlGetLocationUniform(shader.id, RL_DEFAULT_SHADER_UNIFORM_NAME_VIEW);
+        shader.locs[RAYLIB_SHADER_LOC_MATRIX_PROJECTION] = rlGetLocationUniform(shader.id, RL_DEFAULT_SHADER_UNIFORM_NAME_PROJECTION);
+        shader.locs[RAYLIB_SHADER_LOC_MATRIX_MODEL] = rlGetLocationUniform(shader.id, RL_DEFAULT_SHADER_UNIFORM_NAME_MODEL);
+        shader.locs[RAYLIB_SHADER_LOC_MATRIX_NORMAL] = rlGetLocationUniform(shader.id, RL_DEFAULT_SHADER_UNIFORM_NAME_NORMAL);
 
         // Get handles to GLSL uniform locations (fragment shader)
-        shader.locs[SHADER_LOC_COLOR_DIFFUSE] = rlGetLocationUniform(shader.id, RL_DEFAULT_SHADER_UNIFORM_NAME_COLOR);
-        shader.locs[SHADER_LOC_MAP_DIFFUSE] = rlGetLocationUniform(shader.id, RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE0);  // SHADER_LOC_MAP_ALBEDO
-        shader.locs[SHADER_LOC_MAP_SPECULAR] = rlGetLocationUniform(shader.id, RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE1); // SHADER_LOC_MAP_METALNESS
-        shader.locs[SHADER_LOC_MAP_NORMAL] = rlGetLocationUniform(shader.id, RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE2);
+        shader.locs[RAYLIB_SHADER_LOC_COLOR_DIFFUSE] = rlGetLocationUniform(shader.id, RL_DEFAULT_SHADER_UNIFORM_NAME_COLOR);
+        shader.locs[RAYLIB_SHADER_LOC_MAP_DIFFUSE] = rlGetLocationUniform(shader.id, RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE0);  // RAYLIB_SHADER_LOC_MAP_ALBEDO
+        shader.locs[RAYLIB_SHADER_LOC_MAP_SPECULAR] = rlGetLocationUniform(shader.id, RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE1); // RAYLIB_SHADER_LOC_MAP_METALNESS
+        shader.locs[RAYLIB_SHADER_LOC_MAP_NORMAL] = rlGetLocationUniform(shader.id, RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE2);
     }
 
     return shader;
 }
 
 // Check if a shader is ready
-bool IsShaderReady(Shader shader)
+bool RaylibIsShaderReady(RaylibShader shader)
 {
     return ((shader.id > 0) &&          // Validate shader id (loaded successfully)
             (shader.locs != NULL));     // Validate memory has been allocated for default shader locations
 
     // The following locations are tried to be set automatically (locs[i] >= 0),
-    // any of them can be checked for validation but the only mandatory one is, afaik, SHADER_LOC_VERTEX_POSITION
+    // any of them can be checked for validation but the only mandatory one is, afaik, RAYLIB_SHADER_LOC_VERTEX_POSITION
     // NOTE: Users can also setup manually their own attributes/uniforms and do not used the default raylib ones
 
     // Vertex shader attribute locations (default)
-    // shader.locs[SHADER_LOC_VERTEX_POSITION]      // Set by default internal shader
-    // shader.locs[SHADER_LOC_VERTEX_TEXCOORD01]    // Set by default internal shader
-    // shader.locs[SHADER_LOC_VERTEX_TEXCOORD02]
-    // shader.locs[SHADER_LOC_VERTEX_NORMAL]
-    // shader.locs[SHADER_LOC_VERTEX_TANGENT]
-    // shader.locs[SHADER_LOC_VERTEX_COLOR]         // Set by default internal shader
+    // shader.locs[RAYLIB_SHADER_LOC_VERTEX_POSITION]      // Set by default internal shader
+    // shader.locs[RAYLIB_SHADER_LOC_VERTEX_TEXCOORD01]    // Set by default internal shader
+    // shader.locs[RAYLIB_SHADER_LOC_VERTEX_TEXCOORD02]
+    // shader.locs[RAYLIB_SHADER_LOC_VERTEX_NORMAL]
+    // shader.locs[RAYLIB_SHADER_LOC_VERTEX_TANGENT]
+    // shader.locs[RAYLIB_SHADER_LOC_VERTEX_COLOR]         // Set by default internal shader
 
     // Vertex shader uniform locations (default)
-    // shader.locs[SHADER_LOC_MATRIX_MVP]           // Set by default internal shader
-    // shader.locs[SHADER_LOC_MATRIX_VIEW]
-    // shader.locs[SHADER_LOC_MATRIX_PROJECTION]
-    // shader.locs[SHADER_LOC_MATRIX_MODEL]
-    // shader.locs[SHADER_LOC_MATRIX_NORMAL]
+    // shader.locs[RAYLIB_SHADER_LOC_MATRIX_MVP]           // Set by default internal shader
+    // shader.locs[RAYLIB_SHADER_LOC_MATRIX_VIEW]
+    // shader.locs[RAYLIB_SHADER_LOC_MATRIX_PROJECTION]
+    // shader.locs[RAYLIB_SHADER_LOC_MATRIX_MODEL]
+    // shader.locs[RAYLIB_SHADER_LOC_MATRIX_NORMAL]
 
     // Fragment shader uniform locations (default)
-    // shader.locs[SHADER_LOC_COLOR_DIFFUSE]        // Set by default internal shader
-    // shader.locs[SHADER_LOC_MAP_DIFFUSE]          // Set by default internal shader
-    // shader.locs[SHADER_LOC_MAP_SPECULAR]
-    // shader.locs[SHADER_LOC_MAP_NORMAL]
+    // shader.locs[RAYLIB_SHADER_LOC_COLOR_DIFFUSE]        // Set by default internal shader
+    // shader.locs[RAYLIB_SHADER_LOC_MAP_DIFFUSE]          // Set by default internal shader
+    // shader.locs[RAYLIB_SHADER_LOC_MAP_SPECULAR]
+    // shader.locs[RAYLIB_SHADER_LOC_MAP_NORMAL]
 }
 
 // Unload shader from GPU memory (VRAM)
-void UnloadShader(Shader shader)
+void RaylibUnloadShader(RaylibShader shader)
 {
     if (shader.id != rlGetShaderIdDefault())
     {
@@ -1366,25 +1366,25 @@ void UnloadShader(Shader shader)
 }
 
 // Get shader uniform location
-int GetShaderLocation(Shader shader, const char *uniformName)
+int RaylibGetShaderLocation(RaylibShader shader, const char *uniformName)
 {
     return rlGetLocationUniform(shader.id, uniformName);
 }
 
 // Get shader attribute location
-int GetShaderLocationAttrib(Shader shader, const char *attribName)
+int RaylibGetShaderLocationAttrib(RaylibShader shader, const char *attribName)
 {
     return rlGetLocationAttrib(shader.id, attribName);
 }
 
 // Set shader uniform value
-void SetShaderValue(Shader shader, int locIndex, const void *value, int uniformType)
+void RaylibSetShaderValue(RaylibShader shader, int locIndex, const void *value, int uniformType)
 {
-    SetShaderValueV(shader, locIndex, value, uniformType, 1);
+    RaylibSetShaderValueV(shader, locIndex, value, uniformType, 1);
 }
 
 // Set shader uniform value vector
-void SetShaderValueV(Shader shader, int locIndex, const void *value, int uniformType, int count)
+void RaylibSetShaderValueV(RaylibShader shader, int locIndex, const void *value, int uniformType, int count)
 {
     if (locIndex > -1)
     {
@@ -1395,7 +1395,7 @@ void SetShaderValueV(Shader shader, int locIndex, const void *value, int uniform
 }
 
 // Set shader uniform value (matrix 4x4)
-void SetShaderValueMatrix(Shader shader, int locIndex, Matrix mat)
+void RaylibSetShaderValueMatrix(RaylibShader shader, int locIndex, RaylibMatrix mat)
 {
     if (locIndex > -1)
     {
@@ -1406,7 +1406,7 @@ void SetShaderValueMatrix(Shader shader, int locIndex, Matrix mat)
 }
 
 // Set shader uniform value for texture
-void SetShaderValueTexture(Shader shader, int locIndex, Texture2D texture)
+void RaylibSetShaderValueTexture(RaylibShader shader, int locIndex, Texture2D texture)
 {
     if (locIndex > -1)
     {
@@ -1421,17 +1421,17 @@ void SetShaderValueTexture(Shader shader, int locIndex, Texture2D texture)
 //----------------------------------------------------------------------------------
 
 // Get a ray trace from screen position (i.e mouse)
-Ray GetScreenToWorldRay(Vector2 position, Camera camera)
+RaylibRay RaylibGetScreenToWorldRay(RaylibVector2 position, Camera camera)
 {
-    Ray ray = GetScreenToWorldRayEx(position, camera, GetScreenWidth(), GetScreenHeight());
+    RaylibRay ray = RaylibGetScreenToWorldRayEx(position, camera, RaylibGetScreenWidth(), RaylibGetScreenHeight());
 
     return ray;
 }
 
 // Get a ray trace from the screen position (i.e mouse) within a specific section of the screen
-Ray GetScreenToWorldRayEx(Vector2 position, Camera camera, int width, int height)
+RaylibRay RaylibGetScreenToWorldRayEx(RaylibVector2 position, Camera camera, int width, int height)
 {
-    Ray ray = { 0 };
+    RaylibRay ray = { 0 };
 
     // Calculate normalized device coordinates
     // NOTE: y value is negative
@@ -1440,43 +1440,43 @@ Ray GetScreenToWorldRayEx(Vector2 position, Camera camera, int width, int height
     float z = 1.0f;
 
     // Store values in a vector
-    Vector3 deviceCoords = { x, y, z };
+    RaylibVector3 deviceCoords = { x, y, z };
 
     // Calculate view matrix from camera look at
-    Matrix matView = MatrixLookAt(camera.position, camera.target, camera.up);
+    RaylibMatrix matView = RaylibMatrixLookAt(camera.position, camera.target, camera.up);
 
-    Matrix matProj = MatrixIdentity();
+    RaylibMatrix matProj = RaylibMatrixIdentity();
 
-    if (camera.projection == CAMERA_PERSPECTIVE)
+    if (camera.projection == RAYLIB_CAMERA_PERSPECTIVE)
     {
         // Calculate projection matrix from perspective
-        matProj = MatrixPerspective(camera.fovy*DEG2RAD, ((double)width/(double)height), rlGetCullDistanceNear(), rlGetCullDistanceFar());
+        matProj = RaylibMatrixPerspective(camera.fovy*RAYLIB_DEG2RAD, ((double)width/(double)height), rlGetCullDistanceNear(), rlGetCullDistanceFar());
     }
-    else if (camera.projection == CAMERA_ORTHOGRAPHIC)
+    else if (camera.projection == RAYLIB_CAMERA_ORTHOGRAPHIC)
     {
         double aspect = (double)width/(double)height;
         double top = camera.fovy/2.0;
         double right = top*aspect;
 
         // Calculate projection matrix from orthographic
-        matProj = MatrixOrtho(-right, right, -top, top, 0.01, 1000.0);
+        matProj = RaylibMatrixOrtho(-right, right, -top, top, 0.01, 1000.0);
     }
 
     // Unproject far/near points
-    Vector3 nearPoint = Vector3Unproject((Vector3){ deviceCoords.x, deviceCoords.y, 0.0f }, matProj, matView);
-    Vector3 farPoint = Vector3Unproject((Vector3){ deviceCoords.x, deviceCoords.y, 1.0f }, matProj, matView);
+    RaylibVector3 nearPoint = RaylibVector3Unproject((RaylibVector3){ deviceCoords.x, deviceCoords.y, 0.0f }, matProj, matView);
+    RaylibVector3 farPoint = RaylibVector3Unproject((RaylibVector3){ deviceCoords.x, deviceCoords.y, 1.0f }, matProj, matView);
 
     // Unproject the mouse cursor in the near plane
     // We need this as the source position because orthographic projects,
     // compared to perspective doesn't have a convergence point,
     // meaning that the "eye" of the camera is more like a plane than a point
-    Vector3 cameraPlanePointerPos = Vector3Unproject((Vector3){ deviceCoords.x, deviceCoords.y, -1.0f }, matProj, matView);
+    RaylibVector3 cameraPlanePointerPos = RaylibVector3Unproject((RaylibVector3){ deviceCoords.x, deviceCoords.y, -1.0f }, matProj, matView);
 
     // Calculate normalized direction vector
-    Vector3 direction = Vector3Normalize(Vector3Subtract(farPoint, nearPoint));
+    RaylibVector3 direction = RaylibVector3Normalize(RaylibVector3Subtract(farPoint, nearPoint));
 
-    if (camera.projection == CAMERA_PERSPECTIVE) ray.position = camera.position;
-    else if (camera.projection == CAMERA_ORTHOGRAPHIC) ray.position = cameraPlanePointerPos;
+    if (camera.projection == RAYLIB_CAMERA_PERSPECTIVE) ray.position = camera.position;
+    else if (camera.projection == RAYLIB_CAMERA_ORTHOGRAPHIC) ray.position = cameraPlanePointerPos;
 
     // Apply calculated vectors to ray
     ray.direction = direction;
@@ -1485,17 +1485,17 @@ Ray GetScreenToWorldRayEx(Vector2 position, Camera camera, int width, int height
 }
 
 // Get transform matrix for camera
-Matrix GetCameraMatrix(Camera camera)
+RaylibMatrix RaylibGetCameraMatrix(Camera camera)
 {
-    Matrix mat = MatrixLookAt(camera.position, camera.target, camera.up);
+    RaylibMatrix mat = RaylibMatrixLookAt(camera.position, camera.target, camera.up);
 
     return mat;
 }
 
 // Get camera 2d transform matrix
-Matrix GetCameraMatrix2D(Camera2D camera)
+RaylibMatrix RaylibGetCameraMatrix2D(RaylibCamera2D camera)
 {
-    Matrix matTransform = { 0 };
+    RaylibMatrix matTransform = { 0 };
     // The camera in world-space is set by
     //   1. Move it to target
     //   2. Rotate by -rotation and scale by (1/zoom)
@@ -1510,84 +1510,84 @@ Matrix GetCameraMatrix2D(Camera2D camera)
     //   1. Move to offset
     //   2. Rotate and Scale
     //   3. Move by -target
-    Matrix matOrigin = MatrixTranslate(-camera.target.x, -camera.target.y, 0.0f);
-    Matrix matRotation = MatrixRotate((Vector3){ 0.0f, 0.0f, 1.0f }, camera.rotation*DEG2RAD);
-    Matrix matScale = MatrixScale(camera.zoom, camera.zoom, 1.0f);
-    Matrix matTranslation = MatrixTranslate(camera.offset.x, camera.offset.y, 0.0f);
+    RaylibMatrix matOrigin = RaylibMatrixTranslate(-camera.target.x, -camera.target.y, 0.0f);
+    RaylibMatrix matRotation = RaylibMatrixRotate((RaylibVector3){ 0.0f, 0.0f, 1.0f }, camera.rotation*RAYLIB_DEG2RAD);
+    RaylibMatrix matScale = RaylibMatrixScale(camera.zoom, camera.zoom, 1.0f);
+    RaylibMatrix matTranslation = RaylibMatrixTranslate(camera.offset.x, camera.offset.y, 0.0f);
 
-    matTransform = MatrixMultiply(MatrixMultiply(matOrigin, MatrixMultiply(matScale, matRotation)), matTranslation);
+    matTransform = RaylibMatrixMultiply(RaylibMatrixMultiply(matOrigin, RaylibMatrixMultiply(matScale, matRotation)), matTranslation);
 
     return matTransform;
 }
 
 // Get the screen space position from a 3d world space position
-Vector2 GetWorldToScreen(Vector3 position, Camera camera)
+RaylibVector2 RaylibGetWorldToScreen(RaylibVector3 position, Camera camera)
 {
-    Vector2 screenPosition = GetWorldToScreenEx(position, camera, GetScreenWidth(), GetScreenHeight());
+    RaylibVector2 screenPosition = RaylibGetWorldToScreenEx(position, camera, RaylibGetScreenWidth(), RaylibGetScreenHeight());
 
     return screenPosition;
 }
 
 // Get size position for a 3d world space position (useful for texture drawing)
-Vector2 GetWorldToScreenEx(Vector3 position, Camera camera, int width, int height)
+RaylibVector2 RaylibGetWorldToScreenEx(RaylibVector3 position, Camera camera, int width, int height)
 {
     // Calculate projection matrix (from perspective instead of frustum
-    Matrix matProj = MatrixIdentity();
+    RaylibMatrix matProj = RaylibMatrixIdentity();
 
-    if (camera.projection == CAMERA_PERSPECTIVE)
+    if (camera.projection == RAYLIB_CAMERA_PERSPECTIVE)
     {
         // Calculate projection matrix from perspective
-        matProj = MatrixPerspective(camera.fovy*DEG2RAD, ((double)width/(double)height), rlGetCullDistanceNear(), rlGetCullDistanceFar());
+        matProj = RaylibMatrixPerspective(camera.fovy*RAYLIB_DEG2RAD, ((double)width/(double)height), rlGetCullDistanceNear(), rlGetCullDistanceFar());
     }
-    else if (camera.projection == CAMERA_ORTHOGRAPHIC)
+    else if (camera.projection == RAYLIB_CAMERA_ORTHOGRAPHIC)
     {
         double aspect = (double)width/(double)height;
         double top = camera.fovy/2.0;
         double right = top*aspect;
 
         // Calculate projection matrix from orthographic
-        matProj = MatrixOrtho(-right, right, -top, top, rlGetCullDistanceNear(), rlGetCullDistanceFar());
+        matProj = RaylibMatrixOrtho(-right, right, -top, top, rlGetCullDistanceNear(), rlGetCullDistanceFar());
     }
 
     // Calculate view matrix from camera look at (and transpose it)
-    Matrix matView = MatrixLookAt(camera.position, camera.target, camera.up);
+    RaylibMatrix matView = RaylibMatrixLookAt(camera.position, camera.target, camera.up);
 
-    // TODO: Why not use Vector3Transform(Vector3 v, Matrix mat)?
+    // TODO: Why not use RaylibVector3Transform(RaylibVector3 v, RaylibMatrix mat)?
 
     // Convert world position vector to quaternion
     Quaternion worldPos = { position.x, position.y, position.z, 1.0f };
 
-    // Transform world position to view
-    worldPos = QuaternionTransform(worldPos, matView);
+    // RaylibTransform world position to view
+    worldPos = RaylibQuaternionTransform(worldPos, matView);
 
-    // Transform result to projection (clip space position)
-    worldPos = QuaternionTransform(worldPos, matProj);
+    // RaylibTransform result to projection (clip space position)
+    worldPos = RaylibQuaternionTransform(worldPos, matProj);
 
     // Calculate normalized device coordinates (inverted y)
-    Vector3 ndcPos = { worldPos.x/worldPos.w, -worldPos.y/worldPos.w, worldPos.z/worldPos.w };
+    RaylibVector3 ndcPos = { worldPos.x/worldPos.w, -worldPos.y/worldPos.w, worldPos.z/worldPos.w };
 
     // Calculate 2d screen position vector
-    Vector2 screenPosition = { (ndcPos.x + 1.0f)/2.0f*(float)width, (ndcPos.y + 1.0f)/2.0f*(float)height };
+    RaylibVector2 screenPosition = { (ndcPos.x + 1.0f)/2.0f*(float)width, (ndcPos.y + 1.0f)/2.0f*(float)height };
 
     return screenPosition;
 }
 
 // Get the screen space position for a 2d camera world space position
-Vector2 GetWorldToScreen2D(Vector2 position, Camera2D camera)
+RaylibVector2 RaylibGetWorldToScreen2D(RaylibVector2 position, RaylibCamera2D camera)
 {
-    Matrix matCamera = GetCameraMatrix2D(camera);
-    Vector3 transform = Vector3Transform((Vector3){ position.x, position.y, 0 }, matCamera);
+    RaylibMatrix matCamera = RaylibGetCameraMatrix2D(camera);
+    RaylibVector3 transform = RaylibVector3Transform((RaylibVector3){ position.x, position.y, 0 }, matCamera);
 
-    return (Vector2){ transform.x, transform.y };
+    return (RaylibVector2){ transform.x, transform.y };
 }
 
 // Get the world space position for a 2d camera screen space position
-Vector2 GetScreenToWorld2D(Vector2 position, Camera2D camera)
+RaylibVector2 RaylibGetScreenToWorld2D(RaylibVector2 position, RaylibCamera2D camera)
 {
-    Matrix invMatCamera = MatrixInvert(GetCameraMatrix2D(camera));
-    Vector3 transform = Vector3Transform((Vector3){ position.x, position.y, 0 }, invMatCamera);
+    RaylibMatrix invMatCamera = RaylibMatrixInvert(RaylibGetCameraMatrix2D(camera));
+    RaylibVector3 transform = RaylibVector3Transform((RaylibVector3){ position.x, position.y, 0 }, invMatCamera);
 
-    return (Vector2){ transform.x, transform.y };
+    return (RaylibVector2){ transform.x, transform.y };
 }
 
 //----------------------------------------------------------------------------------
@@ -1595,20 +1595,20 @@ Vector2 GetScreenToWorld2D(Vector2 position, Camera2D camera)
 //----------------------------------------------------------------------------------
 
 // NOTE: Functions with a platform-specific implementation on rcore_<platform>.c
-//double GetTime(void)
+//double RaylibGetTime(void)
 
 // Set target FPS (maximum)
-void SetTargetFPS(int fps)
+void RaylibSetTargetFPS(int fps)
 {
     if (fps < 1) CORE.Time.target = 0.0;
     else CORE.Time.target = 1.0/(double)fps;
 
-    TRACELOG(LOG_INFO, "TIMER: Target time per frame: %02.03f milliseconds", (float)CORE.Time.target*1000.0f);
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "TIMER: Target time per frame: %02.03f milliseconds", (float)CORE.Time.target*1000.0f);
 }
 
 // Get current FPS
 // NOTE: We calculate an average framerate
-int GetFPS(void)
+int RaylibGetFPS(void)
 {
     int fps = 0;
 
@@ -1620,7 +1620,7 @@ int GetFPS(void)
     static int index = 0;
     static float history[FPS_CAPTURE_FRAMES_COUNT] = { 0 };
     static float average = 0, last = 0;
-    float fpsFrame = GetFrameTime();
+    float fpsFrame = RaylibGetFrameTime();
 
     // if we reset the window, reset the FPS info
     if (CORE.Time.frameCounter == 0)
@@ -1634,9 +1634,9 @@ int GetFPS(void)
 
     if (fpsFrame == 0) return 0;
 
-    if ((GetTime() - last) > FPS_STEP)
+    if ((RaylibGetTime() - last) > FPS_STEP)
     {
-        last = (float)GetTime();
+        last = (float)RaylibGetTime();
         index = (index + 1)%FPS_CAPTURE_FRAMES_COUNT;
         average -= history[index];
         history[index] = fpsFrame/FPS_CAPTURE_FRAMES_COUNT;
@@ -1650,7 +1650,7 @@ int GetFPS(void)
 }
 
 // Get time in seconds for last frame drawn (delta time)
-float GetFrameTime(void)
+float RaylibGetFrameTime(void)
 {
     return (float)CORE.Time.frame;
 }
@@ -1660,26 +1660,26 @@ float GetFrameTime(void)
 //----------------------------------------------------------------------------------
 
 // NOTE: Functions with a platform-specific implementation on rcore_<platform>.c
-//void SwapScreenBuffer(void);
-//void PollInputEvents(void);
+//void RaylibSwapScreenBuffer(void);
+//void RaylibPollInputEvents(void);
 
 // Wait for some time (stop program execution)
 // NOTE: Sleep() granularity could be around 10 ms, it means, Sleep() could
 // take longer than expected... for that reason we use the busy wait loop
 // Ref: http://stackoverflow.com/questions/43057578/c-programming-win32-games-sleep-taking-longer-than-expected
 // Ref: http://www.geisswerks.com/ryan/FAQS/timing.html --> All about timing on Win32!
-void WaitTime(double seconds)
+void RaylibWaitTime(double seconds)
 {
     if (seconds < 0) return;    // Security check
 
-#if defined(SUPPORT_BUSY_WAIT_LOOP) || defined(SUPPORT_PARTIALBUSY_WAIT_LOOP)
-    double destinationTime = GetTime() + seconds;
+#if defined(RAYLIB_SUPPORT_BUSY_WAIT_LOOP) || defined(RAYLIB_SUPPORT_PARTIALBUSY_WAIT_LOOP)
+    double destinationTime = RaylibGetTime() + seconds;
 #endif
 
-#if defined(SUPPORT_BUSY_WAIT_LOOP)
-    while (GetTime() < destinationTime) { }
+#if defined(RAYLIB_SUPPORT_BUSY_WAIT_LOOP)
+    while (RaylibGetTime() < destinationTime) { }
 #else
-    #if defined(SUPPORT_PARTIALBUSY_WAIT_LOOP)
+    #if defined(RAYLIB_SUPPORT_PARTIALBUSY_WAIT_LOOP)
         double sleepSeconds = seconds - seconds*0.05;  // NOTE: We reserve a percentage of the time for busy waiting
     #else
         double sleepSeconds = seconds;
@@ -1703,8 +1703,8 @@ void WaitTime(double seconds)
         usleep(sleepSeconds*1000000.0);
     #endif
 
-    #if defined(SUPPORT_PARTIALBUSY_WAIT_LOOP)
-        while (GetTime() < destinationTime) { }
+    #if defined(RAYLIB_SUPPORT_PARTIALBUSY_WAIT_LOOP)
+        while (RaylibGetTime() < destinationTime) { }
     #endif
 #endif
 }
@@ -1714,12 +1714,12 @@ void WaitTime(double seconds)
 //----------------------------------------------------------------------------------
 
 // NOTE: Functions with a platform-specific implementation on rcore_<platform>.c
-//void OpenURL(const char *url)
+//void RaylibOpenURL(const char *url)
 
 // Set the seed for the random number generator
-void SetRandomSeed(unsigned int seed)
+void RaylibSetRandomSeed(unsigned int seed)
 {
-#if defined(SUPPORT_RPRAND_GENERATOR)
+#if defined(RAYLIB_SUPPORT_RPRAND_GENERATOR)
     rprand_set_seed(seed);
 #else
     srand(seed);
@@ -1727,7 +1727,7 @@ void SetRandomSeed(unsigned int seed)
 }
 
 // Get a random value between min and max included
-int GetRandomValue(int min, int max)
+int RaylibGetRandomValue(int min, int max)
 {
     int value = 0;
 
@@ -1738,7 +1738,7 @@ int GetRandomValue(int min, int max)
         min = tmp;
     }
 
-#if defined(SUPPORT_RPRAND_GENERATOR)
+#if defined(RAYLIB_SUPPORT_RPRAND_GENERATOR)
     value = rprand_get_value(min, max);
 #else
     // WARNING: Ranges higher than RAND_MAX will return invalid results
@@ -1747,7 +1747,7 @@ int GetRandomValue(int min, int max)
     // NOTE: Depending on the library it can be as low as 32767
     if ((unsigned int)(max - min) > (unsigned int)RAND_MAX)
     {
-        TRACELOG(LOG_WARNING, "Invalid GetRandomValue() arguments, range should not be higher than %i", RAND_MAX);
+        RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "Invalid RaylibGetRandomValue() arguments, range should not be higher than %i", RAND_MAX);
     }
 
     value = (rand()%(abs(max - min) + 1) + min);
@@ -1756,11 +1756,11 @@ int GetRandomValue(int min, int max)
 }
 
 // Load random values sequence, no values repeated, min and max included
-int *LoadRandomSequence(unsigned int count, int min, int max)
+int *RaylibLoadRandomSequence(unsigned int count, int min, int max)
 {
     int *values = NULL;
 
-#if defined(SUPPORT_RPRAND_GENERATOR)
+#if defined(RAYLIB_SUPPORT_RPRAND_GENERATOR)
     values = rprand_load_sequence(count, min, max);
 #else
     if (count > ((unsigned int)abs(max - min) + 1)) return values;  // Security check
@@ -1795,9 +1795,9 @@ int *LoadRandomSequence(unsigned int count, int min, int max)
 }
 
 // Unload random values sequence
-void UnloadRandomSequence(int *sequence)
+void RaylibUnloadRandomSequence(int *sequence)
 {
-#if defined(SUPPORT_RPRAND_GENERATOR)
+#if defined(RAYLIB_SUPPORT_RPRAND_GENERATOR)
     rprand_unload_sequence(sequence);
 #else
     RL_FREE(sequence);
@@ -1806,37 +1806,37 @@ void UnloadRandomSequence(int *sequence)
 
 // Takes a screenshot of current screen
 // NOTE: Provided fileName should not contain paths, saving to working directory
-void TakeScreenshot(const char *fileName)
+void RaylibTakeScreenshot(const char *fileName)
 {
-#if defined(SUPPORT_MODULE_RTEXTURES)
+#if defined(RAYLIB_SUPPORT_MODULE_RTEXTURES)
     // Security check to (partially) avoid malicious code
-    if (strchr(fileName, '\'') != NULL) { TRACELOG(LOG_WARNING, "SYSTEM: Provided fileName could be potentially malicious, avoid [\'] character"); return; }
+    if (strchr(fileName, '\'') != NULL) { RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "SYSTEM: Provided fileName could be potentially malicious, avoid [\'] character"); return; }
 
-    Vector2 scale = GetWindowScaleDPI();
+    RaylibVector2 scale = RaylibGetWindowScaleDPI();
     unsigned char *imgData = rlReadScreenPixels((int)((float)CORE.Window.render.width*scale.x), (int)((float)CORE.Window.render.height*scale.y));
-    Image image = { imgData, (int)((float)CORE.Window.render.width*scale.x), (int)((float)CORE.Window.render.height*scale.y), 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 };
+    RaylibImage image = { imgData, (int)((float)CORE.Window.render.width*scale.x), (int)((float)CORE.Window.render.height*scale.y), 1, RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 };
 
     char path[512] = { 0 };
-    strcpy(path, TextFormat("%s/%s", CORE.Storage.basePath, GetFileName(fileName)));
+    strcpy(path, RaylibTextFormat("%s/%s", CORE.Storage.basePath, RaylibGetFileName(fileName)));
 
-    ExportImage(image, path);           // WARNING: Module required: rtextures
+    RaylibExportImage(image, path);           // WARNING: Module required: rtextures
     RL_FREE(imgData);
 
-    if (FileExists(path)) TRACELOG(LOG_INFO, "SYSTEM: [%s] Screenshot taken successfully", path);
-    else TRACELOG(LOG_WARNING, "SYSTEM: [%s] Screenshot could not be saved", path);
+    if (RaylibFileExists(path)) RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "SYSTEM: [%s] Screenshot taken successfully", path);
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "SYSTEM: [%s] Screenshot could not be saved", path);
 #else
-    TRACELOG(LOG_WARNING,"IMAGE: ExportImage() requires module: rtextures");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING,"IMAGE: RaylibExportImage() requires module: rtextures");
 #endif
 }
 
 // Setup window configuration flags (view FLAGS)
 // NOTE: This function is expected to be called before window creation,
 // because it sets up some flags for the window creation process
-// To configure window states after creation, just use SetWindowState()
-void SetConfigFlags(unsigned int flags)
+// To configure window states after creation, just use RaylibSetWindowState()
+void RaylibSetConfigFlags(unsigned int flags)
 {
     // Selected flags are set but not evaluated at this point,
-    // flag evaluation happens at InitWindow() or SetWindowState()
+    // flag evaluation happens at RaylibInitWindow() or RaylibSetWindowState()
     CORE.Window.flags |= flags;
 }
 
@@ -1845,7 +1845,7 @@ void SetConfigFlags(unsigned int flags)
 //----------------------------------------------------------------------------------
 
 // Check if the file exists
-bool FileExists(const char *fileName)
+bool RaylibFileExists(const char *fileName)
 {
     bool result = false;
 
@@ -1865,25 +1865,25 @@ bool FileExists(const char *fileName)
 
 // Check file extension
 // NOTE: Extensions checking is not case-sensitive
-bool IsFileExtension(const char *fileName, const char *ext)
+bool RaylibIsFileExtension(const char *fileName, const char *ext)
 {
     #define MAX_FILE_EXTENSION_LENGTH  16
 
     bool result = false;
-    const char *fileExt = GetFileExtension(fileName);
+    const char *fileExt = RaylibGetFileExtension(fileName);
 
     if (fileExt != NULL)
     {
-#if defined(SUPPORT_MODULE_RTEXT) && defined(SUPPORT_TEXT_MANIPULATION)
+#if defined(RAYLIB_SUPPORT_MODULE_RTEXT) && defined(RAYLIB_SUPPORT_TEXT_MANIPULATION)
         int extCount = 0;
-        const char **checkExts = TextSplit(ext, ';', &extCount); // WARNING: Module required: rtext
+        const char **checkExts = RaylibTextSplit(ext, ';', &extCount); // WARNING: Module required: rtext
 
         char fileExtLower[MAX_FILE_EXTENSION_LENGTH + 1] = { 0 };
-        strncpy(fileExtLower, TextToLower(fileExt), MAX_FILE_EXTENSION_LENGTH); // WARNING: Module required: rtext
+        strncpy(fileExtLower, RaylibTextToLower(fileExt), MAX_FILE_EXTENSION_LENGTH); // WARNING: Module required: rtext
 
         for (int i = 0; i < extCount; i++)
         {
-            if (strcmp(fileExtLower, TextToLower(checkExts[i])) == 0)
+            if (strcmp(fileExtLower, RaylibTextToLower(checkExts[i])) == 0)
             {
                 result = true;
                 break;
@@ -1898,7 +1898,7 @@ bool IsFileExtension(const char *fileName, const char *ext)
 }
 
 // Check if a directory path exists
-bool DirectoryExists(const char *dirPath)
+bool RaylibDirectoryExists(const char *dirPath)
 {
     bool result = false;
     DIR *dir = opendir(dirPath);
@@ -1914,7 +1914,7 @@ bool DirectoryExists(const char *dirPath)
 
 // Get file length in bytes
 // NOTE: GetFileSize() conflicts with windows.h
-int GetFileLength(const char *fileName)
+int RaylibGetFileLength(const char *fileName)
 {
     int size = 0;
 
@@ -1932,7 +1932,7 @@ int GetFileLength(const char *fileName)
         long int fileSize = ftell(file);
 
         // Check for size overflow (INT_MAX)
-        if (fileSize > 2147483647) TRACELOG(LOG_WARNING, "[%s] File size overflows expected limit, do not use GetFileLength()", fileName);
+        if (fileSize > 2147483647) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "[%s] File size overflows expected limit, do not use RaylibGetFileLength()", fileName);
         else size = (int)fileSize;
 
         fclose(file);
@@ -1942,7 +1942,7 @@ int GetFileLength(const char *fileName)
 }
 
 // Get pointer to extension for a filename string (includes the dot: .png)
-const char *GetFileExtension(const char *fileName)
+const char *RaylibGetFileExtension(const char *fileName)
 {
     const char *dot = strrchr(fileName, '.');
 
@@ -1962,7 +1962,7 @@ static const char *strprbrk(const char *s, const char *charset)
 }
 
 // Get pointer to filename for a path string
-const char *GetFileName(const char *filePath)
+const char *RaylibGetFileName(const char *filePath)
 {
     const char *fileName = NULL;
 
@@ -1974,7 +1974,7 @@ const char *GetFileName(const char *filePath)
 }
 
 // Get filename string without extension (uses static string)
-const char *GetFileNameWithoutExt(const char *filePath)
+const char *RaylibGetFileNameWithoutExt(const char *filePath)
 {
     #define MAX_FILENAME_LENGTH     256
 
@@ -1983,7 +1983,7 @@ const char *GetFileNameWithoutExt(const char *filePath)
 
     if (filePath != NULL)
     {
-        strcpy(fileName, GetFileName(filePath)); // Get filename.ext without path
+        strcpy(fileName, RaylibGetFileName(filePath)); // Get filename.ext without path
         int size = (int)strlen(fileName); // Get size in bytes
 
         for (int i = size; i > 0; i--) // Reverse search '.'
@@ -2001,7 +2001,7 @@ const char *GetFileNameWithoutExt(const char *filePath)
 }
 
 // Get directory for a given filePath
-const char *GetDirectoryPath(const char *filePath)
+const char *RaylibGetDirectoryPath(const char *filePath)
 {
     /*
     // NOTE: Directory separator is different in Windows and other platforms,
@@ -2013,8 +2013,8 @@ const char *GetDirectoryPath(const char *filePath)
     #endif
     */
     const char *lastSlash = NULL;
-    static char dirPath[MAX_FILEPATH_LENGTH] = { 0 };
-    memset(dirPath, 0, MAX_FILEPATH_LENGTH);
+    static char dirPath[RAYLIB_MAX_FILEPATH_LENGTH] = { 0 };
+    memset(dirPath, 0, RAYLIB_MAX_FILEPATH_LENGTH);
 
     // In case provided path does not contain a root drive letter (C:\, D:\) nor leading path separator (\, /),
     // we add the current directory path to dirPath
@@ -2049,10 +2049,10 @@ const char *GetDirectoryPath(const char *filePath)
 }
 
 // Get previous directory path for a given path
-const char *GetPrevDirectoryPath(const char *dirPath)
+const char *RaylibGetPrevDirectoryPath(const char *dirPath)
 {
-    static char prevDirPath[MAX_FILEPATH_LENGTH] = { 0 };
-    memset(prevDirPath, 0, MAX_FILEPATH_LENGTH);
+    static char prevDirPath[RAYLIB_MAX_FILEPATH_LENGTH] = { 0 };
+    memset(prevDirPath, 0, RAYLIB_MAX_FILEPATH_LENGTH);
     int pathLen = (int)strlen(dirPath);
 
     if (pathLen <= 3) strcpy(prevDirPath, dirPath);
@@ -2073,20 +2073,20 @@ const char *GetPrevDirectoryPath(const char *dirPath)
 }
 
 // Get current working directory
-const char *GetWorkingDirectory(void)
+const char *RaylibGetWorkingDirectory(void)
 {
-    static char currentDir[MAX_FILEPATH_LENGTH] = { 0 };
-    memset(currentDir, 0, MAX_FILEPATH_LENGTH);
+    static char currentDir[RAYLIB_MAX_FILEPATH_LENGTH] = { 0 };
+    memset(currentDir, 0, RAYLIB_MAX_FILEPATH_LENGTH);
 
-    char *path = GETCWD(currentDir, MAX_FILEPATH_LENGTH - 1);
+    char *path = GETCWD(currentDir, RAYLIB_MAX_FILEPATH_LENGTH - 1);
 
     return path;
 }
 
-const char *GetApplicationDirectory(void)
+const char *RaylibGetApplicationDirectory(void)
 {
-    static char appDir[MAX_FILEPATH_LENGTH] = { 0 };
-    memset(appDir, 0, MAX_FILEPATH_LENGTH);
+    static char appDir[RAYLIB_MAX_FILEPATH_LENGTH] = { 0 };
+    memset(appDir, 0, RAYLIB_MAX_FILEPATH_LENGTH);
 
 #if defined(_WIN32)
     int len = 0;
@@ -2163,9 +2163,9 @@ const char *GetApplicationDirectory(void)
 // NOTE: Base path is prepended to the scanned filepaths
 // WARNING: Directory is scanned twice, first time to get files count
 // No recursive scanning is done!
-FilePathList LoadDirectoryFiles(const char *dirPath)
+RaylibFilePathList RaylibLoadDirectoryFiles(const char *dirPath)
 {
-    FilePathList files = { 0 };
+    RaylibFilePathList files = { 0 };
     unsigned int fileCounter = 0;
 
     struct dirent *entity;
@@ -2183,7 +2183,7 @@ FilePathList LoadDirectoryFiles(const char *dirPath)
         // Memory allocation for dirFileCount
         files.capacity = fileCounter;
         files.paths = (char **)RL_MALLOC(files.capacity*sizeof(char *));
-        for (unsigned int i = 0; i < files.capacity; i++) files.paths[i] = (char *)RL_MALLOC(MAX_FILEPATH_LENGTH*sizeof(char));
+        for (unsigned int i = 0; i < files.capacity; i++) files.paths[i] = (char *)RL_MALLOC(RAYLIB_MAX_FILEPATH_LENGTH*sizeof(char));
 
         closedir(dir);
 
@@ -2192,22 +2192,22 @@ FilePathList LoadDirectoryFiles(const char *dirPath)
         ScanDirectoryFiles(dirPath, &files, NULL);
 
         // Security check: read files.count should match fileCounter
-        if (files.count != files.capacity) TRACELOG(LOG_WARNING, "FILEIO: Read files count do not match capacity allocated");
+        if (files.count != files.capacity) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: Read files count do not match capacity allocated");
     }
-    else TRACELOG(LOG_WARNING, "FILEIO: Failed to open requested directory");  // Maybe it's a file...
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: Failed to open requested directory");  // Maybe it's a file...
 
     return files;
 }
 
 // Load directory filepaths with extension filtering and recursive directory scan
-// NOTE: On recursive loading we do not pre-scan for file count, we use MAX_FILEPATH_CAPACITY
-FilePathList LoadDirectoryFilesEx(const char *basePath, const char *filter, bool scanSubdirs)
+// NOTE: On recursive loading we do not pre-scan for file count, we use RAYLIB_MAX_FILEPATH_CAPACITY
+RaylibFilePathList RaylibLoadDirectoryFilesEx(const char *basePath, const char *filter, bool scanSubdirs)
 {
-    FilePathList files = { 0 };
+    RaylibFilePathList files = { 0 };
 
-    files.capacity = MAX_FILEPATH_CAPACITY;
+    files.capacity = RAYLIB_MAX_FILEPATH_CAPACITY;
     files.paths = (char **)RL_CALLOC(files.capacity, sizeof(char *));
-    for (unsigned int i = 0; i < files.capacity; i++) files.paths[i] = (char *)RL_CALLOC(MAX_FILEPATH_LENGTH, sizeof(char));
+    for (unsigned int i = 0; i < files.capacity; i++) files.paths[i] = (char *)RL_CALLOC(RAYLIB_MAX_FILEPATH_LENGTH, sizeof(char));
 
     // WARNING: basePath is always prepended to scanned paths
     if (scanSubdirs) ScanDirectoryFilesRecursively(basePath, &files, filter);
@@ -2218,7 +2218,7 @@ FilePathList LoadDirectoryFilesEx(const char *basePath, const char *filter, bool
 
 // Unload directory filepaths
 // WARNING: files.count is not reseted to 0 after unloading
-void UnloadDirectoryFiles(FilePathList files)
+void RaylibUnloadDirectoryFiles(RaylibFilePathList files)
 {
     for (unsigned int i = 0; i < files.capacity; i++) RL_FREE(files.paths[i]);
 
@@ -2226,17 +2226,17 @@ void UnloadDirectoryFiles(FilePathList files)
 }
 
 // Change working directory, returns true on success
-bool ChangeDirectory(const char *dir)
+bool RaylibChangeDirectory(const char *dir)
 {
     bool result = CHDIR(dir);
 
-    if (result != 0) TRACELOG(LOG_WARNING, "SYSTEM: Failed to change to directory: %s", dir);
+    if (result != 0) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "SYSTEM: Failed to change to directory: %s", dir);
 
     return (result == 0);
 }
 
 // Check if a given path point to a file
-bool IsPathFile(const char *path)
+bool RaylibIsPathFile(const char *path)
 {
     struct stat result = { 0 };
     stat(path, &result);
@@ -2245,7 +2245,7 @@ bool IsPathFile(const char *path)
 }
 
 // Check if fileName is valid for the platform/OS
-bool IsFileNameValid(const char *fileName)
+bool RaylibIsFileNameValid(const char *fileName)
 {
     bool valid = true;
 
@@ -2303,7 +2303,7 @@ bool IsFileNameValid(const char *fileName)
 }
 
 // Check if a file has been dropped into window
-bool IsFileDropped(void)
+bool RaylibIsFileDropped(void)
 {
     bool result = false;
 
@@ -2313,9 +2313,9 @@ bool IsFileDropped(void)
 }
 
 // Load dropped filepaths
-FilePathList LoadDroppedFiles(void)
+RaylibFilePathList RaylibLoadDroppedFiles(void)
 {
-    FilePathList files = { 0 };
+    RaylibFilePathList files = { 0 };
 
     files.count = CORE.Window.dropFileCount;
     files.paths = CORE.Window.dropFilepaths;
@@ -2324,7 +2324,7 @@ FilePathList LoadDroppedFiles(void)
 }
 
 // Unload dropped filepaths
-void UnloadDroppedFiles(FilePathList files)
+void RaylibUnloadDroppedFiles(RaylibFilePathList files)
 {
     // WARNING: files pointers are the same as internal ones
 
@@ -2340,7 +2340,7 @@ void UnloadDroppedFiles(FilePathList files)
 }
 
 // Get file modification time (last write time)
-long GetFileModTime(const char *fileName)
+long RaylibGetFileModTime(const char *fileName)
 {
     struct stat result = { 0 };
     long modTime = 0;
@@ -2360,13 +2360,13 @@ long GetFileModTime(const char *fileName)
 //----------------------------------------------------------------------------------
 
 // Compress data (DEFLATE algorithm)
-unsigned char *CompressData(const unsigned char *data, int dataSize, int *compDataSize)
+unsigned char *RaylibCompressData(const unsigned char *data, int dataSize, int *compDataSize)
 {
     #define COMPRESSION_QUALITY_DEFLATE  8
 
     unsigned char *compData = NULL;
 
-#if defined(SUPPORT_COMPRESSION_API)
+#if defined(RAYLIB_SUPPORT_COMPRESSION_API)
     // Compress data and generate a valid DEFLATE stream
     struct sdefl *sdefl = RL_CALLOC(1, sizeof(struct sdefl));   // WARNING: Possible stack overflow, struct sdefl is almost 1MB
     int bounds = sdefl_bound(dataSize);
@@ -2375,39 +2375,39 @@ unsigned char *CompressData(const unsigned char *data, int dataSize, int *compDa
     *compDataSize = sdeflate(sdefl, compData, data, dataSize, COMPRESSION_QUALITY_DEFLATE);   // Compression level 8, same as stbiw
     RL_FREE(sdefl);
 
-    TRACELOG(LOG_INFO, "SYSTEM: Compress data: Original size: %i -> Comp. size: %i", dataSize, *compDataSize);
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "SYSTEM: Compress data: Original size: %i -> Comp. size: %i", dataSize, *compDataSize);
 #endif
 
     return compData;
 }
 
 // Decompress data (DEFLATE algorithm)
-unsigned char *DecompressData(const unsigned char *compData, int compDataSize, int *dataSize)
+unsigned char *RaylibDecompressData(const unsigned char *compData, int compDataSize, int *dataSize)
 {
     unsigned char *data = NULL;
 
-#if defined(SUPPORT_COMPRESSION_API)
+#if defined(RAYLIB_SUPPORT_COMPRESSION_API)
     // Decompress data from a valid DEFLATE stream
-    data = (unsigned char *)RL_CALLOC(MAX_DECOMPRESSION_SIZE*1024*1024, 1);
-    int length = sinflate(data, MAX_DECOMPRESSION_SIZE*1024*1024, compData, compDataSize);
+    data = (unsigned char *)RL_CALLOC(RAYLIB_MAX_DECOMPRESSION_SIZE*1024*1024, 1);
+    int length = sinflate(data, RAYLIB_MAX_DECOMPRESSION_SIZE*1024*1024, compData, compDataSize);
 
     // WARNING: RL_REALLOC can make (and leave) data copies in memory, be careful with sensitive compressed data!
     // TODO: Use a different approach, create another buffer, copy data manually to it and wipe original buffer memory
     unsigned char *temp = (unsigned char *)RL_REALLOC(data, length);
 
     if (temp != NULL) data = temp;
-    else TRACELOG(LOG_WARNING, "SYSTEM: Failed to re-allocate required decompression memory");
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "SYSTEM: Failed to re-allocate required decompression memory");
 
     *dataSize = length;
 
-    TRACELOG(LOG_INFO, "SYSTEM: Decompress data: Comp. size: %i -> Original size: %i", compDataSize, *dataSize);
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "SYSTEM: Decompress data: Comp. size: %i -> Original size: %i", compDataSize, *dataSize);
 #endif
 
     return data;
 }
 
 // Encode data to Base64 string
-char *EncodeDataBase64(const unsigned char *data, int dataSize, int *outputSize)
+char *RaylibEncodeDataBase64(const unsigned char *data, int dataSize, int *outputSize)
 {
     static const unsigned char base64encodeTable[] = {
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
@@ -2443,7 +2443,7 @@ char *EncodeDataBase64(const unsigned char *data, int dataSize, int *outputSize)
 }
 
 // Decode Base64 string data
-unsigned char *DecodeDataBase64(const unsigned char *data, int *outputSize)
+unsigned char *RaylibDecodeDataBase64(const unsigned char *data, int *outputSize)
 {
     static const unsigned char base64decodeTable[] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -2504,23 +2504,23 @@ unsigned char *DecodeDataBase64(const unsigned char *data, int *outputSize)
 // Module Functions Definition: Automation Events Recording and Playing
 //----------------------------------------------------------------------------------
 
-// Load automation events list from file, NULL for empty list, capacity = MAX_AUTOMATION_EVENTS
-AutomationEventList LoadAutomationEventList(const char *fileName)
+// Load automation events list from file, NULL for empty list, capacity = RAYLIB_MAX_AUTOMATION_EVENTS
+RaylibAutomationEventList RaylibLoadAutomationEventList(const char *fileName)
 {
-    AutomationEventList list = { 0 };
+    RaylibAutomationEventList list = { 0 };
 
     // Allocate and empty automation event list, ready to record new events
-    list.events = (AutomationEvent *)RL_CALLOC(MAX_AUTOMATION_EVENTS, sizeof(AutomationEvent));
-    list.capacity = MAX_AUTOMATION_EVENTS;
+    list.events = (RaylibAutomationEvent *)RL_CALLOC(RAYLIB_MAX_AUTOMATION_EVENTS, sizeof(RaylibAutomationEvent));
+    list.capacity = RAYLIB_MAX_AUTOMATION_EVENTS;
 
-#if defined(SUPPORT_AUTOMATION_EVENTS)
-    if (fileName == NULL) TRACELOG(LOG_INFO, "AUTOMATION: New empty events list loaded successfully");
+#if defined(RAYLIB_SUPPORT_AUTOMATION_EVENTS)
+    if (fileName == NULL) RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "AUTOMATION: New empty events list loaded successfully");
     else
     {
         // Load automation events file (binary)
         /*
         //int dataSize = 0;
-        //unsigned char *data = LoadFileData(fileName, &dataSize);
+        //unsigned char *data = RaylibLoadFileData(fileName, &dataSize);
 
         FILE *raeFile = fopen(fileName, "rb");
         unsigned char fileId[4] = { 0 };
@@ -2530,15 +2530,15 @@ AutomationEventList LoadAutomationEventList(const char *fileName)
         if ((fileId[0] == 'r') && (fileId[1] == 'A') && (fileId[2] == 'E') && (fileId[1] == ' '))
         {
             fread(&eventCount, sizeof(int), 1, raeFile);
-            TRACELOG(LOG_WARNING, "Events loaded: %i\n", eventCount);
-            fread(events, sizeof(AutomationEvent), eventCount, raeFile);
+            RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "Events loaded: %i\n", eventCount);
+            fread(events, sizeof(RaylibAutomationEvent), eventCount, raeFile);
         }
 
         fclose(raeFile);
         */
 
         // Load events file (text)
-        //unsigned char *buffer = LoadFileText(fileName);
+        //unsigned char *buffer = RaylibLoadFileText(fileName);
         FILE *raeFile = fopen(fileName, "rt");
 
         if (raeFile != NULL)
@@ -2569,48 +2569,48 @@ AutomationEventList LoadAutomationEventList(const char *fileName)
 
             if (counter != list.count)
             {
-                TRACELOG(LOG_WARNING, "AUTOMATION: Events read from file [%i] do not mach event count specified [%i]", counter, list.count);
+                RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "AUTOMATION: Events read from file [%i] do not mach event count specified [%i]", counter, list.count);
                 list.count = counter;
             }
 
             fclose(raeFile);
 
-            TRACELOG(LOG_INFO, "AUTOMATION: Events file loaded successfully");
+            RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "AUTOMATION: Events file loaded successfully");
         }
 
-        TRACELOG(LOG_INFO, "AUTOMATION: Events loaded from file: %i", list.count);
+        RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "AUTOMATION: Events loaded from file: %i", list.count);
     }
 #endif
     return list;
 }
 
 // Unload automation events list from file
-void UnloadAutomationEventList(AutomationEventList list)
+void RaylibUnloadAutomationEventList(RaylibAutomationEventList list)
 {
-#if defined(SUPPORT_AUTOMATION_EVENTS)
+#if defined(RAYLIB_SUPPORT_AUTOMATION_EVENTS)
     RL_FREE(list.events);
 #endif
 }
 
 // Export automation events list as text file
-bool ExportAutomationEventList(AutomationEventList list, const char *fileName)
+bool RaylibExportAutomationEventList(RaylibAutomationEventList list, const char *fileName)
 {
     bool success = false;
 
-#if defined(SUPPORT_AUTOMATION_EVENTS)
+#if defined(RAYLIB_SUPPORT_AUTOMATION_EVENTS)
     // Export events as binary file
-    // TODO: Save to memory buffer and SaveFileData()
+    // TODO: Save to memory buffer and RaylibSaveFileData()
     /*
     unsigned char fileId[4] = "rAE ";
     FILE *raeFile = fopen(fileName, "wb");
     fwrite(fileId, sizeof(unsigned char), 4, raeFile);
     fwrite(&eventCount, sizeof(int), 1, raeFile);
-    fwrite(events, sizeof(AutomationEvent), eventCount, raeFile);
+    fwrite(events, sizeof(RaylibAutomationEvent), eventCount, raeFile);
     fclose(raeFile);
     */
 
     // Export events as text
-    // TODO: Save to memory buffer and SaveFileText()
+    // TODO: Save to memory buffer and RaylibSaveFileText()
     char *txtData = (char *)RL_CALLOC(256*list.count + 2048, sizeof(char)); // 256 characters per line plus some header
 
     int byteCount = 0;
@@ -2635,7 +2635,7 @@ bool ExportAutomationEventList(AutomationEventList list, const char *fileName)
     }
 
     // NOTE: Text data size exported is determined by '\0' (NULL) character
-    success = SaveFileText(fileName, txtData);
+    success = RaylibSaveFileText(fileName, txtData);
 
     RL_FREE(txtData);
 #endif
@@ -2644,40 +2644,40 @@ bool ExportAutomationEventList(AutomationEventList list, const char *fileName)
 }
 
 // Setup automation event list to record to
-void SetAutomationEventList(AutomationEventList *list)
+void RaylibSetAutomationEventList(RaylibAutomationEventList *list)
 {
-#if defined(SUPPORT_AUTOMATION_EVENTS)
+#if defined(RAYLIB_SUPPORT_AUTOMATION_EVENTS)
     currentEventList = list;
 #endif
 }
 
 // Set automation event internal base frame to start recording
-void SetAutomationEventBaseFrame(int frame)
+void RaylibSetAutomationEventBaseFrame(int frame)
 {
     CORE.Time.frameCounter = frame;
 }
 
-// Start recording automation events (AutomationEventList must be set)
-void StartAutomationEventRecording(void)
+// Start recording automation events (RaylibAutomationEventList must be set)
+void RaylibStartAutomationEventRecording(void)
 {
-#if defined(SUPPORT_AUTOMATION_EVENTS)
+#if defined(RAYLIB_SUPPORT_AUTOMATION_EVENTS)
     automationEventRecording = true;
 #endif
 }
 
 // Stop recording automation events
-void StopAutomationEventRecording(void)
+void RaylibStopAutomationEventRecording(void)
 {
-#if defined(SUPPORT_AUTOMATION_EVENTS)
+#if defined(RAYLIB_SUPPORT_AUTOMATION_EVENTS)
     automationEventRecording = false;
 #endif
 }
 
 // Play a recorded automation event
-void PlayAutomationEvent(AutomationEvent event)
+void RaylibPlayAutomationEvent(RaylibAutomationEvent event)
 {
-#if defined(SUPPORT_AUTOMATION_EVENTS)
-    // WARNING: When should event be played? After/before/replace PollInputEvents()? -> Up to the user!
+#if defined(RAYLIB_SUPPORT_AUTOMATION_EVENTS)
+    // WARNING: When should event be played? After/before/replace RaylibPollInputEvents()? -> Up to the user!
 
     if (!automationEventRecording)      // TODO: Allow recording events while playing?
     {
@@ -2690,7 +2690,7 @@ void PlayAutomationEvent(AutomationEvent event)
 
                 if (CORE.Input.Keyboard.previousKeyState[event.params[0]] == false)
                 {
-                    if (CORE.Input.Keyboard.keyPressedQueueCount < MAX_KEY_PRESSED_QUEUE)
+                    if (CORE.Input.Keyboard.keyPressedQueueCount < RAYLIB_MAX_KEY_PRESSED_QUEUE)
                     {
                         // Add character to the queue
                         CORE.Input.Keyboard.keyPressedQueue[CORE.Input.Keyboard.keyPressedQueueCount] = event.params[0];
@@ -2725,24 +2725,24 @@ void PlayAutomationEvent(AutomationEvent event)
             {
                 CORE.Input.Gamepad.axisState[event.params[0]][event.params[1]] = ((float)event.params[2]/32768.0f);
             } break;
-    #if defined(SUPPORT_GESTURES_SYSTEM)
-            case INPUT_GESTURE: GESTURES.current = event.params[0]; break;     // param[0]: gesture (enum Gesture) -> rgestures.h: GESTURES.current
+    #if defined(RAYLIB_SUPPORT_GESTURES_SYSTEM)
+            case INPUT_GESTURE: GESTURES.current = event.params[0]; break;     // param[0]: gesture (enum RaylibGesture) -> rgestures.h: GESTURES.current
     #endif
             // Window event
             case WINDOW_CLOSE: CORE.Window.shouldClose = true; break;
-            case WINDOW_MAXIMIZE: MaximizeWindow(); break;
-            case WINDOW_MINIMIZE: MinimizeWindow(); break;
-            case WINDOW_RESIZE: SetWindowSize(event.params[0], event.params[1]); break;
+            case WINDOW_MAXIMIZE: RaylibMaximizeWindow(); break;
+            case WINDOW_MINIMIZE: RaylibMinimizeWindow(); break;
+            case WINDOW_RESIZE: RaylibSetWindowSize(event.params[0], event.params[1]); break;
 
             // Custom event
-    #if defined(SUPPORT_SCREEN_CAPTURE)
+    #if defined(RAYLIB_SUPPORT_SCREEN_CAPTURE)
             case ACTION_TAKE_SCREENSHOT:
             {
-                TakeScreenshot(TextFormat("screenshot%03i.png", screenshotCounter));
+                RaylibTakeScreenshot(RaylibTextFormat("screenshot%03i.png", screenshotCounter));
                 screenshotCounter++;
             } break;
     #endif
-            case ACTION_SETTARGETFPS: SetTargetFPS(event.params[0]); break;
+            case ACTION_SETTARGETFPS: RaylibSetTargetFPS(event.params[0]); break;
             default: break;
         }
     }
@@ -2754,12 +2754,12 @@ void PlayAutomationEvent(AutomationEvent event)
 //----------------------------------------------------------------------------------
 
 // Check if a key has been pressed once
-bool IsKeyPressed(int key)
+bool RaylibIsKeyPressed(int key)
 {
 
     bool pressed = false;
 
-    if ((key > 0) && (key < MAX_KEYBOARD_KEYS))
+    if ((key > 0) && (key < RAYLIB_MAX_KEYBOARD_KEYS))
     {
         if ((CORE.Input.Keyboard.previousKeyState[key] == 0) && (CORE.Input.Keyboard.currentKeyState[key] == 1)) pressed = true;
     }
@@ -2768,11 +2768,11 @@ bool IsKeyPressed(int key)
 }
 
 // Check if a key has been pressed again
-bool IsKeyPressedRepeat(int key)
+bool RaylibIsKeyPressedRepeat(int key)
 {
     bool repeat = false;
 
-    if ((key > 0) && (key < MAX_KEYBOARD_KEYS))
+    if ((key > 0) && (key < RAYLIB_MAX_KEYBOARD_KEYS))
     {
         if (CORE.Input.Keyboard.keyRepeatInFrame[key] == 1) repeat = true;
     }
@@ -2781,11 +2781,11 @@ bool IsKeyPressedRepeat(int key)
 }
 
 // Check if a key is being pressed (key held down)
-bool IsKeyDown(int key)
+bool RaylibIsKeyDown(int key)
 {
     bool down = false;
 
-    if ((key > 0) && (key < MAX_KEYBOARD_KEYS))
+    if ((key > 0) && (key < RAYLIB_MAX_KEYBOARD_KEYS))
     {
         if (CORE.Input.Keyboard.currentKeyState[key] == 1) down = true;
     }
@@ -2794,11 +2794,11 @@ bool IsKeyDown(int key)
 }
 
 // Check if a key has been released once
-bool IsKeyReleased(int key)
+bool RaylibIsKeyReleased(int key)
 {
     bool released = false;
 
-    if ((key > 0) && (key < MAX_KEYBOARD_KEYS))
+    if ((key > 0) && (key < RAYLIB_MAX_KEYBOARD_KEYS))
     {
         if ((CORE.Input.Keyboard.previousKeyState[key] == 1) && (CORE.Input.Keyboard.currentKeyState[key] == 0)) released = true;
     }
@@ -2807,11 +2807,11 @@ bool IsKeyReleased(int key)
 }
 
 // Check if a key is NOT being pressed (key not held down)
-bool IsKeyUp(int key)
+bool RaylibIsKeyUp(int key)
 {
     bool up = false;
 
-    if ((key > 0) && (key < MAX_KEYBOARD_KEYS))
+    if ((key > 0) && (key < RAYLIB_MAX_KEYBOARD_KEYS))
     {
         if (CORE.Input.Keyboard.currentKeyState[key] == 0) up = true;
     }
@@ -2820,7 +2820,7 @@ bool IsKeyUp(int key)
 }
 
 // Get the last key pressed
-int GetKeyPressed(void)
+int RaylibGetKeyPressed(void)
 {
     int value = 0;
 
@@ -2842,7 +2842,7 @@ int GetKeyPressed(void)
 }
 
 // Get the last char pressed
-int GetCharPressed(void)
+int RaylibGetCharPressed(void)
 {
     int value = 0;
 
@@ -2865,7 +2865,7 @@ int GetCharPressed(void)
 
 // Set a custom key to exit program
 // NOTE: default exitKey is set to ESCAPE
-void SetExitKey(int key)
+void RaylibSetExitKey(int key)
 {
     CORE.Input.Keyboard.exitKey = key;
 }
@@ -2875,86 +2875,86 @@ void SetExitKey(int key)
 //----------------------------------------------------------------------------------
 
 // NOTE: Functions with a platform-specific implementation on rcore_<platform>.c
-//int SetGamepadMappings(const char *mappings)
+//int RaylibSetGamepadMappings(const char *mappings)
 
 // Check if a gamepad is available
-bool IsGamepadAvailable(int gamepad)
+bool RaylibIsGamepadAvailable(int gamepad)
 {
     bool result = false;
 
-    if ((gamepad < MAX_GAMEPADS) && CORE.Input.Gamepad.ready[gamepad]) result = true;
+    if ((gamepad < RAYLIB_MAX_GAMEPADS) && CORE.Input.Gamepad.ready[gamepad]) result = true;
 
     return result;
 }
 
 // Get gamepad internal name id
-const char *GetGamepadName(int gamepad)
+const char *RaylibGetGamepadName(int gamepad)
 {
     return CORE.Input.Gamepad.name[gamepad];
 }
 
 // Check if a gamepad button has been pressed once
-bool IsGamepadButtonPressed(int gamepad, int button)
+bool RaylibIsGamepadButtonPressed(int gamepad, int button)
 {
     bool pressed = false;
 
-    if ((gamepad < MAX_GAMEPADS) && CORE.Input.Gamepad.ready[gamepad] && (button < MAX_GAMEPAD_BUTTONS) &&
+    if ((gamepad < RAYLIB_MAX_GAMEPADS) && CORE.Input.Gamepad.ready[gamepad] && (button < RAYLIB_MAX_GAMEPAD_BUTTONS) &&
         (CORE.Input.Gamepad.previousButtonState[gamepad][button] == 0) && (CORE.Input.Gamepad.currentButtonState[gamepad][button] == 1)) pressed = true;
 
     return pressed;
 }
 
 // Check if a gamepad button is being pressed
-bool IsGamepadButtonDown(int gamepad, int button)
+bool RaylibIsGamepadButtonDown(int gamepad, int button)
 {
     bool down = false;
 
-    if ((gamepad < MAX_GAMEPADS) && CORE.Input.Gamepad.ready[gamepad] && (button < MAX_GAMEPAD_BUTTONS) &&
+    if ((gamepad < RAYLIB_MAX_GAMEPADS) && CORE.Input.Gamepad.ready[gamepad] && (button < RAYLIB_MAX_GAMEPAD_BUTTONS) &&
         (CORE.Input.Gamepad.currentButtonState[gamepad][button] == 1)) down = true;
 
     return down;
 }
 
 // Check if a gamepad button has NOT been pressed once
-bool IsGamepadButtonReleased(int gamepad, int button)
+bool RaylibIsGamepadButtonReleased(int gamepad, int button)
 {
     bool released = false;
 
-    if ((gamepad < MAX_GAMEPADS) && CORE.Input.Gamepad.ready[gamepad] && (button < MAX_GAMEPAD_BUTTONS) &&
+    if ((gamepad < RAYLIB_MAX_GAMEPADS) && CORE.Input.Gamepad.ready[gamepad] && (button < RAYLIB_MAX_GAMEPAD_BUTTONS) &&
         (CORE.Input.Gamepad.previousButtonState[gamepad][button] == 1) && (CORE.Input.Gamepad.currentButtonState[gamepad][button] == 0)) released = true;
 
     return released;
 }
 
 // Check if a gamepad button is NOT being pressed
-bool IsGamepadButtonUp(int gamepad, int button)
+bool RaylibIsGamepadButtonUp(int gamepad, int button)
 {
     bool up = false;
 
-    if ((gamepad < MAX_GAMEPADS) && CORE.Input.Gamepad.ready[gamepad] && (button < MAX_GAMEPAD_BUTTONS) &&
+    if ((gamepad < RAYLIB_MAX_GAMEPADS) && CORE.Input.Gamepad.ready[gamepad] && (button < RAYLIB_MAX_GAMEPAD_BUTTONS) &&
         (CORE.Input.Gamepad.currentButtonState[gamepad][button] == 0)) up = true;
 
     return up;
 }
 
 // Get the last gamepad button pressed
-int GetGamepadButtonPressed(void)
+int RaylibGetGamepadButtonPressed(void)
 {
     return CORE.Input.Gamepad.lastButtonPressed;
 }
 
 // Get gamepad axis count
-int GetGamepadAxisCount(int gamepad)
+int RaylibGetGamepadAxisCount(int gamepad)
 {
     return CORE.Input.Gamepad.axisCount[gamepad];
 }
 
 // Get axis movement vector for a gamepad
-float GetGamepadAxisMovement(int gamepad, int axis)
+float RaylibGetGamepadAxisMovement(int gamepad, int axis)
 {
     float value = 0;
 
-    if ((gamepad < MAX_GAMEPADS) && CORE.Input.Gamepad.ready[gamepad] && (axis < MAX_GAMEPAD_AXIS) &&
+    if ((gamepad < RAYLIB_MAX_GAMEPADS) && CORE.Input.Gamepad.ready[gamepad] && (axis < RAYLIB_MAX_GAMEPAD_AXIS) &&
         (fabsf(CORE.Input.Gamepad.axisState[gamepad][axis]) > 0.1f)) value = CORE.Input.Gamepad.axisState[gamepad][axis];      // 0.1f = GAMEPAD_AXIS_MINIMUM_DRIFT/DELTA
 
     return value;
@@ -2965,11 +2965,11 @@ float GetGamepadAxisMovement(int gamepad, int axis)
 //----------------------------------------------------------------------------------
 
 // NOTE: Functions with a platform-specific implementation on rcore_<platform>.c
-//void SetMousePosition(int x, int y)
-//void SetMouseCursor(int cursor)
+//void RaylibSetMousePosition(int x, int y)
+//void RaylibSetMouseCursor(int cursor)
 
 // Check if a mouse button has been pressed once
-bool IsMouseButtonPressed(int button)
+bool RaylibIsMouseButtonPressed(int button)
 {
     bool pressed = false;
 
@@ -2982,7 +2982,7 @@ bool IsMouseButtonPressed(int button)
 }
 
 // Check if a mouse button is being pressed
-bool IsMouseButtonDown(int button)
+bool RaylibIsMouseButtonDown(int button)
 {
     bool down = false;
 
@@ -2995,7 +2995,7 @@ bool IsMouseButtonDown(int button)
 }
 
 // Check if a mouse button has been released once
-bool IsMouseButtonReleased(int button)
+bool RaylibIsMouseButtonReleased(int button)
 {
     bool released = false;
 
@@ -3008,7 +3008,7 @@ bool IsMouseButtonReleased(int button)
 }
 
 // Check if a mouse button is NOT being pressed
-bool IsMouseButtonUp(int button)
+bool RaylibIsMouseButtonUp(int button)
 {
     bool up = false;
 
@@ -3021,23 +3021,23 @@ bool IsMouseButtonUp(int button)
 }
 
 // Get mouse position X
-int GetMouseX(void)
+int RaylibGetMouseX(void)
 {
     int mouseX = (int)((CORE.Input.Mouse.currentPosition.x + CORE.Input.Mouse.offset.x)*CORE.Input.Mouse.scale.x);
     return mouseX;
 }
 
 // Get mouse position Y
-int GetMouseY(void)
+int RaylibGetMouseY(void)
 {
     int mouseY = (int)((CORE.Input.Mouse.currentPosition.y + CORE.Input.Mouse.offset.y)*CORE.Input.Mouse.scale.y);
     return mouseY;
 }
 
 // Get mouse position XY
-Vector2 GetMousePosition(void)
+RaylibVector2 RaylibGetMousePosition(void)
 {
-    Vector2 position = { 0 };
+    RaylibVector2 position = { 0 };
 
     position.x = (CORE.Input.Mouse.currentPosition.x + CORE.Input.Mouse.offset.x)*CORE.Input.Mouse.scale.x;
     position.y = (CORE.Input.Mouse.currentPosition.y + CORE.Input.Mouse.offset.y)*CORE.Input.Mouse.scale.y;
@@ -3046,9 +3046,9 @@ Vector2 GetMousePosition(void)
 }
 
 // Get mouse delta between frames
-Vector2 GetMouseDelta(void)
+RaylibVector2 RaylibGetMouseDelta(void)
 {
-    Vector2 delta = { 0 };
+    RaylibVector2 delta = { 0 };
 
     delta.x = CORE.Input.Mouse.currentPosition.x - CORE.Input.Mouse.previousPosition.x;
     delta.y = CORE.Input.Mouse.currentPosition.y - CORE.Input.Mouse.previousPosition.y;
@@ -3058,20 +3058,20 @@ Vector2 GetMouseDelta(void)
 
 // Set mouse offset
 // NOTE: Useful when rendering to different size targets
-void SetMouseOffset(int offsetX, int offsetY)
+void RaylibSetMouseOffset(int offsetX, int offsetY)
 {
-    CORE.Input.Mouse.offset = (Vector2){ (float)offsetX, (float)offsetY };
+    CORE.Input.Mouse.offset = (RaylibVector2){ (float)offsetX, (float)offsetY };
 }
 
 // Set mouse scaling
 // NOTE: Useful when rendering to different size targets
-void SetMouseScale(float scaleX, float scaleY)
+void RaylibSetMouseScale(float scaleX, float scaleY)
 {
-    CORE.Input.Mouse.scale = (Vector2){ scaleX, scaleY };
+    CORE.Input.Mouse.scale = (RaylibVector2){ scaleX, scaleY };
 }
 
 // Get mouse wheel movement Y
-float GetMouseWheelMove(void)
+float RaylibGetMouseWheelMove(void)
 {
     float result = 0.0f;
 
@@ -3082,9 +3082,9 @@ float GetMouseWheelMove(void)
 }
 
 // Get mouse wheel movement X/Y as a vector
-Vector2 GetMouseWheelMoveV(void)
+RaylibVector2 RaylibGetMouseWheelMoveV(void)
 {
-    Vector2 result = { 0 };
+    RaylibVector2 result = { 0 };
 
     result = CORE.Input.Mouse.currentWheelMove;
 
@@ -3096,14 +3096,14 @@ Vector2 GetMouseWheelMoveV(void)
 //----------------------------------------------------------------------------------
 
 // Get touch position X for touch point 0 (relative to screen size)
-int GetTouchX(void)
+int RaylibGetTouchX(void)
 {
     int touchX = (int)CORE.Input.Touch.position[0].x;
     return touchX;
 }
 
 // Get touch position Y for touch point 0 (relative to screen size)
-int GetTouchY(void)
+int RaylibGetTouchY(void)
 {
     int touchY = (int)CORE.Input.Touch.position[0].y;
     return touchY;
@@ -3111,28 +3111,28 @@ int GetTouchY(void)
 
 // Get touch position XY for a touch point index (relative to screen size)
 // TODO: Touch position should be scaled depending on display size and render size
-Vector2 GetTouchPosition(int index)
+RaylibVector2 RaylibGetTouchPosition(int index)
 {
-    Vector2 position = { -1.0f, -1.0f };
+    RaylibVector2 position = { -1.0f, -1.0f };
 
-    if (index < MAX_TOUCH_POINTS) position = CORE.Input.Touch.position[index];
-    else TRACELOG(LOG_WARNING, "INPUT: Required touch point out of range (Max touch points: %i)", MAX_TOUCH_POINTS);
+    if (index < RAYLIB_MAX_TOUCH_POINTS) position = CORE.Input.Touch.position[index];
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "INPUT: Required touch point out of range (Max touch points: %i)", RAYLIB_MAX_TOUCH_POINTS);
 
     return position;
 }
 
 // Get touch point identifier for given index
-int GetTouchPointId(int index)
+int RaylibGetTouchPointId(int index)
 {
     int id = -1;
 
-    if (index < MAX_TOUCH_POINTS) id = CORE.Input.Touch.pointId[index];
+    if (index < RAYLIB_MAX_TOUCH_POINTS) id = CORE.Input.Touch.pointId[index];
 
     return id;
 }
 
 // Get number of touch points
-int GetTouchPointCount(void)
+int RaylibGetTouchPointCount(void)
 {
     return CORE.Input.Touch.pointCount;
 }
@@ -3152,7 +3152,7 @@ void InitTimer(void)
     // However, it can also reduce overall system performance, because the thread scheduler switches tasks more often
     // High resolutions can also prevent the CPU power management system from entering power-saving modes
     // Setting a higher resolution does not improve the accuracy of the high-resolution performance counter
-#if defined(_WIN32) && defined(SUPPORT_WINMM_HIGHRES_TIMER) && !defined(SUPPORT_BUSY_WAIT_LOOP) && !defined(PLATFORM_DESKTOP_SDL)
+#if defined(_WIN32) && defined(RAYLIB_SUPPORT_WINMM_HIGHRES_TIMER) && !defined(RAYLIB_SUPPORT_BUSY_WAIT_LOOP) && !defined(PLATFORM_DESKTOP_SDL)
     timeBeginPeriod(1);                 // Setup high-resolution timer to 1ms (granularity of 1-2 ms)
 #endif
 
@@ -3163,10 +3163,10 @@ void InitTimer(void)
     {
         CORE.Time.base = (unsigned long long int)now.tv_sec*1000000000LLU + (unsigned long long int)now.tv_nsec;
     }
-    else TRACELOG(LOG_WARNING, "TIMER: Hi-resolution timer not available");
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "TIMER: Hi-resolution timer not available");
 #endif
 
-    CORE.Time.previous = GetTime();     // Get time as double
+    CORE.Time.previous = RaylibGetTime();     // Get time as double
 }
 
 // Set viewport for a provided width and height
@@ -3179,7 +3179,7 @@ void SetupViewport(int width, int height)
     // NOTE: We consider render size (scaled) and offset in case black bars are required and
     // render area does not match full display area (this situation is only applicable on fullscreen mode)
 #if defined(__APPLE__)
-    Vector2 scale = GetWindowScaleDPI();
+    RaylibVector2 scale = RaylibGetWindowScaleDPI();
     rlViewport(CORE.Window.renderOffset.x/2*scale.x, CORE.Window.renderOffset.y/2*scale.y, (CORE.Window.render.width)*scale.x, (CORE.Window.render.height)*scale.y);
 #else
     rlViewport(CORE.Window.renderOffset.x/2, CORE.Window.renderOffset.y/2, CORE.Window.render.width, CORE.Window.render.height);
@@ -3203,7 +3203,7 @@ void SetupFramebuffer(int width, int height)
     // Calculate CORE.Window.render.width and CORE.Window.render.height, we have the display size (input params) and the desired screen size (global var)
     if ((CORE.Window.screen.width > CORE.Window.display.width) || (CORE.Window.screen.height > CORE.Window.display.height))
     {
-        TRACELOG(LOG_WARNING, "DISPLAY: Downscaling required: Screen size (%ix%i) is bigger than display size (%ix%i)", CORE.Window.screen.width, CORE.Window.screen.height, CORE.Window.display.width, CORE.Window.display.height);
+        RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "DISPLAY: Downscaling required: Screen size (%ix%i) is bigger than display size (%ix%i)", CORE.Window.screen.width, CORE.Window.screen.height, CORE.Window.display.width, CORE.Window.display.height);
 
         // Downscaling to fit display with border-bars
         float widthRatio = (float)CORE.Window.display.width/(float)CORE.Window.screen.width;
@@ -3226,19 +3226,19 @@ void SetupFramebuffer(int width, int height)
 
         // Screen scaling required
         float scaleRatio = (float)CORE.Window.render.width/(float)CORE.Window.screen.width;
-        CORE.Window.screenScale = MatrixScale(scaleRatio, scaleRatio, 1.0f);
+        CORE.Window.screenScale = RaylibMatrixScale(scaleRatio, scaleRatio, 1.0f);
 
         // NOTE: We render to full display resolution!
         // We just need to calculate above parameters for downscale matrix and offsets
         CORE.Window.render.width = CORE.Window.display.width;
         CORE.Window.render.height = CORE.Window.display.height;
 
-        TRACELOG(LOG_WARNING, "DISPLAY: Downscale matrix generated, content will be rendered at (%ix%i)", CORE.Window.render.width, CORE.Window.render.height);
+        RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "DISPLAY: Downscale matrix generated, content will be rendered at (%ix%i)", CORE.Window.render.width, CORE.Window.render.height);
     }
     else if ((CORE.Window.screen.width < CORE.Window.display.width) || (CORE.Window.screen.height < CORE.Window.display.height))
     {
         // Required screen size is smaller than display size
-        TRACELOG(LOG_INFO, "DISPLAY: Upscaling required: Screen size (%ix%i) smaller than display size (%ix%i)", CORE.Window.screen.width, CORE.Window.screen.height, CORE.Window.display.width, CORE.Window.display.height);
+        RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "DISPLAY: Upscaling required: Screen size (%ix%i) smaller than display size (%ix%i)", CORE.Window.screen.width, CORE.Window.screen.height, CORE.Window.display.width, CORE.Window.display.height);
 
         if ((CORE.Window.screen.width == 0) || (CORE.Window.screen.height == 0))
         {
@@ -3277,10 +3277,10 @@ void SetupFramebuffer(int width, int height)
 // Scan all files and directories in a base path
 // WARNING: files.paths[] must be previously allocated and
 // contain enough space to store all required paths
-static void ScanDirectoryFiles(const char *basePath, FilePathList *files, const char *filter)
+static void ScanDirectoryFiles(const char *basePath, RaylibFilePathList *files, const char *filter)
 {
-    static char path[MAX_FILEPATH_LENGTH] = { 0 };
-    memset(path, 0, MAX_FILEPATH_LENGTH);
+    static char path[RAYLIB_MAX_FILEPATH_LENGTH] = { 0 };
+    memset(path, 0, RAYLIB_MAX_FILEPATH_LENGTH);
 
     struct dirent *dp = NULL;
     DIR *dir = opendir(basePath);
@@ -3300,7 +3300,7 @@ static void ScanDirectoryFiles(const char *basePath, FilePathList *files, const 
 
                 if (filter != NULL)
                 {
-                    if (IsFileExtension(path, filter))
+                    if (RaylibIsFileExtension(path, filter))
                     {
                         strcpy(files->paths[files->count], path);
                         files->count++;
@@ -3316,14 +3316,14 @@ static void ScanDirectoryFiles(const char *basePath, FilePathList *files, const 
 
         closedir(dir);
     }
-    else TRACELOG(LOG_WARNING, "FILEIO: Directory cannot be opened (%s)", basePath);
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: Directory cannot be opened (%s)", basePath);
 }
 
 // Scan all files and directories recursively from a base path
-static void ScanDirectoryFilesRecursively(const char *basePath, FilePathList *files, const char *filter)
+static void ScanDirectoryFilesRecursively(const char *basePath, RaylibFilePathList *files, const char *filter)
 {
-    char path[MAX_FILEPATH_LENGTH] = { 0 };
-    memset(path, 0, MAX_FILEPATH_LENGTH);
+    char path[RAYLIB_MAX_FILEPATH_LENGTH] = { 0 };
+    memset(path, 0, RAYLIB_MAX_FILEPATH_LENGTH);
 
     struct dirent *dp = NULL;
     DIR *dir = opendir(basePath);
@@ -3341,11 +3341,11 @@ static void ScanDirectoryFilesRecursively(const char *basePath, FilePathList *fi
                 sprintf(path, "%s/%s", basePath, dp->d_name);
             #endif
 
-                if (IsPathFile(path))
+                if (RaylibIsPathFile(path))
                 {
                     if (filter != NULL)
                     {
-                        if (IsFileExtension(path, filter))
+                        if (RaylibIsFileExtension(path, filter))
                         {
                             strcpy(files->paths[files->count], path);
                             files->count++;
@@ -3359,7 +3359,7 @@ static void ScanDirectoryFilesRecursively(const char *basePath, FilePathList *fi
 
                     if (files->count >= files->capacity)
                     {
-                        TRACELOG(LOG_WARNING, "FILEIO: Maximum filepath scan capacity reached (%i files)", files->capacity);
+                        RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: Maximum filepath scan capacity reached (%i files)", files->capacity);
                         break;
                     }
                 }
@@ -3369,12 +3369,12 @@ static void ScanDirectoryFilesRecursively(const char *basePath, FilePathList *fi
 
         closedir(dir);
     }
-    else TRACELOG(LOG_WARNING, "FILEIO: Directory cannot be opened (%s)", basePath);
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: Directory cannot be opened (%s)", basePath);
 }
 
-#if defined(SUPPORT_AUTOMATION_EVENTS)
+#if defined(RAYLIB_SUPPORT_AUTOMATION_EVENTS)
 // Automation event recording
-// NOTE: Recording is by default done at EndDrawing(), before PollInputEvents()
+// NOTE: Recording is by default done at RaylibEndDrawing(), before RaylibPollInputEvents()
 static void RecordAutomationEvent(void)
 {
     // Checking events in current frame and save them into currentEventList
@@ -3384,7 +3384,7 @@ static void RecordAutomationEvent(void)
 
     // Keyboard input events recording
     //-------------------------------------------------------------------------------------
-    for (int key = 0; key < MAX_KEYBOARD_KEYS; key++)
+    for (int key = 0; key < RAYLIB_MAX_KEYBOARD_KEYS; key++)
     {
         // Event type: INPUT_KEY_UP (only saved once)
         if (CORE.Input.Keyboard.previousKeyState[key] && !CORE.Input.Keyboard.currentKeyState[key])
@@ -3395,7 +3395,7 @@ static void RecordAutomationEvent(void)
             currentEventList->events[currentEventList->count].params[1] = 0;
             currentEventList->events[currentEventList->count].params[2] = 0;
 
-            TRACELOG(LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_KEY_UP | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
+            RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_KEY_UP | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
             currentEventList->count++;
         }
 
@@ -3410,7 +3410,7 @@ static void RecordAutomationEvent(void)
             currentEventList->events[currentEventList->count].params[1] = 0;
             currentEventList->events[currentEventList->count].params[2] = 0;
 
-            TRACELOG(LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_KEY_DOWN | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
+            RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_KEY_DOWN | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
             currentEventList->count++;
         }
 
@@ -3420,7 +3420,7 @@ static void RecordAutomationEvent(void)
 
     // Mouse input currentEventList->events recording
     //-------------------------------------------------------------------------------------
-    for (int button = 0; button < MAX_MOUSE_BUTTONS; button++)
+    for (int button = 0; button < RAYLIB_MAX_MOUSE_BUTTONS; button++)
     {
         // Event type: INPUT_MOUSE_BUTTON_UP
         if (CORE.Input.Mouse.previousButtonState[button] && !CORE.Input.Mouse.currentButtonState[button])
@@ -3431,7 +3431,7 @@ static void RecordAutomationEvent(void)
             currentEventList->events[currentEventList->count].params[1] = 0;
             currentEventList->events[currentEventList->count].params[2] = 0;
 
-            TRACELOG(LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_MOUSE_BUTTON_UP | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
+            RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_MOUSE_BUTTON_UP | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
             currentEventList->count++;
         }
 
@@ -3446,7 +3446,7 @@ static void RecordAutomationEvent(void)
             currentEventList->events[currentEventList->count].params[1] = 0;
             currentEventList->events[currentEventList->count].params[2] = 0;
 
-            TRACELOG(LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_MOUSE_BUTTON_DOWN | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
+            RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_MOUSE_BUTTON_DOWN | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
             currentEventList->count++;
         }
 
@@ -3463,7 +3463,7 @@ static void RecordAutomationEvent(void)
         currentEventList->events[currentEventList->count].params[1] = (int)CORE.Input.Mouse.currentPosition.y;
         currentEventList->events[currentEventList->count].params[2] = 0;
 
-        TRACELOG(LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_MOUSE_POSITION | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
+        RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_MOUSE_POSITION | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
         currentEventList->count++;
 
         if (currentEventList->count == currentEventList->capacity) return;    // Security check
@@ -3479,7 +3479,7 @@ static void RecordAutomationEvent(void)
         currentEventList->events[currentEventList->count].params[1] = (int)CORE.Input.Mouse.currentWheelMove.y;;
         currentEventList->events[currentEventList->count].params[2] = 0;
 
-        TRACELOG(LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_MOUSE_WHEEL_MOTION | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
+        RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_MOUSE_WHEEL_MOTION | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
         currentEventList->count++;
 
         if (currentEventList->count == currentEventList->capacity) return;    // Security check
@@ -3488,7 +3488,7 @@ static void RecordAutomationEvent(void)
 
     // Touch input currentEventList->events recording
     //-------------------------------------------------------------------------------------
-    for (int id = 0; id < MAX_TOUCH_POINTS; id++)
+    for (int id = 0; id < RAYLIB_MAX_TOUCH_POINTS; id++)
     {
         // Event type: INPUT_TOUCH_UP
         if (CORE.Input.Touch.previousTouchState[id] && !CORE.Input.Touch.currentTouchState[id])
@@ -3499,7 +3499,7 @@ static void RecordAutomationEvent(void)
             currentEventList->events[currentEventList->count].params[1] = 0;
             currentEventList->events[currentEventList->count].params[2] = 0;
 
-            TRACELOG(LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_TOUCH_UP | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
+            RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_TOUCH_UP | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
             currentEventList->count++;
         }
 
@@ -3514,7 +3514,7 @@ static void RecordAutomationEvent(void)
             currentEventList->events[currentEventList->count].params[1] = 0;
             currentEventList->events[currentEventList->count].params[2] = 0;
 
-            TRACELOG(LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_TOUCH_DOWN | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
+            RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_TOUCH_DOWN | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
             currentEventList->count++;
         }
 
@@ -3532,7 +3532,7 @@ static void RecordAutomationEvent(void)
             currentEventList->events[currentEventList->count].params[1] = (int)CORE.Input.Touch.currentPosition[id].x;
             currentEventList->events[currentEventList->count].params[2] = (int)CORE.Input.Touch.currentPosition[id].y;
 
-            TRACELOG(LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_TOUCH_POSITION | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
+            RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_TOUCH_POSITION | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
             currentEventList->count++;
         }
         */
@@ -3543,7 +3543,7 @@ static void RecordAutomationEvent(void)
 
     // Gamepad input currentEventList->events recording
     //-------------------------------------------------------------------------------------
-    for (int gamepad = 0; gamepad < MAX_GAMEPADS; gamepad++)
+    for (int gamepad = 0; gamepad < RAYLIB_MAX_GAMEPADS; gamepad++)
     {
         // Event type: INPUT_GAMEPAD_CONNECT
         /*
@@ -3563,7 +3563,7 @@ static void RecordAutomationEvent(void)
         }
         */
 
-        for (int button = 0; button < MAX_GAMEPAD_BUTTONS; button++)
+        for (int button = 0; button < RAYLIB_MAX_GAMEPAD_BUTTONS; button++)
         {
             // Event type: INPUT_GAMEPAD_BUTTON_UP
             if (CORE.Input.Gamepad.previousButtonState[gamepad][button] && !CORE.Input.Gamepad.currentButtonState[gamepad][button])
@@ -3574,7 +3574,7 @@ static void RecordAutomationEvent(void)
                 currentEventList->events[currentEventList->count].params[1] = button;
                 currentEventList->events[currentEventList->count].params[2] = 0;
 
-                TRACELOG(LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_GAMEPAD_BUTTON_UP | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
+                RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_GAMEPAD_BUTTON_UP | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
                 currentEventList->count++;
             }
 
@@ -3589,14 +3589,14 @@ static void RecordAutomationEvent(void)
                 currentEventList->events[currentEventList->count].params[1] = button;
                 currentEventList->events[currentEventList->count].params[2] = 0;
 
-                TRACELOG(LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_GAMEPAD_BUTTON_DOWN | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
+                RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_GAMEPAD_BUTTON_DOWN | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
                 currentEventList->count++;
             }
 
             if (currentEventList->count == currentEventList->capacity) return;    // Security check
         }
 
-        for (int axis = 0; axis < MAX_GAMEPAD_AXIS; axis++)
+        for (int axis = 0; axis < RAYLIB_MAX_GAMEPAD_AXIS; axis++)
         {
             // Event type: INPUT_GAMEPAD_AXIS_MOTION
             if (CORE.Input.Gamepad.axisState[gamepad][axis] > 0.1f)
@@ -3607,7 +3607,7 @@ static void RecordAutomationEvent(void)
                 currentEventList->events[currentEventList->count].params[1] = axis;
                 currentEventList->events[currentEventList->count].params[2] = (int)(CORE.Input.Gamepad.axisState[gamepad][axis]*32768.0f);
 
-                TRACELOG(LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_GAMEPAD_AXIS_MOTION | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
+                RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_GAMEPAD_AXIS_MOTION | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
                 currentEventList->count++;
             }
 
@@ -3616,10 +3616,10 @@ static void RecordAutomationEvent(void)
     }
     //-------------------------------------------------------------------------------------
 
-#if defined(SUPPORT_GESTURES_SYSTEM)
+#if defined(RAYLIB_SUPPORT_GESTURES_SYSTEM)
     // Gestures input currentEventList->events recording
     //-------------------------------------------------------------------------------------
-    if (GESTURES.current != GESTURE_NONE)
+    if (GESTURES.current != RAYLIB_GESTURE_NONE)
     {
         // Event type: INPUT_GESTURE
         currentEventList->events[currentEventList->count].frame = CORE.Time.frameCounter;
@@ -3628,7 +3628,7 @@ static void RecordAutomationEvent(void)
         currentEventList->events[currentEventList->count].params[1] = 0;
         currentEventList->events[currentEventList->count].params[2] = 0;
 
-        TRACELOG(LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_GESTURE | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
+        RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "AUTOMATION: Frame: %i | Event type: INPUT_GESTURE | Event parameters: %i, %i, %i", currentEventList->events[currentEventList->count].frame, currentEventList->events[currentEventList->count].params[0], currentEventList->events[currentEventList->count].params[1], currentEventList->events[currentEventList->count].params[2]);
         currentEventList->count++;
 
         if (currentEventList->count == currentEventList->capacity) return;    // Security check
@@ -3638,35 +3638,35 @@ static void RecordAutomationEvent(void)
 }
 #endif
 
-#if !defined(SUPPORT_MODULE_RTEXT)
+#if !defined(RAYLIB_SUPPORT_MODULE_RTEXT)
 // Formatting of text with variables to 'embed'
 // WARNING: String returned will expire after this function is called MAX_TEXTFORMAT_BUFFERS times
-const char *TextFormat(const char *text, ...)
+const char *RaylibTextFormat(const char *text, ...)
 {
 #ifndef MAX_TEXTFORMAT_BUFFERS
     #define MAX_TEXTFORMAT_BUFFERS      4        // Maximum number of static buffers for text formatting
 #endif
-#ifndef MAX_TEXT_BUFFER_LENGTH
-    #define MAX_TEXT_BUFFER_LENGTH   1024        // Maximum size of static text buffer
+#ifndef RAYLIB_MAX_TEXT_BUFFER_LENGTH
+    #define RAYLIB_MAX_TEXT_BUFFER_LENGTH   1024        // Maximum size of static text buffer
 #endif
 
     // We create an array of buffers so strings don't expire until MAX_TEXTFORMAT_BUFFERS invocations
-    static char buffers[MAX_TEXTFORMAT_BUFFERS][MAX_TEXT_BUFFER_LENGTH] = { 0 };
+    static char buffers[MAX_TEXTFORMAT_BUFFERS][RAYLIB_MAX_TEXT_BUFFER_LENGTH] = { 0 };
     static int index = 0;
 
     char *currentBuffer = buffers[index];
-    memset(currentBuffer, 0, MAX_TEXT_BUFFER_LENGTH);   // Clear buffer before using
+    memset(currentBuffer, 0, RAYLIB_MAX_TEXT_BUFFER_LENGTH);   // Clear buffer before using
 
     va_list args;
     va_start(args, text);
-    int requiredByteCount = vsnprintf(currentBuffer, MAX_TEXT_BUFFER_LENGTH, text, args);
+    int requiredByteCount = vsnprintf(currentBuffer, RAYLIB_MAX_TEXT_BUFFER_LENGTH, text, args);
     va_end(args);
 
-    // If requiredByteCount is larger than the MAX_TEXT_BUFFER_LENGTH, then overflow occured
-    if (requiredByteCount >= MAX_TEXT_BUFFER_LENGTH)
+    // If requiredByteCount is larger than the RAYLIB_MAX_TEXT_BUFFER_LENGTH, then overflow occured
+    if (requiredByteCount >= RAYLIB_MAX_TEXT_BUFFER_LENGTH)
     {
         // Inserting "..." at the end of the string to mark as truncated
-        char *truncBuffer = buffers[index] + MAX_TEXT_BUFFER_LENGTH - 4; // Adding 4 bytes = "...\0"
+        char *truncBuffer = buffers[index] + RAYLIB_MAX_TEXT_BUFFER_LENGTH - 4; // Adding 4 bytes = "...\0"
         sprintf(truncBuffer, "...");
     }
 
@@ -3676,4 +3676,4 @@ const char *TextFormat(const char *text, ...)
     return currentBuffer;
 }
 
-#endif // !SUPPORT_MODULE_RTEXT
+#endif // !RAYLIB_SUPPORT_MODULE_RTEXT

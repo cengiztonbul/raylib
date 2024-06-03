@@ -14,7 +14,7 @@
 *       - Improvement 02
 *
 *   ADDITIONAL NOTES:
-*       - TRACELOG() function is located in raylib [utils] module
+*       - RAYLIB_TRACELOG() function is located in raylib [utils] module
 *
 *   CONFIGURATION:
 *       #define RCORE_PLATFORM_CUSTOM_FLAG
@@ -49,7 +49,7 @@
 #include <android_native_app_glue.h>    // Required for: android_app struct and activity management
 #include <android/window.h>             // Required for: AWINDOW_FLAG_FULLSCREEN definition and others
 //#include <android/sensor.h>           // Required for: Android sensors functions (accelerometer, gyroscope, light...)
-#include <jni.h>                        // Required for: JNIEnv and JavaVM [Used in OpenURL()]
+#include <jni.h>                        // Required for: JNIEnv and JavaVM [Used in RaylibOpenURL()]
 
 #include <EGL/egl.h>                    // Native platform windowing system interface
 
@@ -81,90 +81,90 @@ static PlatformData platform = { 0 };   // Platform specific data
 // Local Variables Definition
 //----------------------------------------------------------------------------------
 #define KEYCODE_MAP_SIZE 162
-static const KeyboardKey KeycodeMap[KEYCODE_MAP_SIZE] = {
-    KEY_NULL,           // AKEYCODE_UNKNOWN
+static const RaylibKeyboardKey KeycodeMap[KEYCODE_MAP_SIZE] = {
+    RAYLIB_KEY_NULL,           // AKEYCODE_UNKNOWN
     0,                  // AKEYCODE_SOFT_LEFT
     0,                  // AKEYCODE_SOFT_RIGHT
     0,                  // AKEYCODE_HOME
-    KEY_BACK,           // AKEYCODE_BACK
+    RAYLIB_KEY_BACK,           // AKEYCODE_BACK
     0,                  // AKEYCODE_CALL
     0,                  // AKEYCODE_ENDCALL
-    KEY_ZERO,           // AKEYCODE_0
-    KEY_ONE,            // AKEYCODE_1
-    KEY_TWO,            // AKEYCODE_2
-    KEY_THREE,          // AKEYCODE_3
-    KEY_FOUR,           // AKEYCODE_4
-    KEY_FIVE,           // AKEYCODE_5
-    KEY_SIX,            // AKEYCODE_6
-    KEY_SEVEN,          // AKEYCODE_7
-    KEY_EIGHT,          // AKEYCODE_8
-    KEY_NINE,           // AKEYCODE_9
+    RAYLIB_KEY_ZERO,           // AKEYCODE_0
+    RAYLIB_KEY_ONE,            // AKEYCODE_1
+    RAYLIB_KEY_TWO,            // AKEYCODE_2
+    RAYLIB_KEY_THREE,          // AKEYCODE_3
+    RAYLIB_KEY_FOUR,           // AKEYCODE_4
+    RAYLIB_KEY_FIVE,           // AKEYCODE_5
+    RAYLIB_KEY_SIX,            // AKEYCODE_6
+    RAYLIB_KEY_SEVEN,          // AKEYCODE_7
+    RAYLIB_KEY_EIGHT,          // AKEYCODE_8
+    RAYLIB_KEY_NINE,           // AKEYCODE_9
     0,                  // AKEYCODE_STAR
     0,                  // AKEYCODE_POUND
-    KEY_UP,             // AKEYCODE_DPAD_UP
-    KEY_DOWN,           // AKEYCODE_DPAD_DOWN
-    KEY_LEFT,           // AKEYCODE_DPAD_LEFT
-    KEY_RIGHT,          // AKEYCODE_DPAD_RIGHT
+    RAYLIB_KEY_UP,             // AKEYCODE_DPAD_UP
+    RAYLIB_KEY_DOWN,           // AKEYCODE_DPAD_DOWN
+    RAYLIB_KEY_LEFT,           // AKEYCODE_DPAD_LEFT
+    RAYLIB_KEY_RIGHT,          // AKEYCODE_DPAD_RIGHT
     0,                  // AKEYCODE_DPAD_CENTER
-    KEY_VOLUME_UP,      // AKEYCODE_VOLUME_UP
-    KEY_VOLUME_DOWN,    // AKEYCODE_VOLUME_DOWN
+    RAYLIB_KEY_VOLUME_UP,      // AKEYCODE_VOLUME_UP
+    RAYLIB_KEY_VOLUME_DOWN,    // AKEYCODE_VOLUME_DOWN
     0,                  // AKEYCODE_POWER
     0,                  // AKEYCODE_CAMERA
     0,                  // AKEYCODE_CLEAR
-    KEY_A,              // AKEYCODE_A
-    KEY_B,              // AKEYCODE_B
-    KEY_C,              // AKEYCODE_C
-    KEY_D,              // AKEYCODE_D
-    KEY_E,              // AKEYCODE_E
-    KEY_F,              // AKEYCODE_F
-    KEY_G,              // AKEYCODE_G
-    KEY_H,              // AKEYCODE_H
-    KEY_I,              // AKEYCODE_I
-    KEY_J,              // AKEYCODE_J
-    KEY_K,              // AKEYCODE_K
-    KEY_L,              // AKEYCODE_L
-    KEY_M,              // AKEYCODE_M
-    KEY_N,              // AKEYCODE_N
-    KEY_O,              // AKEYCODE_O
-    KEY_P,              // AKEYCODE_P
-    KEY_Q,              // AKEYCODE_Q
-    KEY_R,              // AKEYCODE_R
-    KEY_S,              // AKEYCODE_S
-    KEY_T,              // AKEYCODE_T
-    KEY_U,              // AKEYCODE_U
-    KEY_V,              // AKEYCODE_V
-    KEY_W,              // AKEYCODE_W
-    KEY_X,              // AKEYCODE_X
-    KEY_Y,              // AKEYCODE_Y
-    KEY_Z,              // AKEYCODE_Z
-    KEY_COMMA,          // AKEYCODE_COMMA
-    KEY_PERIOD,         // AKEYCODE_PERIOD
-    KEY_LEFT_ALT,       // AKEYCODE_ALT_LEFT
-    KEY_RIGHT_ALT,      // AKEYCODE_ALT_RIGHT
-    KEY_LEFT_SHIFT,     // AKEYCODE_SHIFT_LEFT
-    KEY_RIGHT_SHIFT,    // AKEYCODE_SHIFT_RIGHT
-    KEY_TAB,            // AKEYCODE_TAB
-    KEY_SPACE,          // AKEYCODE_SPACE
+    RAYLIB_KEY_A,              // AKEYCODE_A
+    RAYLIB_KEY_B,              // AKEYCODE_B
+    RAYLIB_KEY_C,              // AKEYCODE_C
+    RAYLIB_KEY_D,              // AKEYCODE_D
+    RAYLIB_KEY_E,              // AKEYCODE_E
+    RAYLIB_KEY_F,              // AKEYCODE_F
+    RAYLIB_KEY_G,              // AKEYCODE_G
+    RAYLIB_KEY_H,              // AKEYCODE_H
+    RAYLIB_KEY_I,              // AKEYCODE_I
+    RAYLIB_KEY_J,              // AKEYCODE_J
+    RAYLIB_KEY_K,              // AKEYCODE_K
+    RAYLIB_KEY_L,              // AKEYCODE_L
+    RAYLIB_KEY_M,              // AKEYCODE_M
+    RAYLIB_KEY_N,              // AKEYCODE_N
+    RAYLIB_KEY_O,              // AKEYCODE_O
+    RAYLIB_KEY_P,              // AKEYCODE_P
+    RAYLIB_KEY_Q,              // AKEYCODE_Q
+    RAYLIB_KEY_R,              // AKEYCODE_R
+    RAYLIB_KEY_S,              // AKEYCODE_S
+    RAYLIB_KEY_T,              // AKEYCODE_T
+    RAYLIB_KEY_U,              // AKEYCODE_U
+    RAYLIB_KEY_V,              // AKEYCODE_V
+    RAYLIB_KEY_W,              // AKEYCODE_W
+    RAYLIB_KEY_X,              // AKEYCODE_X
+    RAYLIB_KEY_Y,              // AKEYCODE_Y
+    RAYLIB_KEY_Z,              // AKEYCODE_Z
+    RAYLIB_KEY_COMMA,          // AKEYCODE_COMMA
+    RAYLIB_KEY_PERIOD,         // AKEYCODE_PERIOD
+    RAYLIB_KEY_LEFT_ALT,       // AKEYCODE_ALT_LEFT
+    RAYLIB_KEY_RIGHT_ALT,      // AKEYCODE_ALT_RIGHT
+    RAYLIB_KEY_LEFT_SHIFT,     // AKEYCODE_SHIFT_LEFT
+    RAYLIB_KEY_RIGHT_SHIFT,    // AKEYCODE_SHIFT_RIGHT
+    RAYLIB_KEY_TAB,            // AKEYCODE_TAB
+    RAYLIB_KEY_SPACE,          // AKEYCODE_SPACE
     0,                  // AKEYCODE_SYM
     0,                  // AKEYCODE_EXPLORER
     0,                  // AKEYCODE_ENVELOPE
-    KEY_ENTER,          // AKEYCODE_ENTER
-    KEY_BACKSPACE,      // AKEYCODE_DEL
-    KEY_GRAVE,          // AKEYCODE_GRAVE
-    KEY_MINUS,          // AKEYCODE_MINUS
-    KEY_EQUAL,          // AKEYCODE_EQUALS
-    KEY_LEFT_BRACKET,   // AKEYCODE_LEFT_BRACKET
-    KEY_RIGHT_BRACKET,  // AKEYCODE_RIGHT_BRACKET
-    KEY_BACKSLASH,      // AKEYCODE_BACKSLASH
-    KEY_SEMICOLON,      // AKEYCODE_SEMICOLON
-    KEY_APOSTROPHE,     // AKEYCODE_APOSTROPHE
-    KEY_SLASH,          // AKEYCODE_SLASH
+    RAYLIB_KEY_ENTER,          // AKEYCODE_ENTER
+    RAYLIB_KEY_BACKSPACE,      // AKEYCODE_DEL
+    RAYLIB_KEY_GRAVE,          // AKEYCODE_GRAVE
+    RAYLIB_KEY_MINUS,          // AKEYCODE_MINUS
+    RAYLIB_KEY_EQUAL,          // AKEYCODE_EQUALS
+    RAYLIB_KEY_LEFT_BRACKET,   // AKEYCODE_LEFT_BRACKET
+    RAYLIB_KEY_RIGHT_BRACKET,  // AKEYCODE_RIGHT_BRACKET
+    RAYLIB_KEY_BACKSLASH,      // AKEYCODE_BACKSLASH
+    RAYLIB_KEY_SEMICOLON,      // AKEYCODE_SEMICOLON
+    RAYLIB_KEY_APOSTROPHE,     // AKEYCODE_APOSTROPHE
+    RAYLIB_KEY_SLASH,          // AKEYCODE_SLASH
     0,                  // AKEYCODE_AT
     0,                  // AKEYCODE_NUM
     0,                  // AKEYCODE_HEADSETHOOK
     0,                  // AKEYCODE_FOCUS
     0,                  // AKEYCODE_PLUS
-    KEY_MENU,           // AKEYCODE_MENU
+    RAYLIB_KEY_MENU,           // AKEYCODE_MENU
     0,                  // AKEYCODE_NOTIFICATION
     0,                  // AKEYCODE_SEARCH
     0,                  // AKEYCODE_MEDIA_PLAY_PAUSE
@@ -174,8 +174,8 @@ static const KeyboardKey KeycodeMap[KEYCODE_MAP_SIZE] = {
     0,                  // AKEYCODE_MEDIA_REWIND
     0,                  // AKEYCODE_MEDIA_FAST_FORWARD
     0,                  // AKEYCODE_MUTE
-    KEY_PAGE_UP,        // AKEYCODE_PAGE_UP
-    KEY_PAGE_DOWN,      // AKEYCODE_PAGE_DOWN
+    RAYLIB_KEY_PAGE_UP,        // AKEYCODE_PAGE_UP
+    RAYLIB_KEY_PAGE_DOWN,      // AKEYCODE_PAGE_DOWN
     0,                  // AKEYCODE_PICTSYMBOLS
     0,                  // AKEYCODE_SWITCH_CHARSET
     0,                  // AKEYCODE_BUTTON_A
@@ -193,57 +193,57 @@ static const KeyboardKey KeycodeMap[KEYCODE_MAP_SIZE] = {
     0,                  // AKEYCODE_BUTTON_START
     0,                  // AKEYCODE_BUTTON_SELECT
     0,                  // AKEYCODE_BUTTON_MODE
-    KEY_ESCAPE,         // AKEYCODE_ESCAPE
-    KEY_DELETE,         // AKEYCODE_FORWARD_DELL
-    KEY_LEFT_CONTROL,   // AKEYCODE_CTRL_LEFT
-    KEY_RIGHT_CONTROL,  // AKEYCODE_CTRL_RIGHT
-    KEY_CAPS_LOCK,      // AKEYCODE_CAPS_LOCK
-    KEY_SCROLL_LOCK,    // AKEYCODE_SCROLL_LOCK
-    KEY_LEFT_SUPER,     // AKEYCODE_META_LEFT
-    KEY_RIGHT_SUPER,    // AKEYCODE_META_RIGHT
+    RAYLIB_KEY_ESCAPE,         // AKEYCODE_ESCAPE
+    RAYLIB_KEY_DELETE,         // AKEYCODE_FORWARD_DELL
+    RAYLIB_KEY_LEFT_CONTROL,   // AKEYCODE_CTRL_LEFT
+    RAYLIB_KEY_RIGHT_CONTROL,  // AKEYCODE_CTRL_RIGHT
+    RAYLIB_KEY_CAPS_LOCK,      // AKEYCODE_CAPS_LOCK
+    RAYLIB_KEY_SCROLL_LOCK,    // AKEYCODE_SCROLL_LOCK
+    RAYLIB_KEY_LEFT_SUPER,     // AKEYCODE_META_LEFT
+    RAYLIB_KEY_RIGHT_SUPER,    // AKEYCODE_META_RIGHT
     0,                  // AKEYCODE_FUNCTION
-    KEY_PRINT_SCREEN,   // AKEYCODE_SYSRQ
-    KEY_PAUSE,          // AKEYCODE_BREAK
-    KEY_HOME,           // AKEYCODE_MOVE_HOME
-    KEY_END,            // AKEYCODE_MOVE_END
-    KEY_INSERT,         // AKEYCODE_INSERT
+    RAYLIB_KEY_PRINT_SCREEN,   // AKEYCODE_SYSRQ
+    RAYLIB_KEY_PAUSE,          // AKEYCODE_BREAK
+    RAYLIB_KEY_HOME,           // AKEYCODE_MOVE_HOME
+    RAYLIB_KEY_END,            // AKEYCODE_MOVE_END
+    RAYLIB_KEY_INSERT,         // AKEYCODE_INSERT
     0,                  // AKEYCODE_FORWARD
     0,                  // AKEYCODE_MEDIA_PLAY
     0,                  // AKEYCODE_MEDIA_PAUSE
     0,                  // AKEYCODE_MEDIA_CLOSE
     0,                  // AKEYCODE_MEDIA_EJECT
     0,                  // AKEYCODE_MEDIA_RECORD
-    KEY_F1,             // AKEYCODE_F1
-    KEY_F2,             // AKEYCODE_F2
-    KEY_F3,             // AKEYCODE_F3
-    KEY_F4,             // AKEYCODE_F4
-    KEY_F5,             // AKEYCODE_F5
-    KEY_F6,             // AKEYCODE_F6
-    KEY_F7,             // AKEYCODE_F7
-    KEY_F8,             // AKEYCODE_F8
-    KEY_F9,             // AKEYCODE_F9
-    KEY_F10,            // AKEYCODE_F10
-    KEY_F11,            // AKEYCODE_F11
-    KEY_F12,            // AKEYCODE_F12
-    KEY_NUM_LOCK,       // AKEYCODE_NUM_LOCK
-    KEY_KP_0,           // AKEYCODE_NUMPAD_0
-    KEY_KP_1,           // AKEYCODE_NUMPAD_1
-    KEY_KP_2,           // AKEYCODE_NUMPAD_2
-    KEY_KP_3,           // AKEYCODE_NUMPAD_3
-    KEY_KP_4,           // AKEYCODE_NUMPAD_4
-    KEY_KP_5,           // AKEYCODE_NUMPAD_5
-    KEY_KP_6,           // AKEYCODE_NUMPAD_6
-    KEY_KP_7,           // AKEYCODE_NUMPAD_7
-    KEY_KP_8,           // AKEYCODE_NUMPAD_8
-    KEY_KP_9,           // AKEYCODE_NUMPAD_9
-    KEY_KP_DIVIDE,      // AKEYCODE_NUMPAD_DIVIDE
-    KEY_KP_MULTIPLY,    // AKEYCODE_NUMPAD_MULTIPLY
-    KEY_KP_SUBTRACT,    // AKEYCODE_NUMPAD_SUBTRACT
-    KEY_KP_ADD,         // AKEYCODE_NUMPAD_ADD
-    KEY_KP_DECIMAL,     // AKEYCODE_NUMPAD_DOT
+    RAYLIB_KEY_F1,             // AKEYCODE_F1
+    RAYLIB_KEY_F2,             // AKEYCODE_F2
+    RAYLIB_KEY_F3,             // AKEYCODE_F3
+    RAYLIB_KEY_F4,             // AKEYCODE_F4
+    RAYLIB_KEY_F5,             // AKEYCODE_F5
+    RAYLIB_KEY_F6,             // AKEYCODE_F6
+    RAYLIB_KEY_F7,             // AKEYCODE_F7
+    RAYLIB_KEY_F8,             // AKEYCODE_F8
+    RAYLIB_KEY_F9,             // AKEYCODE_F9
+    RAYLIB_KEY_F10,            // AKEYCODE_F10
+    RAYLIB_KEY_F11,            // AKEYCODE_F11
+    RAYLIB_KEY_F12,            // AKEYCODE_F12
+    RAYLIB_KEY_NUM_LOCK,       // AKEYCODE_NUM_LOCK
+    RAYLIB_KEY_KP_0,           // AKEYCODE_NUMPAD_0
+    RAYLIB_KEY_KP_1,           // AKEYCODE_NUMPAD_1
+    RAYLIB_KEY_KP_2,           // AKEYCODE_NUMPAD_2
+    RAYLIB_KEY_KP_3,           // AKEYCODE_NUMPAD_3
+    RAYLIB_KEY_KP_4,           // AKEYCODE_NUMPAD_4
+    RAYLIB_KEY_KP_5,           // AKEYCODE_NUMPAD_5
+    RAYLIB_KEY_KP_6,           // AKEYCODE_NUMPAD_6
+    RAYLIB_KEY_KP_7,           // AKEYCODE_NUMPAD_7
+    RAYLIB_KEY_KP_8,           // AKEYCODE_NUMPAD_8
+    RAYLIB_KEY_KP_9,           // AKEYCODE_NUMPAD_9
+    RAYLIB_KEY_KP_DIVIDE,      // AKEYCODE_NUMPAD_DIVIDE
+    RAYLIB_KEY_KP_MULTIPLY,    // AKEYCODE_NUMPAD_MULTIPLY
+    RAYLIB_KEY_KP_SUBTRACT,    // AKEYCODE_NUMPAD_SUBTRACT
+    RAYLIB_KEY_KP_ADD,         // AKEYCODE_NUMPAD_ADD
+    RAYLIB_KEY_KP_DECIMAL,     // AKEYCODE_NUMPAD_DOT
     0,                  // AKEYCODE_NUMPAD_COMMA
-    KEY_KP_ENTER,       // AKEYCODE_NUMPAD_ENTER
-    KEY_KP_EQUAL        // AKEYCODE_NUMPAD_EQUALS
+    RAYLIB_KEY_KP_ENTER,       // AKEYCODE_NUMPAD_ENTER
+    RAYLIB_KEY_KP_EQUAL        // AKEYCODE_NUMPAD_EQUALS
 };
 
 //----------------------------------------------------------------------------------
@@ -254,7 +254,7 @@ void ClosePlatform(void);        // Close platform
 
 static void AndroidCommandCallback(struct android_app *app, int32_t cmd);           // Process Android activity lifecycle commands
 static int32_t AndroidInputCallback(struct android_app *app, AInputEvent *event);   // Process Android inputs
-static GamepadButton AndroidTranslateGamepadButton(int button);                     // Map Android gamepad button to raylib gamepad button
+static RaylibGamepadButton AndroidTranslateGamepadButton(int button);                     // Map Android gamepad button to raylib gamepad button
 
 //----------------------------------------------------------------------------------
 // Module Functions Declaration
@@ -306,246 +306,246 @@ struct android_app *GetAndroidApp(void)
 //----------------------------------------------------------------------------------
 
 // Check if application should close
-bool WindowShouldClose(void)
+bool RaylibWindowShouldClose(void)
 {
     if (CORE.Window.ready) return CORE.Window.shouldClose;
     else return true;
 }
 
 // Toggle fullscreen mode
-void ToggleFullscreen(void)
+void RaylibToggleFullscreen(void)
 {
-    TRACELOG(LOG_WARNING, "ToggleFullscreen() not available on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibToggleFullscreen() not available on target platform");
 }
 
 // Toggle borderless windowed mode
-void ToggleBorderlessWindowed(void)
+void RaylibToggleBorderlessWindowed(void)
 {
-    TRACELOG(LOG_WARNING, "ToggleBorderlessWindowed() not available on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibToggleBorderlessWindowed() not available on target platform");
 }
 
 // Set window state: maximized, if resizable
-void MaximizeWindow(void)
+void RaylibMaximizeWindow(void)
 {
-    TRACELOG(LOG_WARNING, "MaximizeWindow() not available on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibMaximizeWindow() not available on target platform");
 }
 
 // Set window state: minimized
-void MinimizeWindow(void)
+void RaylibMinimizeWindow(void)
 {
-    TRACELOG(LOG_WARNING, "MinimizeWindow() not available on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibMinimizeWindow() not available on target platform");
 }
 
 // Set window state: not minimized/maximized
-void RestoreWindow(void)
+void RaylibRestoreWindow(void)
 {
-    TRACELOG(LOG_WARNING, "RestoreWindow() not available on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibRestoreWindow() not available on target platform");
 }
 
 // Set window configuration state using flags
-void SetWindowState(unsigned int flags)
+void RaylibSetWindowState(unsigned int flags)
 {
-    TRACELOG(LOG_WARNING, "SetWindowState() not available on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibSetWindowState() not available on target platform");
 }
 
 // Clear window configuration state flags
-void ClearWindowState(unsigned int flags)
+void RaylibClearWindowState(unsigned int flags)
 {
-    TRACELOG(LOG_WARNING, "ClearWindowState() not available on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibClearWindowState() not available on target platform");
 }
 
 // Set icon for window
-void SetWindowIcon(Image image)
+void RaylibSetWindowIcon(RaylibImage image)
 {
-    TRACELOG(LOG_WARNING, "SetWindowIcon() not available on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibSetWindowIcon() not available on target platform");
 }
 
 // Set icon for window
-void SetWindowIcons(Image *images, int count)
+void RaylibSetWindowIcons(RaylibImage *images, int count)
 {
-    TRACELOG(LOG_WARNING, "SetWindowIcons() not available on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibSetWindowIcons() not available on target platform");
 }
 
 // Set title for window
-void SetWindowTitle(const char *title)
+void RaylibSetWindowTitle(const char *title)
 {
     CORE.Window.title = title;
 }
 
 // Set window position on screen (windowed mode)
-void SetWindowPosition(int x, int y)
+void RaylibSetWindowPosition(int x, int y)
 {
-    TRACELOG(LOG_WARNING, "SetWindowPosition() not available on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibSetWindowPosition() not available on target platform");
 }
 
 // Set monitor for the current window
-void SetWindowMonitor(int monitor)
+void RaylibSetWindowMonitor(int monitor)
 {
-    TRACELOG(LOG_WARNING, "SetWindowMonitor() not available on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibSetWindowMonitor() not available on target platform");
 }
 
-// Set window minimum dimensions (FLAG_WINDOW_RESIZABLE)
-void SetWindowMinSize(int width, int height)
+// Set window minimum dimensions (RAYLIB_FLAG_WINDOW_RESIZABLE)
+void RaylibSetWindowMinSize(int width, int height)
 {
     CORE.Window.screenMin.width = width;
     CORE.Window.screenMin.height = height;
 }
 
-// Set window maximum dimensions (FLAG_WINDOW_RESIZABLE)
-void SetWindowMaxSize(int width, int height)
+// Set window maximum dimensions (RAYLIB_FLAG_WINDOW_RESIZABLE)
+void RaylibSetWindowMaxSize(int width, int height)
 {
     CORE.Window.screenMax.width = width;
     CORE.Window.screenMax.height = height;
 }
 
 // Set window dimensions
-void SetWindowSize(int width, int height)
+void RaylibSetWindowSize(int width, int height)
 {
-    TRACELOG(LOG_WARNING, "SetWindowSize() not available on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibSetWindowSize() not available on target platform");
 }
 
 // Set window opacity, value opacity is between 0.0 and 1.0
-void SetWindowOpacity(float opacity)
+void RaylibSetWindowOpacity(float opacity)
 {
-    TRACELOG(LOG_WARNING, "SetWindowOpacity() not available on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibSetWindowOpacity() not available on target platform");
 }
 
 // Set window focused
-void SetWindowFocused(void)
+void RaylibSetWindowFocused(void)
 {
-    TRACELOG(LOG_WARNING, "SetWindowFocused() not available on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibSetWindowFocused() not available on target platform");
 }
 
 // Get native window handle
-void *GetWindowHandle(void)
+void *RaylibGetWindowHandle(void)
 {
-    TRACELOG(LOG_WARNING, "GetWindowHandle() not implemented on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibGetWindowHandle() not implemented on target platform");
     return NULL;
 }
 
 // Get number of monitors
-int GetMonitorCount(void)
+int RaylibGetMonitorCount(void)
 {
-    TRACELOG(LOG_WARNING, "GetMonitorCount() not implemented on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibGetMonitorCount() not implemented on target platform");
     return 1;
 }
 
 // Get number of monitors
-int GetCurrentMonitor(void)
+int RaylibGetCurrentMonitor(void)
 {
-    TRACELOG(LOG_WARNING, "GetCurrentMonitor() not implemented on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibGetCurrentMonitor() not implemented on target platform");
     return 0;
 }
 
 // Get selected monitor position
-Vector2 GetMonitorPosition(int monitor)
+RaylibVector2 RaylibGetMonitorPosition(int monitor)
 {
-    TRACELOG(LOG_WARNING, "GetMonitorPosition() not implemented on target platform");
-    return (Vector2){ 0, 0 };
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibGetMonitorPosition() not implemented on target platform");
+    return (RaylibVector2){ 0, 0 };
 }
 
 // Get selected monitor width (currently used by monitor)
-int GetMonitorWidth(int monitor)
+int RaylibGetMonitorWidth(int monitor)
 {
-    TRACELOG(LOG_WARNING, "GetMonitorWidth() not implemented on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibGetMonitorWidth() not implemented on target platform");
     return 0;
 }
 
 // Get selected monitor height (currently used by monitor)
-int GetMonitorHeight(int monitor)
+int RaylibGetMonitorHeight(int monitor)
 {
-    TRACELOG(LOG_WARNING, "GetMonitorHeight() not implemented on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibGetMonitorHeight() not implemented on target platform");
     return 0;
 }
 
 // Get selected monitor physical width in millimetres
-int GetMonitorPhysicalWidth(int monitor)
+int RaylibGetMonitorPhysicalWidth(int monitor)
 {
-    TRACELOG(LOG_WARNING, "GetMonitorPhysicalWidth() not implemented on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibGetMonitorPhysicalWidth() not implemented on target platform");
     return 0;
 }
 
 // Get selected monitor physical height in millimetres
-int GetMonitorPhysicalHeight(int monitor)
+int RaylibGetMonitorPhysicalHeight(int monitor)
 {
-    TRACELOG(LOG_WARNING, "GetMonitorPhysicalHeight() not implemented on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibGetMonitorPhysicalHeight() not implemented on target platform");
     return 0;
 }
 
 // Get selected monitor refresh rate
-int GetMonitorRefreshRate(int monitor)
+int RaylibGetMonitorRefreshRate(int monitor)
 {
-    TRACELOG(LOG_WARNING, "GetMonitorRefreshRate() not implemented on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibGetMonitorRefreshRate() not implemented on target platform");
     return 0;
 }
 
 // Get the human-readable, UTF-8 encoded name of the selected monitor
-const char *GetMonitorName(int monitor)
+const char *RaylibGetMonitorName(int monitor)
 {
-    TRACELOG(LOG_WARNING, "GetMonitorName() not implemented on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibGetMonitorName() not implemented on target platform");
     return "";
 }
 
 // Get window position XY on monitor
-Vector2 GetWindowPosition(void)
+RaylibVector2 RaylibGetWindowPosition(void)
 {
-    TRACELOG(LOG_WARNING, "GetWindowPosition() not implemented on target platform");
-    return (Vector2){ 0, 0 };
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibGetWindowPosition() not implemented on target platform");
+    return (RaylibVector2){ 0, 0 };
 }
 
 // Get window scale DPI factor for current monitor
-Vector2 GetWindowScaleDPI(void)
+RaylibVector2 RaylibGetWindowScaleDPI(void)
 {
-    TRACELOG(LOG_WARNING, "GetWindowScaleDPI() not implemented on target platform");
-    return (Vector2){ 1.0f, 1.0f };
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibGetWindowScaleDPI() not implemented on target platform");
+    return (RaylibVector2){ 1.0f, 1.0f };
 }
 
 // Set clipboard text content
-void SetClipboardText(const char *text)
+void RaylibSetClipboardText(const char *text)
 {
-    TRACELOG(LOG_WARNING, "SetClipboardText() not implemented on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibSetClipboardText() not implemented on target platform");
 }
 
 // Get clipboard text content
 // NOTE: returned string is allocated and freed by GLFW
-const char *GetClipboardText(void)
+const char *RaylibGetClipboardText(void)
 {
-    TRACELOG(LOG_WARNING, "GetClipboardText() not implemented on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibGetClipboardText() not implemented on target platform");
     return NULL;
 }
 
 // Show mouse cursor
-void ShowCursor(void)
+void RaylibShowCursor(void)
 {
     CORE.Input.Mouse.cursorHidden = false;
 }
 
 // Hides mouse cursor
-void HideCursor(void)
+void RaylibHideCursor(void)
 {
     CORE.Input.Mouse.cursorHidden = true;
 }
 
 // Enables cursor (unlock cursor)
-void EnableCursor(void)
+void RaylibEnableCursor(void)
 {
     // Set cursor position in the middle
-    SetMousePosition(CORE.Window.screen.width/2, CORE.Window.screen.height/2);
+    RaylibSetMousePosition(CORE.Window.screen.width/2, CORE.Window.screen.height/2);
 
     CORE.Input.Mouse.cursorHidden = false;
 }
 
 // Disables cursor (lock cursor)
-void DisableCursor(void)
+void RaylibDisableCursor(void)
 {
     // Set cursor position in the middle
-    SetMousePosition(CORE.Window.screen.width/2, CORE.Window.screen.height/2);
+    RaylibSetMousePosition(CORE.Window.screen.width/2, CORE.Window.screen.height/2);
 
     CORE.Input.Mouse.cursorHidden = true;
 }
 
 // Swap back buffer with front buffer (screen drawing)
-void SwapScreenBuffer(void)
+void RaylibSwapScreenBuffer(void)
 {
     eglSwapBuffers(platform.device, platform.surface);
 }
@@ -555,7 +555,7 @@ void SwapScreenBuffer(void)
 //----------------------------------------------------------------------------------
 
 // Get elapsed time measure in seconds since InitTimer()
-double GetTime(void)
+double RaylibGetTime(void)
 {
     double time = 0.0;
     struct timespec ts = { 0 };
@@ -572,10 +572,10 @@ double GetTime(void)
 // A user could craft a malicious string performing another action.
 // Only call this function yourself not with user input or make sure to check the string yourself.
 // Ref: https://github.com/raysan5/raylib/issues/686
-void OpenURL(const char *url)
+void RaylibOpenURL(const char *url)
 {
     // Security check to (partially) avoid malicious code
-    if (strchr(url, '\'') != NULL) TRACELOG(LOG_WARNING, "SYSTEM: Provided URL could be potentially malicious, avoid [\'] character");
+    if (strchr(url, '\'') != NULL) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "SYSTEM: Provided URL could be potentially malicious, avoid [\'] character");
     else
     {
         JNIEnv *env = NULL;
@@ -607,35 +607,35 @@ void OpenURL(const char *url)
 //----------------------------------------------------------------------------------
 
 // Set internal gamepad mappings
-int SetGamepadMappings(const char *mappings)
+int RaylibSetGamepadMappings(const char *mappings)
 {
-    TRACELOG(LOG_WARNING, "SetGamepadMappings() not implemented on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibSetGamepadMappings() not implemented on target platform");
     return 0;
 }
 
 // Set gamepad vibration
-void SetGamepadVibration(int gamepad, float leftMotor, float rightMotor)
+void RaylibSetGamepadVibration(int gamepad, float leftMotor, float rightMotor)
 {
-    TRACELOG(LOG_WARNING, "GamepadSetVibration() not implemented on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "GamepadSetVibration() not implemented on target platform");
 }
 
 // Set mouse position XY
-void SetMousePosition(int x, int y)
+void RaylibSetMousePosition(int x, int y)
 {
-    CORE.Input.Mouse.currentPosition = (Vector2){ (float)x, (float)y };
+    CORE.Input.Mouse.currentPosition = (RaylibVector2){ (float)x, (float)y };
     CORE.Input.Mouse.previousPosition = CORE.Input.Mouse.currentPosition;
 }
 
 // Set mouse cursor
-void SetMouseCursor(int cursor)
+void RaylibSetMouseCursor(int cursor)
 {
-    TRACELOG(LOG_WARNING, "SetMouseCursor() not implemented on target platform");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "RaylibSetMouseCursor() not implemented on target platform");
 }
 
 // Register all input events
-void PollInputEvents(void)
+void RaylibPollInputEvents(void)
 {
-#if defined(SUPPORT_GESTURES_SYSTEM)
+#if defined(RAYLIB_SUPPORT_GESTURES_SYSTEM)
     // NOTE: Gestures update must be called every frame to reset gestures correctly
     // because ProcessGestureEvent() is just called on an event, not every frame
     UpdateGestures();
@@ -645,27 +645,27 @@ void PollInputEvents(void)
     CORE.Input.Keyboard.keyPressedQueueCount = 0;
     CORE.Input.Keyboard.charPressedQueueCount = 0;
     // Reset key repeats
-    for (int i = 0; i < MAX_KEYBOARD_KEYS; i++) CORE.Input.Keyboard.keyRepeatInFrame[i] = 0;
+    for (int i = 0; i < RAYLIB_MAX_KEYBOARD_KEYS; i++) CORE.Input.Keyboard.keyRepeatInFrame[i] = 0;
 
     // Reset last gamepad button/axis registered state
-    CORE.Input.Gamepad.lastButtonPressed = 0;       // GAMEPAD_BUTTON_UNKNOWN
+    CORE.Input.Gamepad.lastButtonPressed = 0;       // RAYLIB_GAMEPAD_BUTTON_UNKNOWN
     //CORE.Input.Gamepad.axisCount = 0;
 
-    for (int i = 0; i < MAX_GAMEPADS; i++)
+    for (int i = 0; i < RAYLIB_MAX_GAMEPADS; i++)
     {
         if (CORE.Input.Gamepad.ready[i])     // Check if gamepad is available
         {
             // Register previous gamepad states
-            for (int k = 0; k < MAX_GAMEPAD_BUTTONS; k++)
+            for (int k = 0; k < RAYLIB_MAX_GAMEPAD_BUTTONS; k++)
                 CORE.Input.Gamepad.previousButtonState[i][k] = CORE.Input.Gamepad.currentButtonState[i][k];
         }
     }
     
     // Register previous touch states
-    for (int i = 0; i < MAX_TOUCH_POINTS; i++) CORE.Input.Touch.previousTouchState[i] = CORE.Input.Touch.currentTouchState[i];
+    for (int i = 0; i < RAYLIB_MAX_TOUCH_POINTS; i++) CORE.Input.Touch.previousTouchState[i] = CORE.Input.Touch.currentTouchState[i];
 
     // Reset touch positions
-    //for (int i = 0; i < MAX_TOUCH_POINTS; i++) CORE.Input.Touch.position[i] = (Vector2){ 0, 0 };
+    //for (int i = 0; i < RAYLIB_MAX_TOUCH_POINTS; i++) CORE.Input.Touch.position[i] = (RaylibVector2){ 0, 0 };
 
     // Register previous keys states
     // NOTE: Android supports up to 260 keys
@@ -713,19 +713,19 @@ int InitPlatform(void)
 
     int orientation = AConfiguration_getOrientation(platform.app->config);
 
-    if (orientation == ACONFIGURATION_ORIENTATION_PORT) TRACELOG(LOG_INFO, "ANDROID: Window orientation set as portrait");
-    else if (orientation == ACONFIGURATION_ORIENTATION_LAND) TRACELOG(LOG_INFO, "ANDROID: Window orientation set as landscape");
+    if (orientation == ACONFIGURATION_ORIENTATION_PORT) RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "ANDROID: Window orientation set as portrait");
+    else if (orientation == ACONFIGURATION_ORIENTATION_LAND) RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "ANDROID: Window orientation set as landscape");
 
     // TODO: Automatic orientation doesn't seem to work
     if (CORE.Window.screen.width <= CORE.Window.screen.height)
     {
         AConfiguration_setOrientation(platform.app->config, ACONFIGURATION_ORIENTATION_PORT);
-        TRACELOG(LOG_WARNING, "ANDROID: Window orientation changed to portrait");
+        RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "ANDROID: Window orientation changed to portrait");
     }
     else
     {
         AConfiguration_setOrientation(platform.app->config, ACONFIGURATION_ORIENTATION_LAND);
-        TRACELOG(LOG_WARNING, "ANDROID: Window orientation changed to landscape");
+        RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "ANDROID: Window orientation changed to landscape");
     }
 
     //AConfiguration_getDensity(platform.app->config);
@@ -734,10 +734,10 @@ int InitPlatform(void)
     //AConfiguration_getScreenLong(platform.app->config);
 
     // Set some default window flags
-    CORE.Window.flags &= ~FLAG_WINDOW_HIDDEN;       // false
-    CORE.Window.flags &= ~FLAG_WINDOW_MINIMIZED;    // false
-    CORE.Window.flags |= FLAG_WINDOW_MAXIMIZED;     // true
-    CORE.Window.flags &= ~FLAG_WINDOW_UNFOCUSED;    // false
+    CORE.Window.flags &= ~RAYLIB_FLAG_WINDOW_HIDDEN;       // false
+    CORE.Window.flags &= ~RAYLIB_FLAG_WINDOW_MINIMIZED;    // false
+    CORE.Window.flags |= RAYLIB_FLAG_WINDOW_MAXIMIZED;     // true
+    CORE.Window.flags &= ~RAYLIB_FLAG_WINDOW_UNFOCUSED;    // false
     //----------------------------------------------------------------------------
 
     // Initialize App command system
@@ -758,7 +758,7 @@ int InitPlatform(void)
     CORE.Storage.basePath = platform.app->activity->internalDataPath;   // Define base path for storage
     //----------------------------------------------------------------------------
 
-    TRACELOG(LOG_INFO, "PLATFORM: ANDROID: Initialized successfully");
+    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "PLATFORM: ANDROID: Initialized successfully");
 
     // Android ALooper_pollAll() variables
     int pollResult = 0;
@@ -813,23 +813,23 @@ void ClosePlatform(void)
 static int InitGraphicsDevice(void)
 {
     CORE.Window.fullscreen = true;
-    CORE.Window.flags |= FLAG_FULLSCREEN_MODE;
+    CORE.Window.flags |= RAYLIB_FLAG_FULLSCREEN_MODE;
 
     EGLint samples = 0;
     EGLint sampleBuffer = 0;
-    if (CORE.Window.flags & FLAG_MSAA_4X_HINT)
+    if (CORE.Window.flags & RAYLIB_FLAG_MSAA_4X_HINT)
     {
         samples = 4;
         sampleBuffer = 1;
-        TRACELOG(LOG_INFO, "DISPLAY: Trying to enable MSAA x4");
+        RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "DISPLAY: Trying to enable MSAA x4");
     }
 
     const EGLint framebufferAttribs[] =
     {
         EGL_RENDERABLE_TYPE, (rlGetVersion() == RL_OPENGL_ES_30)? EGL_OPENGL_ES3_BIT : EGL_OPENGL_ES2_BIT,      // Type of context support
-        EGL_RED_SIZE, 8,            // RED color bit depth (alternative: 5)
-        EGL_GREEN_SIZE, 8,          // GREEN color bit depth (alternative: 6)
-        EGL_BLUE_SIZE, 8,           // BLUE color bit depth (alternative: 5)
+        EGL_RED_SIZE, 8,            // RAYLIB_RED color bit depth (alternative: 5)
+        EGL_GREEN_SIZE, 8,          // RAYLIB_GREEN color bit depth (alternative: 6)
+        EGL_BLUE_SIZE, 8,           // RAYLIB_BLUE color bit depth (alternative: 5)
         //EGL_TRANSPARENT_TYPE, EGL_NONE, // Request transparent framebuffer (EGL_TRANSPARENT_RGB does not work on RPI)
         EGL_DEPTH_SIZE, 16,         // Depth buffer size (Required to use Depth testing!)
         //EGL_STENCIL_SIZE, 8,      // Stencil buffer size
@@ -850,7 +850,7 @@ static int InitGraphicsDevice(void)
     platform.device = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (platform.device == EGL_NO_DISPLAY)
     {
-        TRACELOG(LOG_WARNING, "DISPLAY: Failed to initialize EGL device");
+        RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "DISPLAY: Failed to initialize EGL device");
         return -1;
     }
 
@@ -858,7 +858,7 @@ static int InitGraphicsDevice(void)
     if (eglInitialize(platform.device, NULL, NULL) == EGL_FALSE)
     {
         // If all of the calls to eglInitialize returned EGL_FALSE then an error has occurred.
-        TRACELOG(LOG_WARNING, "DISPLAY: Failed to initialize EGL device");
+        RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "DISPLAY: Failed to initialize EGL device");
         return -1;
     }
 
@@ -872,7 +872,7 @@ static int InitGraphicsDevice(void)
     platform.context = eglCreateContext(platform.device, platform.config, EGL_NO_CONTEXT, contextAttribs);
     if (platform.context == EGL_NO_CONTEXT)
     {
-        TRACELOG(LOG_WARNING, "DISPLAY: Failed to create EGL context");
+        RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "DISPLAY: Failed to create EGL context");
         return -1;
     }
 
@@ -901,7 +901,7 @@ static int InitGraphicsDevice(void)
 
     if (eglMakeCurrent(platform.device, platform.surface, platform.surface, platform.context) == EGL_FALSE)
     {
-        TRACELOG(LOG_WARNING, "DISPLAY: Failed to attach EGL rendering context to EGL surface");
+        RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "DISPLAY: Failed to attach EGL rendering context to EGL surface");
         return -1;
     }
     else
@@ -911,11 +911,11 @@ static int InitGraphicsDevice(void)
         CORE.Window.currentFbo.width = CORE.Window.render.width;
         CORE.Window.currentFbo.height = CORE.Window.render.height;
 
-        TRACELOG(LOG_INFO, "DISPLAY: Device initialized successfully");
-        TRACELOG(LOG_INFO, "    > Display size: %i x %i", CORE.Window.display.width, CORE.Window.display.height);
-        TRACELOG(LOG_INFO, "    > Screen size:  %i x %i", CORE.Window.screen.width, CORE.Window.screen.height);
-        TRACELOG(LOG_INFO, "    > Render size:  %i x %i", CORE.Window.render.width, CORE.Window.render.height);
-        TRACELOG(LOG_INFO, "    > Viewport offsets: %i, %i", CORE.Window.renderOffset.x, CORE.Window.renderOffset.y);
+        RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "DISPLAY: Device initialized successfully");
+        RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "    > Display size: %i x %i", CORE.Window.display.width, CORE.Window.display.height);
+        RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "    > Screen size:  %i x %i", CORE.Window.screen.width, CORE.Window.screen.height);
+        RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "    > Render size:  %i x %i", CORE.Window.render.width, CORE.Window.render.height);
+        RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "    > Viewport offsets: %i, %i", CORE.Window.renderOffset.x, CORE.Window.renderOffset.y);
     }
 
     // Load OpenGL extensions
@@ -924,7 +924,7 @@ static int InitGraphicsDevice(void)
 
     CORE.Window.ready = true;
 
-    if ((CORE.Window.flags & FLAG_WINDOW_MINIMIZED) > 0) MinimizeWindow();
+    if ((CORE.Window.flags & RAYLIB_FLAG_WINDOW_MINIMIZED) > 0) RaylibMinimizeWindow();
 
     return 0;
 }
@@ -982,36 +982,36 @@ static void AndroidCommandCallback(struct android_app *app, int32_t cmd)
                     // Initialize hi-res timer
                     InitTimer();
 
-                #if defined(SUPPORT_MODULE_RTEXT) && defined(SUPPORT_DEFAULT_FONT)
+                #if defined(RAYLIB_SUPPORT_MODULE_RTEXT) && defined(RAYLIB_SUPPORT_DEFAULT_FONT)
                     // Load default font
                     // WARNING: External function: Module required: rtext
                     LoadFontDefault();
-                    #if defined(SUPPORT_MODULE_RSHAPES)
+                    #if defined(RAYLIB_SUPPORT_MODULE_RSHAPES)
                     // Set font white rectangle for shapes drawing, so shapes and text can be batched together
                     // WARNING: rshapes module is required, if not available, default internal white rectangle is used
-                    Rectangle rec = GetFontDefault().recs[95];
-                    if (CORE.Window.flags & FLAG_MSAA_4X_HINT)
+                    RaylibRectangle rec = RaylibGetFontDefault().recs[95];
+                    if (CORE.Window.flags & RAYLIB_FLAG_MSAA_4X_HINT)
                     {
                         // NOTE: We try to maxime rec padding to avoid pixel bleeding on MSAA filtering
-                        SetShapesTexture(GetFontDefault().texture, (Rectangle){ rec.x + 2, rec.y + 2, 1, 1 });
+                        RaylibSetShapesTexture(RaylibGetFontDefault().texture, (RaylibRectangle){ rec.x + 2, rec.y + 2, 1, 1 });
                     }
                     else
                     {
                         // NOTE: We set up a 1px padding on char rectangle to avoid pixel bleeding
-                        SetShapesTexture(GetFontDefault().texture, (Rectangle){ rec.x + 1, rec.y + 1, rec.width - 2, rec.height - 2 });
+                        RaylibSetShapesTexture(RaylibGetFontDefault().texture, (RaylibRectangle){ rec.x + 1, rec.y + 1, rec.width - 2, rec.height - 2 });
                     }
                     #endif
                 #else
-                    #if defined(SUPPORT_MODULE_RSHAPES)
+                    #if defined(RAYLIB_SUPPORT_MODULE_RSHAPES)
                     // Set default texture and rectangle to be used for shapes drawing
                     // NOTE: rlgl default texture is a 1x1 pixel UNCOMPRESSED_R8G8B8A8
-                    Texture2D texture = { rlGetTextureIdDefault(), 1, 1, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 };
-                    SetShapesTexture(texture, (Rectangle){ 0.0f, 0.0f, 1.0f, 1.0f });    // WARNING: Module required: rshapes
+                    Texture2D texture = { rlGetTextureIdDefault(), 1, 1, 1, RAYLIB_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 };
+                    RaylibSetShapesTexture(texture, (RaylibRectangle){ 0.0f, 0.0f, 1.0f, 1.0f });    // WARNING: Module required: rshapes
                     #endif
                 #endif
 
                     // Initialize random seed
-                    SetRandomSeed((unsigned int)time(NULL));
+                    RaylibSetRandomSeed((unsigned int)time(NULL));
 
                     // TODO: GPU assets reload in case of lost focus (lost context)
                     // NOTE: This problem has been solved just unbinding and rebinding context from display
@@ -1023,7 +1023,7 @@ static void AndroidCommandCallback(struct android_app *app, int32_t cmd)
                             // TODO: Unload old asset if required
 
                             // Load texture again to pointed texture
-                            (*textureAsset + i) = LoadTexture(assetPath[i]);
+                            (*textureAsset + i) = RaylibLoadTexture(assetPath[i]);
                         }
                     }
                     */
@@ -1033,15 +1033,15 @@ static void AndroidCommandCallback(struct android_app *app, int32_t cmd)
         case APP_CMD_GAINED_FOCUS:
         {
             platform.appEnabled = true;
-            CORE.Window.flags &= ~FLAG_WINDOW_UNFOCUSED;
-            //ResumeMusicStream();
+            CORE.Window.flags &= ~RAYLIB_FLAG_WINDOW_UNFOCUSED;
+            //RaylibResumeMusicStream();
         } break;
         case APP_CMD_PAUSE: break;
         case APP_CMD_LOST_FOCUS:
         {
             platform.appEnabled = false;
-            CORE.Window.flags |= FLAG_WINDOW_UNFOCUSED;
-            //PauseMusicStream();
+            CORE.Window.flags |= RAYLIB_FLAG_WINDOW_UNFOCUSED;
+            //RaylibPauseMusicStream();
         } break;
         case APP_CMD_TERM_WINDOW:
         {
@@ -1062,7 +1062,7 @@ static void AndroidCommandCallback(struct android_app *app, int32_t cmd)
                 platform.contextRebindRequired = true;
             }
             // If 'platform.device' is already set to 'EGL_NO_DISPLAY'
-            // this means that the user has already called 'CloseWindow()'
+            // this means that the user has already called 'RaylibCloseWindow()'
 
         } break;
         case APP_CMD_SAVE_STATE: break;
@@ -1080,29 +1080,29 @@ static void AndroidCommandCallback(struct android_app *app, int32_t cmd)
 }
 
 // ANDROID: Map Android gamepad button to raylib gamepad button
-static GamepadButton AndroidTranslateGamepadButton(int button)
+static RaylibGamepadButton AndroidTranslateGamepadButton(int button)
 {
     switch (button)
     {
-        case AKEYCODE_BUTTON_A: return GAMEPAD_BUTTON_RIGHT_FACE_DOWN;
-        case AKEYCODE_BUTTON_B: return GAMEPAD_BUTTON_RIGHT_FACE_RIGHT;
-        case AKEYCODE_BUTTON_X: return GAMEPAD_BUTTON_RIGHT_FACE_LEFT;
-        case AKEYCODE_BUTTON_Y: return GAMEPAD_BUTTON_RIGHT_FACE_UP;
-        case AKEYCODE_BUTTON_L1: return GAMEPAD_BUTTON_LEFT_TRIGGER_1;
-        case AKEYCODE_BUTTON_R1: return GAMEPAD_BUTTON_RIGHT_TRIGGER_1;
-        case AKEYCODE_BUTTON_L2: return GAMEPAD_BUTTON_LEFT_TRIGGER_2;
-        case AKEYCODE_BUTTON_R2: return GAMEPAD_BUTTON_RIGHT_TRIGGER_2;
-        case AKEYCODE_BUTTON_THUMBL: return GAMEPAD_BUTTON_LEFT_THUMB;
-        case AKEYCODE_BUTTON_THUMBR: return GAMEPAD_BUTTON_RIGHT_THUMB;
-        case AKEYCODE_BUTTON_START: return GAMEPAD_BUTTON_MIDDLE_RIGHT;
-        case AKEYCODE_BUTTON_SELECT: return GAMEPAD_BUTTON_MIDDLE_LEFT;
-        case AKEYCODE_BUTTON_MODE: return GAMEPAD_BUTTON_MIDDLE;
+        case AKEYCODE_BUTTON_A: return RAYLIB_GAMEPAD_BUTTON_RIGHT_FACE_DOWN;
+        case AKEYCODE_BUTTON_B: return RAYLIB_GAMEPAD_BUTTON_RIGHT_FACE_RIGHT;
+        case AKEYCODE_BUTTON_X: return RAYLIB_GAMEPAD_BUTTON_RIGHT_FACE_LEFT;
+        case AKEYCODE_BUTTON_Y: return RAYLIB_GAMEPAD_BUTTON_RIGHT_FACE_UP;
+        case AKEYCODE_BUTTON_L1: return RAYLIB_GAMEPAD_BUTTON_LEFT_TRIGGER_1;
+        case AKEYCODE_BUTTON_R1: return RAYLIB_GAMEPAD_BUTTON_RIGHT_TRIGGER_1;
+        case AKEYCODE_BUTTON_L2: return RAYLIB_GAMEPAD_BUTTON_LEFT_TRIGGER_2;
+        case AKEYCODE_BUTTON_R2: return RAYLIB_GAMEPAD_BUTTON_RIGHT_TRIGGER_2;
+        case AKEYCODE_BUTTON_THUMBL: return RAYLIB_GAMEPAD_BUTTON_LEFT_THUMB;
+        case AKEYCODE_BUTTON_THUMBR: return RAYLIB_GAMEPAD_BUTTON_RIGHT_THUMB;
+        case AKEYCODE_BUTTON_START: return RAYLIB_GAMEPAD_BUTTON_MIDDLE_RIGHT;
+        case AKEYCODE_BUTTON_SELECT: return RAYLIB_GAMEPAD_BUTTON_MIDDLE_LEFT;
+        case AKEYCODE_BUTTON_MODE: return RAYLIB_GAMEPAD_BUTTON_MIDDLE;
         // On some (most?) gamepads dpad events are reported as axis motion instead
-        case AKEYCODE_DPAD_DOWN: return GAMEPAD_BUTTON_LEFT_FACE_DOWN;
-        case AKEYCODE_DPAD_RIGHT: return GAMEPAD_BUTTON_LEFT_FACE_RIGHT;
-        case AKEYCODE_DPAD_LEFT: return GAMEPAD_BUTTON_LEFT_FACE_LEFT;
-        case AKEYCODE_DPAD_UP: return GAMEPAD_BUTTON_LEFT_FACE_UP;
-        default: return GAMEPAD_BUTTON_UNKNOWN;
+        case AKEYCODE_DPAD_DOWN: return RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_DOWN;
+        case AKEYCODE_DPAD_RIGHT: return RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_RIGHT;
+        case AKEYCODE_DPAD_LEFT: return RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_LEFT;
+        case AKEYCODE_DPAD_UP: return RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_UP;
+        default: return RAYLIB_GAMEPAD_BUTTON_UNKNOWN;
     }
 }
 
@@ -1124,17 +1124,17 @@ static int32_t AndroidInputCallback(struct android_app *app, AInputEvent *event)
             // For now we'll assume a single gamepad which we "detect" on its input event
             CORE.Input.Gamepad.ready[0] = true;
 
-            CORE.Input.Gamepad.axisState[0][GAMEPAD_AXIS_LEFT_X] = AMotionEvent_getAxisValue(
+            CORE.Input.Gamepad.axisState[0][RAYLIB_GAMEPAD_AXIS_LEFT_X] = AMotionEvent_getAxisValue(
                     event, AMOTION_EVENT_AXIS_X, 0);
-            CORE.Input.Gamepad.axisState[0][GAMEPAD_AXIS_LEFT_Y] = AMotionEvent_getAxisValue(
+            CORE.Input.Gamepad.axisState[0][RAYLIB_GAMEPAD_AXIS_LEFT_Y] = AMotionEvent_getAxisValue(
                     event, AMOTION_EVENT_AXIS_Y, 0);
-            CORE.Input.Gamepad.axisState[0][GAMEPAD_AXIS_RIGHT_X] = AMotionEvent_getAxisValue(
+            CORE.Input.Gamepad.axisState[0][RAYLIB_GAMEPAD_AXIS_RIGHT_X] = AMotionEvent_getAxisValue(
                     event, AMOTION_EVENT_AXIS_Z, 0);
-            CORE.Input.Gamepad.axisState[0][GAMEPAD_AXIS_RIGHT_Y] = AMotionEvent_getAxisValue(
+            CORE.Input.Gamepad.axisState[0][RAYLIB_GAMEPAD_AXIS_RIGHT_Y] = AMotionEvent_getAxisValue(
                     event, AMOTION_EVENT_AXIS_RZ, 0);
-            CORE.Input.Gamepad.axisState[0][GAMEPAD_AXIS_LEFT_TRIGGER] = AMotionEvent_getAxisValue(
+            CORE.Input.Gamepad.axisState[0][RAYLIB_GAMEPAD_AXIS_LEFT_TRIGGER] = AMotionEvent_getAxisValue(
                     event, AMOTION_EVENT_AXIS_BRAKE, 0) * 2.0f - 1.0f;
-            CORE.Input.Gamepad.axisState[0][GAMEPAD_AXIS_RIGHT_TRIGGER] = AMotionEvent_getAxisValue(
+            CORE.Input.Gamepad.axisState[0][RAYLIB_GAMEPAD_AXIS_RIGHT_TRIGGER] = AMotionEvent_getAxisValue(
                     event, AMOTION_EVENT_AXIS_GAS, 0) * 2.0f - 1.0f;
 
             // dpad is reported as an axis on android
@@ -1143,34 +1143,34 @@ static int32_t AndroidInputCallback(struct android_app *app, AInputEvent *event)
 
             if (dpadX == 1.0f)
             {
-                CORE.Input.Gamepad.currentButtonState[0][GAMEPAD_BUTTON_LEFT_FACE_RIGHT] = 1;
-                CORE.Input.Gamepad.currentButtonState[0][GAMEPAD_BUTTON_LEFT_FACE_LEFT] = 0;
+                CORE.Input.Gamepad.currentButtonState[0][RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_RIGHT] = 1;
+                CORE.Input.Gamepad.currentButtonState[0][RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_LEFT] = 0;
             }
             else if (dpadX == -1.0f)
             {
-                CORE.Input.Gamepad.currentButtonState[0][GAMEPAD_BUTTON_LEFT_FACE_RIGHT] = 0;
-                CORE.Input.Gamepad.currentButtonState[0][GAMEPAD_BUTTON_LEFT_FACE_LEFT] = 1;
+                CORE.Input.Gamepad.currentButtonState[0][RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_RIGHT] = 0;
+                CORE.Input.Gamepad.currentButtonState[0][RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_LEFT] = 1;
             }
             else
             {
-                CORE.Input.Gamepad.currentButtonState[0][GAMEPAD_BUTTON_LEFT_FACE_RIGHT] = 0;
-                CORE.Input.Gamepad.currentButtonState[0][GAMEPAD_BUTTON_LEFT_FACE_LEFT] = 0;
+                CORE.Input.Gamepad.currentButtonState[0][RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_RIGHT] = 0;
+                CORE.Input.Gamepad.currentButtonState[0][RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_LEFT] = 0;
             }
 
             if (dpadY == 1.0f)
             {
-                CORE.Input.Gamepad.currentButtonState[0][GAMEPAD_BUTTON_LEFT_FACE_DOWN] = 1;
-                CORE.Input.Gamepad.currentButtonState[0][GAMEPAD_BUTTON_LEFT_FACE_UP] = 0;
+                CORE.Input.Gamepad.currentButtonState[0][RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_DOWN] = 1;
+                CORE.Input.Gamepad.currentButtonState[0][RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_UP] = 0;
             }
             else if (dpadY == -1.0f)
             {
-                CORE.Input.Gamepad.currentButtonState[0][GAMEPAD_BUTTON_LEFT_FACE_DOWN] = 0;
-                CORE.Input.Gamepad.currentButtonState[0][GAMEPAD_BUTTON_LEFT_FACE_UP] = 1;
+                CORE.Input.Gamepad.currentButtonState[0][RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_DOWN] = 0;
+                CORE.Input.Gamepad.currentButtonState[0][RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_UP] = 1;
             }
             else
             {
-                CORE.Input.Gamepad.currentButtonState[0][GAMEPAD_BUTTON_LEFT_FACE_DOWN] = 0;
-                CORE.Input.Gamepad.currentButtonState[0][GAMEPAD_BUTTON_LEFT_FACE_UP] = 0;
+                CORE.Input.Gamepad.currentButtonState[0][RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_DOWN] = 0;
+                CORE.Input.Gamepad.currentButtonState[0][RAYLIB_GAMEPAD_BUTTON_LEFT_FACE_UP] = 0;
             }
 
             return 1; // Handled gamepad axis motion
@@ -1188,9 +1188,9 @@ static int32_t AndroidInputCallback(struct android_app *app, AInputEvent *event)
             // For now we'll assume a single gamepad which we "detect" on its input event
             CORE.Input.Gamepad.ready[0] = true;
 
-            GamepadButton button = AndroidTranslateGamepadButton(keycode);
+            RaylibGamepadButton button = AndroidTranslateGamepadButton(keycode);
 
-            if (button == GAMEPAD_BUTTON_UNKNOWN) return 1;
+            if (button == RAYLIB_GAMEPAD_BUTTON_UNKNOWN) return 1;
 
             if (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_DOWN)
             {
@@ -1201,8 +1201,8 @@ static int32_t AndroidInputCallback(struct android_app *app, AInputEvent *event)
             return 1; // Handled gamepad button
         }
 
-        KeyboardKey key = (keycode > 0 && keycode < KEYCODE_MAP_SIZE) ? KeycodeMap[keycode] : KEY_NULL;
-        if (key != KEY_NULL)
+        RaylibKeyboardKey key = (keycode > 0 && keycode < KEYCODE_MAP_SIZE) ? KeycodeMap[keycode] : RAYLIB_KEY_NULL;
+        if (key != RAYLIB_KEY_NULL)
         {
             // Save current key and its state
             // NOTE: Android key action is 0 for down and 1 for up
@@ -1243,15 +1243,15 @@ static int32_t AndroidInputCallback(struct android_app *app, AInputEvent *event)
     // Register touch points count
     CORE.Input.Touch.pointCount = AMotionEvent_getPointerCount(event);
 
-    for (int i = 0; (i < CORE.Input.Touch.pointCount) && (i < MAX_TOUCH_POINTS); i++)
+    for (int i = 0; (i < CORE.Input.Touch.pointCount) && (i < RAYLIB_MAX_TOUCH_POINTS); i++)
     {
         // Register touch points id
         CORE.Input.Touch.pointId[i] = AMotionEvent_getPointerId(event, i);
 
         // Register touch points position
-        CORE.Input.Touch.position[i] = (Vector2){ AMotionEvent_getX(event, i), AMotionEvent_getY(event, i) };
+        CORE.Input.Touch.position[i] = (RaylibVector2){ AMotionEvent_getX(event, i), AMotionEvent_getY(event, i) };
 
-        // Normalize CORE.Input.Touch.position[i] for CORE.Window.screen.width and CORE.Window.screen.height
+        // RaylibNormalize CORE.Input.Touch.position[i] for CORE.Window.screen.width and CORE.Window.screen.height
         float widthRatio = (float)(CORE.Window.screen.width + CORE.Window.renderOffset.x) / (float)CORE.Window.display.width;
         float heightRatio = (float)(CORE.Window.screen.height + CORE.Window.renderOffset.y) / (float)CORE.Window.display.height;
         CORE.Input.Touch.position[i].x = CORE.Input.Touch.position[i].x * widthRatio - (float)CORE.Window.renderOffset.x / 2;
@@ -1261,26 +1261,26 @@ static int32_t AndroidInputCallback(struct android_app *app, AInputEvent *event)
     int32_t action = AMotionEvent_getAction(event);
     unsigned int flags = action & AMOTION_EVENT_ACTION_MASK;
 
-#if defined(SUPPORT_GESTURES_SYSTEM)
+#if defined(RAYLIB_SUPPORT_GESTURES_SYSTEM)
     GestureEvent gestureEvent = { 0 };
 
     gestureEvent.pointCount = CORE.Input.Touch.pointCount;
 
     // Register touch actions
-    if (flags == AMOTION_EVENT_ACTION_DOWN) gestureEvent.touchAction = TOUCH_ACTION_DOWN;
-    else if (flags == AMOTION_EVENT_ACTION_UP) gestureEvent.touchAction = TOUCH_ACTION_UP;
-    else if (flags == AMOTION_EVENT_ACTION_MOVE) gestureEvent.touchAction = TOUCH_ACTION_MOVE;
-    else if (flags == AMOTION_EVENT_ACTION_CANCEL) gestureEvent.touchAction = TOUCH_ACTION_CANCEL;
+    if (flags == AMOTION_EVENT_ACTION_DOWN) gestureEvent.touchAction = RAYLIB_TOUCH_ACTION_DOWN;
+    else if (flags == AMOTION_EVENT_ACTION_UP) gestureEvent.touchAction = RAYLIB_TOUCH_ACTION_UP;
+    else if (flags == AMOTION_EVENT_ACTION_MOVE) gestureEvent.touchAction = RAYLIB_TOUCH_ACTION_MOVE;
+    else if (flags == AMOTION_EVENT_ACTION_CANCEL) gestureEvent.touchAction = RAYLIB_TOUCH_ACTION_CANCEL;
 
-    for (int i = 0; (i < gestureEvent.pointCount) && (i < MAX_TOUCH_POINTS); i++)
+    for (int i = 0; (i < gestureEvent.pointCount) && (i < RAYLIB_MAX_TOUCH_POINTS); i++)
     {
         gestureEvent.pointId[i] = CORE.Input.Touch.pointId[i];
         gestureEvent.position[i] = CORE.Input.Touch.position[i];
-        gestureEvent.position[i].x /= (float)GetScreenWidth();
-        gestureEvent.position[i].y /= (float)GetScreenHeight();
+        gestureEvent.position[i].x /= (float)RaylibGetScreenWidth();
+        gestureEvent.position[i].y /= (float)RaylibGetScreenHeight();
     }
 
-    // Gesture data is sent to gestures system for processing
+    // RaylibGesture data is sent to gestures system for processing
     ProcessGestureEvent(gestureEvent);
 #endif
 
@@ -1289,7 +1289,7 @@ static int32_t AndroidInputCallback(struct android_app *app, AInputEvent *event)
     if (flags == AMOTION_EVENT_ACTION_POINTER_UP || flags == AMOTION_EVENT_ACTION_UP)
     {
         // One of the touchpoints is released, remove it from touch point arrays
-        for (int i = pointerIndex; (i < CORE.Input.Touch.pointCount - 1) && (i < MAX_TOUCH_POINTS); i++)
+        for (int i = pointerIndex; (i < CORE.Input.Touch.pointCount - 1) && (i < RAYLIB_MAX_TOUCH_POINTS); i++)
         {
             CORE.Input.Touch.pointId[i] = CORE.Input.Touch.pointId[i+1];
             CORE.Input.Touch.position[i] = CORE.Input.Touch.position[i+1];
@@ -1301,8 +1301,8 @@ static int32_t AndroidInputCallback(struct android_app *app, AInputEvent *event)
     // When all touchpoints are tapped and released really quickly, this event is generated
     if (flags == AMOTION_EVENT_ACTION_CANCEL) CORE.Input.Touch.pointCount = 0;
 
-    if (CORE.Input.Touch.pointCount > 0) CORE.Input.Touch.currentTouchState[MOUSE_BUTTON_LEFT] = 1;
-    else CORE.Input.Touch.currentTouchState[MOUSE_BUTTON_LEFT] = 0;
+    if (CORE.Input.Touch.pointCount > 0) CORE.Input.Touch.currentTouchState[RAYLIB_MOUSE_BUTTON_LEFT] = 1;
+    else CORE.Input.Touch.currentTouchState[RAYLIB_MOUSE_BUTTON_LEFT] = 0;
 
     // Stores the previous position of touch[0] only while it's active to calculate the delta.
     if (flags == AMOTION_EVENT_ACTION_MOVE)
@@ -1316,7 +1316,7 @@ static int32_t AndroidInputCallback(struct android_app *app, AInputEvent *event)
 
     // Map touch[0] as mouse input for convenience
     CORE.Input.Mouse.currentPosition = CORE.Input.Touch.position[0];
-    CORE.Input.Mouse.currentWheelMove = (Vector2){ 0.0f, 0.0f };
+    CORE.Input.Mouse.currentWheelMove = (RaylibVector2){ 0.0f, 0.0f };
 
     return 0;
 }

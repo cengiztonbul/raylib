@@ -3,9 +3,9 @@
 *   raylib.utils - Some common utility functions
 *
 *   CONFIGURATION:
-*       #define SUPPORT_TRACELOG
-*           Show TraceLog() output messages
-*           NOTE: By default LOG_DEBUG traces not shown
+*       #define RAYLIB_SUPPORT_TRACELOG
+*           Show RaylibTraceLog() output messages
+*           NOTE: By default RAYLIB_LOG_DEBUG traces not shown
 *
 *
 *   LICENSE: zlib/libpng
@@ -38,7 +38,7 @@
 
 #include "utils.h"
 
-#if defined(PLATFORM_ANDROID)
+#if defined(RAYLIB_PLATFORM_ANDROID)
     #include <errno.h>                  // Required for: Android error types
     #include <android/log.h>            // Required for: Android log system: __android_log_vprint()
     #include <android/asset_manager.h>  // Required for: Android assets manager: AAsset, AAssetManager_open()...
@@ -52,32 +52,32 @@
 //----------------------------------------------------------------------------------
 // Defines and Macros
 //----------------------------------------------------------------------------------
-#ifndef MAX_TRACELOG_MSG_LENGTH
-    #define MAX_TRACELOG_MSG_LENGTH     256         // Max length of one trace-log message
+#ifndef RAYLIB_MAX_TRACELOG_MSG_LENGTH
+    #define RAYLIB_MAX_TRACELOG_MSG_LENGTH     256         // Max length of one trace-log message
 #endif
 
 //----------------------------------------------------------------------------------
 // Global Variables Definition
 //----------------------------------------------------------------------------------
-static int logTypeLevel = LOG_INFO;                 // Minimum log type level
+static int logTypeLevel = RAYLIB_LOG_INFO;                 // Minimum log type level
 
-static TraceLogCallback traceLog = NULL;            // TraceLog callback function pointer
-static LoadFileDataCallback loadFileData = NULL;    // LoadFileData callback function pointer
-static SaveFileDataCallback saveFileData = NULL;    // SaveFileText callback function pointer
-static LoadFileTextCallback loadFileText = NULL;    // LoadFileText callback function pointer
-static SaveFileTextCallback saveFileText = NULL;    // SaveFileText callback function pointer
+static RaylibTraceLogCallback traceLog = NULL;            // RaylibTraceLog callback function pointer
+static RaylibLoadFileDataCallback loadFileData = NULL;    // RaylibLoadFileData callback function pointer
+static RaylibSaveFileDataCallback saveFileData = NULL;    // RaylibSaveFileText callback function pointer
+static RaylibLoadFileTextCallback loadFileText = NULL;    // RaylibLoadFileText callback function pointer
+static RaylibSaveFileTextCallback saveFileText = NULL;    // RaylibSaveFileText callback function pointer
 
 //----------------------------------------------------------------------------------
 // Functions to set internal callbacks
 //----------------------------------------------------------------------------------
-void SetTraceLogCallback(TraceLogCallback callback) { traceLog = callback; }              // Set custom trace log
-void SetLoadFileDataCallback(LoadFileDataCallback callback) { loadFileData = callback; }  // Set custom file data loader
-void SetSaveFileDataCallback(SaveFileDataCallback callback) { saveFileData = callback; }  // Set custom file data saver
-void SetLoadFileTextCallback(LoadFileTextCallback callback) { loadFileText = callback; }  // Set custom file text loader
-void SetSaveFileTextCallback(SaveFileTextCallback callback) { saveFileText = callback; }  // Set custom file text saver
+void RaylibSetTraceLogCallback(RaylibTraceLogCallback callback) { traceLog = callback; }              // Set custom trace log
+void RaylibSetLoadFileDataCallback(RaylibLoadFileDataCallback callback) { loadFileData = callback; }  // Set custom file data loader
+void RaylibSetSaveFileDataCallback(RaylibSaveFileDataCallback callback) { saveFileData = callback; }  // Set custom file data saver
+void RaylibSetLoadFileTextCallback(RaylibLoadFileTextCallback callback) { loadFileText = callback; }  // Set custom file text loader
+void RaylibSetSaveFileTextCallback(RaylibSaveFileTextCallback callback) { saveFileText = callback; }  // Set custom file text saver
 
 
-#if defined(PLATFORM_ANDROID)
+#if defined(RAYLIB_PLATFORM_ANDROID)
 static AAssetManager *assetManager = NULL;          // Android assets manager pointer
 static const char *internalDataPath = NULL;         // Android internal data path
 #endif
@@ -85,7 +85,7 @@ static const char *internalDataPath = NULL;         // Android internal data pat
 //----------------------------------------------------------------------------------
 // Module specific Functions Declaration
 //----------------------------------------------------------------------------------
-#if defined(PLATFORM_ANDROID)
+#if defined(RAYLIB_PLATFORM_ANDROID)
 FILE *funopen(const void *cookie, int (*readfn)(void *, char *, int), int (*writefn)(void *, const char *, int),
               fpos_t (*seekfn)(void *, fpos_t, int), int (*closefn)(void *));
 
@@ -100,12 +100,12 @@ static int android_close(void *cookie);
 //----------------------------------------------------------------------------------
 
 // Set the current threshold (minimum) log level
-void SetTraceLogLevel(int logType) { logTypeLevel = logType; }
+void RaylibSetTraceLogLevel(int logType) { logTypeLevel = logType; }
 
-// Show trace log messages (LOG_INFO, LOG_WARNING, LOG_ERROR, LOG_DEBUG)
-void TraceLog(int logType, const char *text, ...)
+// Show trace log messages (RAYLIB_LOG_INFO, RAYLIB_LOG_WARNING, RAYLIB_LOG_ERROR, RAYLIB_LOG_DEBUG)
+void RaylibTraceLog(int logType, const char *text, ...)
 {
-#if defined(SUPPORT_TRACELOG)
+#if defined(RAYLIB_SUPPORT_TRACELOG)
     // Message has level below current threshold, don't emit
     if (logType < logTypeLevel) return;
 
@@ -119,33 +119,33 @@ void TraceLog(int logType, const char *text, ...)
         return;
     }
 
-#if defined(PLATFORM_ANDROID)
+#if defined(RAYLIB_PLATFORM_ANDROID)
     switch (logType)
     {
-        case LOG_TRACE: __android_log_vprint(ANDROID_LOG_VERBOSE, "raylib", text, args); break;
-        case LOG_DEBUG: __android_log_vprint(ANDROID_LOG_DEBUG, "raylib", text, args); break;
-        case LOG_INFO: __android_log_vprint(ANDROID_LOG_INFO, "raylib", text, args); break;
-        case LOG_WARNING: __android_log_vprint(ANDROID_LOG_WARN, "raylib", text, args); break;
-        case LOG_ERROR: __android_log_vprint(ANDROID_LOG_ERROR, "raylib", text, args); break;
-        case LOG_FATAL: __android_log_vprint(ANDROID_LOG_FATAL, "raylib", text, args); break;
+        case RAYLIB_LOG_TRACE: __android_log_vprint(ANDROID_LOG_VERBOSE, "raylib", text, args); break;
+        case RAYLIB_LOG_DEBUG: __android_log_vprint(ANDROID_LOG_DEBUG, "raylib", text, args); break;
+        case RAYLIB_LOG_INFO: __android_log_vprint(ANDROID_LOG_INFO, "raylib", text, args); break;
+        case RAYLIB_LOG_WARNING: __android_log_vprint(ANDROID_LOG_WARN, "raylib", text, args); break;
+        case RAYLIB_LOG_ERROR: __android_log_vprint(ANDROID_LOG_ERROR, "raylib", text, args); break;
+        case RAYLIB_LOG_FATAL: __android_log_vprint(ANDROID_LOG_FATAL, "raylib", text, args); break;
         default: break;
     }
 #else
-    char buffer[MAX_TRACELOG_MSG_LENGTH] = { 0 };
+    char buffer[RAYLIB_MAX_TRACELOG_MSG_LENGTH] = { 0 };
 
     switch (logType)
     {
-        case LOG_TRACE: strcpy(buffer, "TRACE: "); break;
-        case LOG_DEBUG: strcpy(buffer, "DEBUG: "); break;
-        case LOG_INFO: strcpy(buffer, "INFO: "); break;
-        case LOG_WARNING: strcpy(buffer, "WARNING: "); break;
-        case LOG_ERROR: strcpy(buffer, "ERROR: "); break;
-        case LOG_FATAL: strcpy(buffer, "FATAL: "); break;
+        case RAYLIB_LOG_TRACE: strcpy(buffer, "TRACE: "); break;
+        case RAYLIB_LOG_DEBUG: strcpy(buffer, "DEBUG: "); break;
+        case RAYLIB_LOG_INFO: strcpy(buffer, "INFO: "); break;
+        case RAYLIB_LOG_WARNING: strcpy(buffer, "WARNING: "); break;
+        case RAYLIB_LOG_ERROR: strcpy(buffer, "ERROR: "); break;
+        case RAYLIB_LOG_FATAL: strcpy(buffer, "FATAL: "); break;
         default: break;
     }
 
     unsigned int textSize = (unsigned int)strlen(text);
-    memcpy(buffer + strlen(buffer), text, (textSize < (MAX_TRACELOG_MSG_LENGTH - 12))? textSize : (MAX_TRACELOG_MSG_LENGTH - 12));
+    memcpy(buffer + strlen(buffer), text, (textSize < (RAYLIB_MAX_TRACELOG_MSG_LENGTH - 12))? textSize : (RAYLIB_MAX_TRACELOG_MSG_LENGTH - 12));
     strcat(buffer, "\n");
     vprintf(buffer, args);
     fflush(stdout);
@@ -153,34 +153,34 @@ void TraceLog(int logType, const char *text, ...)
 
     va_end(args);
 
-    if (logType == LOG_FATAL) exit(EXIT_FAILURE);  // If fatal logging, exit program
+    if (logType == RAYLIB_LOG_FATAL) exit(EXIT_FAILURE);  // If fatal logging, exit program
 
-#endif  // SUPPORT_TRACELOG
+#endif  // RAYLIB_SUPPORT_TRACELOG
 }
 
 // Internal memory allocator
 // NOTE: Initializes to zero by default
-void *MemAlloc(unsigned int size)
+void *RaylibMemAlloc(unsigned int size)
 {
     void *ptr = RL_CALLOC(size, 1);
     return ptr;
 }
 
 // Internal memory reallocator
-void *MemRealloc(void *ptr, unsigned int size)
+void *RaylibMemRealloc(void *ptr, unsigned int size)
 {
     void *ret = RL_REALLOC(ptr, size);
     return ret;
 }
 
 // Internal memory free
-void MemFree(void *ptr)
+void RaylibMemFree(void *ptr)
 {
     RL_FREE(ptr);
 }
 
 // Load data from file into a buffer
-unsigned char *LoadFileData(const char *fileName, int *dataSize)
+unsigned char *RaylibLoadFileData(const char *fileName, int *dataSize)
 {
     unsigned char *data = NULL;
     *dataSize = 0;
@@ -192,7 +192,7 @@ unsigned char *LoadFileData(const char *fileName, int *dataSize)
             data = loadFileData(fileName, dataSize);
             return data;
         }
-#if defined(SUPPORT_STANDARD_FILEIO)
+#if defined(RAYLIB_SUPPORT_STANDARD_FILEIO)
         FILE *file = fopen(fileName, "rb");
 
         if (file != NULL)
@@ -216,7 +216,7 @@ unsigned char *LoadFileData(const char *fileName, int *dataSize)
                     // dataSize is unified along raylib as a 'int' type, so, for file-sizes > INT_MAX (2147483647 bytes) we have a limitation
                     if (count > 2147483647)
                     {
-                        TRACELOG(LOG_WARNING, "FILEIO: [%s] File is bigger than 2147483647 bytes, avoid using LoadFileData()", fileName);
+                        RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: [%s] File is bigger than 2147483647 bytes, avoid using RaylibLoadFileData()", fileName);
 
                         RL_FREE(data);
                         data = NULL;
@@ -225,34 +225,34 @@ unsigned char *LoadFileData(const char *fileName, int *dataSize)
                     {
                         *dataSize = (int)count;
 
-                        if ((*dataSize) != size) TRACELOG(LOG_WARNING, "FILEIO: [%s] File partially loaded (%i bytes out of %i)", fileName, dataSize, count);
-                        else TRACELOG(LOG_INFO, "FILEIO: [%s] File loaded successfully", fileName);
+                        if ((*dataSize) != size) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: [%s] File partially loaded (%i bytes out of %i)", fileName, dataSize, count);
+                        else RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "FILEIO: [%s] File loaded successfully", fileName);
                     }
                 }
-                else TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to allocated memory for file reading", fileName);
+                else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: [%s] Failed to allocated memory for file reading", fileName);
             }
-            else TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to read file", fileName);
+            else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: [%s] Failed to read file", fileName);
 
             fclose(file);
         }
-        else TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to open file", fileName);
+        else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: [%s] Failed to open file", fileName);
 #else
-    TRACELOG(LOG_WARNING, "FILEIO: Standard file io not supported, use custom file callback");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: Standard file io not supported, use custom file callback");
 #endif
     }
-    else TRACELOG(LOG_WARNING, "FILEIO: File name provided is not valid");
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: File name provided is not valid");
 
     return data;
 }
 
-// Unload file data allocated by LoadFileData()
-void UnloadFileData(unsigned char *data)
+// Unload file data allocated by RaylibLoadFileData()
+void RaylibUnloadFileData(unsigned char *data)
 {
     RL_FREE(data);
 }
 
 // Save data to file from buffer
-bool SaveFileData(const char *fileName, void *data, int dataSize)
+bool RaylibSaveFileData(const char *fileName, void *data, int dataSize)
 {
     bool success = false;
 
@@ -262,7 +262,7 @@ bool SaveFileData(const char *fileName, void *data, int dataSize)
         {
             return saveFileData(fileName, data, dataSize);
         }
-#if defined(SUPPORT_STANDARD_FILEIO)
+#if defined(RAYLIB_SUPPORT_STANDARD_FILEIO)
         FILE *file = fopen(fileName, "wb");
 
         if (file != NULL)
@@ -271,25 +271,25 @@ bool SaveFileData(const char *fileName, void *data, int dataSize)
             // and expects a size_t input value but as dataSize is limited to INT_MAX (2147483647 bytes), there shouldn't be a problem
             int count = (int)fwrite(data, sizeof(unsigned char), dataSize, file);
 
-            if (count == 0) TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to write file", fileName);
-            else if (count != dataSize) TRACELOG(LOG_WARNING, "FILEIO: [%s] File partially written", fileName);
-            else TRACELOG(LOG_INFO, "FILEIO: [%s] File saved successfully", fileName);
+            if (count == 0) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: [%s] Failed to write file", fileName);
+            else if (count != dataSize) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: [%s] File partially written", fileName);
+            else RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "FILEIO: [%s] File saved successfully", fileName);
 
             int result = fclose(file);
             if (result == 0) success = true;
         }
-        else TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to open file", fileName);
+        else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: [%s] Failed to open file", fileName);
 #else
-    TRACELOG(LOG_WARNING, "FILEIO: Standard file io not supported, use custom file callback");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: Standard file io not supported, use custom file callback");
 #endif
     }
-    else TRACELOG(LOG_WARNING, "FILEIO: File name provided is not valid");
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: File name provided is not valid");
 
     return success;
 }
 
 // Export data to code (.h), returns true on success
-bool ExportDataAsCode(const unsigned char *data, int dataSize, const char *fileName)
+bool RaylibExportDataAsCode(const unsigned char *data, int dataSize, const char *fileName)
 {
     bool success = false;
 
@@ -315,7 +315,7 @@ bool ExportDataAsCode(const unsigned char *data, int dataSize, const char *fileN
 
     // Get file name from path
     char varFileName[256] = { 0 };
-    strcpy(varFileName, GetFileNameWithoutExt(fileName));
+    strcpy(varFileName, RaylibGetFileNameWithoutExt(fileName));
     for (int i = 0; varFileName[i] != '\0'; i++)
     {
         // Convert variable name to uppercase
@@ -331,19 +331,19 @@ bool ExportDataAsCode(const unsigned char *data, int dataSize, const char *fileN
     byteCount += sprintf(txtData + byteCount, "0x%x };\n", data[dataSize - 1]);
 
     // NOTE: Text data size exported is determined by '\0' (NULL) character
-    success = SaveFileText(fileName, txtData);
+    success = RaylibSaveFileText(fileName, txtData);
 
     RL_FREE(txtData);
 
-    if (success != 0) TRACELOG(LOG_INFO, "FILEIO: [%s] Data as code exported successfully", fileName);
-    else TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to export data as code", fileName);
+    if (success != 0) RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "FILEIO: [%s] Data as code exported successfully", fileName);
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: [%s] Failed to export data as code", fileName);
 
     return success;
 }
 
 // Load text data from file, returns a '\0' terminated string
 // NOTE: text chars array should be freed manually
-char *LoadFileText(const char *fileName)
+char *RaylibLoadFileText(const char *fileName)
 {
     char *text = NULL;
 
@@ -354,7 +354,7 @@ char *LoadFileText(const char *fileName)
             text = loadFileText(fileName);
             return text;
         }
-#if defined(SUPPORT_STANDARD_FILEIO)
+#if defined(RAYLIB_SUPPORT_STANDARD_FILEIO)
         FILE *file = fopen(fileName, "rt");
 
         if (file != NULL)
@@ -381,32 +381,32 @@ char *LoadFileText(const char *fileName)
                     // Zero-terminate the string
                     text[count] = '\0';
 
-                    TRACELOG(LOG_INFO, "FILEIO: [%s] Text file loaded successfully", fileName);
+                    RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "FILEIO: [%s] Text file loaded successfully", fileName);
                 }
-                else TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to allocated memory for file reading", fileName);
+                else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: [%s] Failed to allocated memory for file reading", fileName);
             }
-            else TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to read text file", fileName);
+            else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: [%s] Failed to read text file", fileName);
 
             fclose(file);
         }
-        else TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to open text file", fileName);
+        else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: [%s] Failed to open text file", fileName);
 #else
-    TRACELOG(LOG_WARNING, "FILEIO: Standard file io not supported, use custom file callback");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: Standard file io not supported, use custom file callback");
 #endif
     }
-    else TRACELOG(LOG_WARNING, "FILEIO: File name provided is not valid");
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: File name provided is not valid");
 
     return text;
 }
 
-// Unload file text data allocated by LoadFileText()
-void UnloadFileText(char *text)
+// Unload file text data allocated by RaylibLoadFileText()
+void RaylibUnloadFileText(char *text)
 {
     RL_FREE(text);
 }
 
 // Save text data to file (write), string must be '\0' terminated
-bool SaveFileText(const char *fileName, char *text)
+bool RaylibSaveFileText(const char *fileName, char *text)
 {
     bool success = false;
 
@@ -416,30 +416,30 @@ bool SaveFileText(const char *fileName, char *text)
         {
             return saveFileText(fileName, text);
         }
-#if defined(SUPPORT_STANDARD_FILEIO)
+#if defined(RAYLIB_SUPPORT_STANDARD_FILEIO)
         FILE *file = fopen(fileName, "wt");
 
         if (file != NULL)
         {
             int count = fprintf(file, "%s", text);
 
-            if (count < 0) TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to write text file", fileName);
-            else TRACELOG(LOG_INFO, "FILEIO: [%s] Text file saved successfully", fileName);
+            if (count < 0) RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: [%s] Failed to write text file", fileName);
+            else RAYLIB_TRACELOG(RAYLIB_LOG_INFO, "FILEIO: [%s] Text file saved successfully", fileName);
 
             int result = fclose(file);
             if (result == 0) success = true;
         }
-        else TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to open text file", fileName);
+        else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: [%s] Failed to open text file", fileName);
 #else
-    TRACELOG(LOG_WARNING, "FILEIO: Standard file io not supported, use custom file callback");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: Standard file io not supported, use custom file callback");
 #endif
     }
-    else TRACELOG(LOG_WARNING, "FILEIO: File name provided is not valid");
+    else RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "FILEIO: File name provided is not valid");
 
     return success;
 }
 
-#if defined(PLATFORM_ANDROID)
+#if defined(RAYLIB_PLATFORM_ANDROID)
 // Initialize asset manager from android app
 void InitAssetManager(AAssetManager *manager, const char *dataPath)
 {
@@ -458,7 +458,7 @@ FILE *android_fopen(const char *fileName, const char *mode)
         // write data when required using the standard stdio FILE access functions
         // Ref: https://stackoverflow.com/questions/11294487/android-writing-saving-files-from-native-code-only
         #undef fopen
-        return fopen(TextFormat("%s/%s", internalDataPath, fileName), mode);
+        return fopen(RaylibTextFormat("%s/%s", internalDataPath, fileName), mode);
         #define fopen(name, mode) android_fopen(name, mode)
     }
     else
@@ -475,17 +475,17 @@ FILE *android_fopen(const char *fileName, const char *mode)
         {
             #undef fopen
             // Just do a regular open if file is not found in the assets
-            return fopen(TextFormat("%s/%s", internalDataPath, fileName), mode);
+            return fopen(RaylibTextFormat("%s/%s", internalDataPath, fileName), mode);
             #define fopen(name, mode) android_fopen(name, mode)
         }
     }
 }
-#endif  // PLATFORM_ANDROID
+#endif  // RAYLIB_PLATFORM_ANDROID
 
 //----------------------------------------------------------------------------------
 // Module specific Functions Definition
 //----------------------------------------------------------------------------------
-#if defined(PLATFORM_ANDROID)
+#if defined(RAYLIB_PLATFORM_ANDROID)
 static int android_read(void *cookie, char *data, int dataSize)
 {
     return AAsset_read((AAsset *)cookie, data, dataSize);
@@ -493,7 +493,7 @@ static int android_read(void *cookie, char *data, int dataSize)
 
 static int android_write(void *cookie, const char *data, int dataSize)
 {
-    TRACELOG(LOG_WARNING, "ANDROID: Failed to provide write access to APK");
+    RAYLIB_TRACELOG(RAYLIB_LOG_WARNING, "ANDROID: Failed to provide write access to APK");
 
     return EACCES;
 }
@@ -508,4 +508,4 @@ static int android_close(void *cookie)
     AAsset_close((AAsset *)cookie);
     return 0;
 }
-#endif  // PLATFORM_ANDROID
+#endif  // RAYLIB_PLATFORM_ANDROID
